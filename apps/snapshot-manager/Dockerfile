@@ -18,7 +18,7 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN apk add --no-cache git
 
-WORKDIR /daytona
+WORKDIR /cogbox
 
 # Yarn caching layer
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -51,8 +51,8 @@ RUN apk update && apk upgrade --no-cache openssl pcre2 \
 
 WORKDIR /usr/local/bin
 
-COPY --from=build /daytona/dist/apps/snapshot-manager daytona-snapshot-manager
+COPY --from=build /cogbox/dist/apps/snapshot-manager cogbox-snapshot-manager
 
-RUN chmod +x daytona-snapshot-manager
+RUN chmod +x cogbox-snapshot-manager
 
-ENTRYPOINT ["daytona-snapshot-manager"]
+ENTRYPOINT ["cogbox-snapshot-manager"]

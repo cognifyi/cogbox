@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright 2025 Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 set -e
@@ -15,8 +16,8 @@ fi
 
 poetry build
 
-mv src/daytona src/daytona_sdk
-sed -i 's/^name = "[^"]*"/name = "daytona_sdk"/' pyproject.toml
+mv src/cogbox src/cogbox_sdk
+sed -i 's/^name = "[^"]*"/name = "cogbox_sdk"/' pyproject.toml
 poetry build
-mv src/daytona_sdk src/daytona
-sed -i 's/^name = "[^"]*"/name = "daytona"/' pyproject.toml
+mv src/cogbox_sdk src/cogbox
+sed -i 's/^name = "[^"]*"/name = "cogbox"/' pyproject.toml

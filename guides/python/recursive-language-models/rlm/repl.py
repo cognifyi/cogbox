@@ -1,4 +1,5 @@
 # Copyright 2025 Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 """REPL execution for deeper-rlm agents.
@@ -24,10 +25,10 @@ from typing import TYPE_CHECKING, Callable
 import requests
 from rlm.types import CodeBlockResult
 
-from daytona import SessionExecuteRequest
+from cogbox import SessionExecuteRequest
 
 if TYPE_CHECKING:
-    from daytona import Sandbox
+    from cogbox import Sandbox
 
 
 def _retry_file_op(op_func, max_retries: int = 3, operation_name: str = "file operation"):
@@ -181,9 +182,9 @@ def find_final_answer(response: str) -> tuple[str | None, str | None]:
     return None, None
 
 
-class DaytonaREPL:
+class CogboxREPL:
     """
-    REPL environment that executes Python code in a Daytona sandbox.
+    REPL environment that executes Python code in a Cogbox sandbox.
 
     Uses a broker server pattern for blocking rlm_query() calls:
     - Flask broker runs inside sandbox on port 8080
@@ -207,7 +208,7 @@ class DaytonaREPL:
         Initialize the REPL.
 
         Args:
-            sandbox: Daytona sandbox instance
+            sandbox: Cogbox sandbox instance
             rlm_query_handler: Callback for rlm_query() - spawns sub-agent
             rlm_query_batched_handler: Callback for rlm_query_batched()
             cwd: Working directory
@@ -289,8 +290,8 @@ class DaytonaREPL:
     def _preview_headers(self) -> dict[str, str]:
         """Return headers required for preview URL authentication."""
         return {
-            "X-Daytona-Preview-Token": self.broker_token or "",
-            "X-Daytona-Skip-Preview-Warning": "true",
+            "X-Cogbox-Preview-Token": self.broker_token or "",
+            "X-Cogbox-Skip-Preview-Warning": "true",
         }
 
     def _wait_for_broker(self, max_wait: int = 30):

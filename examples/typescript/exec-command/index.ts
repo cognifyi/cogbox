@@ -1,4 +1,4 @@
-import { Daytona, Sandbox, Image, DaytonaTimeoutError, ExecutionError, OutputMessage } from '@daytona/sdk'
+import { Cogbox, Sandbox, Image, CogboxTimeoutError, ExecutionError, OutputMessage } from '@cogbox/sdk'
 
 async function basicExec(sandbox: Sandbox) {
   //  run some typescript code directly
@@ -158,7 +158,7 @@ print('Finished!')`,
       },
     )
   } catch (error) {
-    if (error instanceof DaytonaTimeoutError) {
+    if (error instanceof CogboxTimeoutError) {
       console.log(`Timed out as expected: ${error.message}`)
     } else {
       throw error
@@ -167,10 +167,10 @@ print('Finished!')`,
 }
 
 async function main() {
-  const daytona = new Daytona()
+  const cogbox = new Cogbox()
 
   //  first, create a sandbox
-  const sandbox = await daytona.create(
+  const sandbox = await cogbox.create(
     {
       image: Image.base('ubuntu:22.04').runCommands(
         'apt-get update',
@@ -199,7 +199,7 @@ async function main() {
     console.error('Error executing commands:', error)
   } finally {
     //  cleanup
-    await daytona.delete(sandbox)
+    await cogbox.delete(sandbox)
   }
 }
 

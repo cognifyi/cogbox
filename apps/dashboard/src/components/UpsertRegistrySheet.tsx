@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -34,7 +35,7 @@ import { useCreateRegistryMutation } from '@/hooks/mutations/useCreateRegistryMu
 import { useUpdateRegistryMutation } from '@/hooks/mutations/useUpdateRegistryMutation'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { DockerRegistry } from '@daytona/api-client'
+import { DockerRegistry } from '@cogbox/api-client'
 import { useForm } from '@tanstack/react-form'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'

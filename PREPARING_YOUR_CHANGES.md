@@ -2,7 +2,7 @@
 
 This document contains information related to preparing changes for a pull request. Here's a quick checklist for a good PR, more details below:
 
-1. A discussion around the change on [Slack](https://go.daytona.io/slack) or in an issue.
+1. A discussion around the change on [Slack](https://go.cogbox.pazity.com/slack) or in an issue.
 1. A GitHub Issue with a good description associated with the PR
 1. One feature/change per PR
 1. One commit per PR
@@ -19,7 +19,7 @@ For example, if a descriptive title covers what the commit does in practice, the
 However, if the commit has an out-sized impact relative to other commits, its description will need to reflect that.
 
 Reviewers may ask you to amend your commits if they are not descriptive enough.
-Since the descriptiveness of a commit is subjective, please feel free to talk to us on [Slack](https://go.daytona.io/slack) if you have any questions.
+Since the descriptiveness of a commit is subjective, please feel free to talk to us on [Slack](https://go.cogbox.pazity.com/slack) if you have any questions.
 
 ### Optional Commit Template
 
@@ -37,9 +37,9 @@ We require that you squash all changes to a single commit. You can do this with 
 
 ## Developer's Certificate of Origin
 
-Any contributions to Daytona must only contain code that can legally be contributed to Daytona, and which the Daytona project can distribute under its license.
+Any contributions to Cogbox must only contain code that can legally be contributed to Cogbox, and which the Cogbox project can distribute under its license.
 
-Prior to contributing to Daytona please read the [Developer's Certificate of Origin](https://developercertificate.org/) and sign-off all commits with the `--signoff` option provided by `git commit`. For example:
+Prior to contributing to Cogbox please read the [Developer's Certificate of Origin](https://developercertificate.org/) and sign-off all commits with the `--signoff` option provided by `git commit`. For example:
 
 ```
 git commit --signoff --message "This is the commit message"

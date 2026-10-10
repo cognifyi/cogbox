@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package middlewares
@@ -15,12 +16,12 @@ import (
 
 func AuthMiddleware(apiToken string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader(constants.DAYTONA_AUTHORIZATION_HEADER)
+		authHeader := ctx.GetHeader(constants.COGBOX_AUTHORIZATION_HEADER)
 		if authHeader == "" {
 			authHeader = ctx.GetHeader(constants.AUTHORIZATION_HEADER)
 		}
 
-		ctx.Request.Header.Del(constants.DAYTONA_AUTHORIZATION_HEADER)
+		ctx.Request.Header.Del(constants.COGBOX_AUTHORIZATION_HEADER)
 
 		if authHeader == "" {
 			ctx.Error(common_errors.NewUnauthorizedError(errors.New("authorization header required")))

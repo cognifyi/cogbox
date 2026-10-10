@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Configuration, ProcessApi } from '@daytona/toolbox-api-client'
+import { Configuration, ProcessApi } from '@cogbox/toolbox-api-client'
 import type {
   Command,
   Session,
@@ -12,7 +13,7 @@ import type {
   CodeRunRequest,
   PtyCreateRequest,
   PtySessionInfo,
-} from '@daytona/toolbox-api-client'
+} from '@cogbox/toolbox-api-client'
 import type { ExecuteResponse } from './types/ExecuteResponse'
 import { parseChart } from './types/Charts'
 import { stdDemuxStream } from './utils/Stream'
@@ -305,7 +306,7 @@ export class Process {
    *
    * // Change directory
    * await process.executeSessionCommand(sessionId, {
-   *   command: 'cd /home/daytona'
+   *   command: 'cd /home/cogbox'
    * });
    *
    * // Run command in new directory

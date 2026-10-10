@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -15,9 +16,9 @@ import {
 } from '@/contexts/PlaygroundContext'
 import { ScreenshotActions, ScreenshotFormatOption } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { CompressedScreenshotResponse, RegionScreenshotResponse } from '@daytona/api-client'
-import { ComputerUse, ScreenshotRegion } from '@daytona/sdk'
-import { ScreenshotResponse } from '@daytona/toolbox-api-client'
+import { CompressedScreenshotResponse, RegionScreenshotResponse } from '@cogbox/api-client'
+import { ComputerUse, ScreenshotRegion } from '@cogbox/sdk'
+import { ScreenshotResponse } from '@cogbox/toolbox-api-client'
 import PlaygroundActionForm from '../../ActionForm'
 import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'

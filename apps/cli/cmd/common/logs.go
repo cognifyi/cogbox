@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -51,7 +52,7 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.ServerApi.Token.AccessToken))
 
 		if params.ActiveOrganizationId != nil {
-			req.Header.Add("X-Daytona-Organization-ID", *params.ActiveOrganizationId)
+			req.Header.Add("X-Cogbox-Organization-ID", *params.ActiveOrganizationId)
 		}
 	}
 

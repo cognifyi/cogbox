@@ -13,22 +13,22 @@ const DEFAULT_LOCAL_PATH = join(__dirname, '../../cli/hack/docs')
 // content to appear above the commands outline
 const prepend = `---
 title: CLI
-description: A reference of supported operations using the Daytona CLI.
+description: A reference of supported operations using the Cogbox CLI.
 sidebar:
-  label: Daytona CLI Reference
+  label: Cogbox CLI Reference
 ---
 import { TabItem, Tabs } from "@astrojs/starlight/components";
 import Aside from "@components/Aside.astro";
 import Label from "@components/Label.astro";
 
-Daytona provides command-line access to core features for interacting with Daytona Sandboxes, including managing their lifecycle, snapshots, and more.
+Cogbox provides command-line access to core features for interacting with Cogbox Sandboxes, including managing their lifecycle, snapshots, and more.
 
-The CLI reference lists all commands supported by the \`daytona\` command-line tool, complete with a description of their behavior, and any supported flags.
-You can access this documentation on a per-command basis by appending the \`--help\`/\`-h\` flag when invoking \`daytona\`.
+The CLI reference lists all commands supported by the \`cogbox\` command-line tool, complete with a description of their behavior, and any supported flags.
+You can access this documentation on a per-command basis by appending the \`--help\`/\`-h\` flag when invoking \`cogbox\`.
 
 ## Installation
 
-Install the Daytona CLI to interact with Daytona sandboxes from the command line.
+Install the Cogbox CLI to interact with Cogbox sandboxes from the command line.
 
 <Tabs syncKey="language">
 <TabItem label="Mac">
@@ -38,13 +38,13 @@ Download the latest binary from GitHub releases and install it to \`/usr/local/b
 For Apple Silicon (\`arm64\`):
 
   \`\`\`bash
-  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/daytona-darwin-arm64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-darwin-arm64 -o /usr/local/bin/cogbox && sudo chmod +x /usr/local/bin/cogbox
   \`\`\`
 
 For Intel (\`amd64\`):
 
   \`\`\`bash
-  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/daytona-darwin-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-darwin-amd64 -o /usr/local/bin/cogbox && sudo chmod +x /usr/local/bin/cogbox
   \`\`\`
 
 </TabItem>
@@ -55,33 +55,33 @@ Choose the command for your Linux architecture. Both commands download the lates
 For \`amd64\` (\`x86_64\`):
 
   \`\`\`bash
-  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-linux-amd64 -o /usr/local/bin/cogbox && sudo chmod +x /usr/local/bin/cogbox
   \`\`\`
 
 For \`arm64\` (\`aarch64\`):
 
   \`\`\`bash
-  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/daytona-linux-arm64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  sudo curl -fL https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-linux-arm64 -o /usr/local/bin/cogbox && sudo chmod +x /usr/local/bin/cogbox
   \`\`\`
 
 </TabItem>
 <TabItem label="Windows">
 
 \`\`\`bash
-powershell -Command "Invoke-WebRequest -Uri https://github.com/cognifyi/cogbox/releases/latest/download/daytona-windows-amd64.exe -OutFile daytona.exe"
+powershell -Command "Invoke-WebRequest -Uri https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-windows-amd64.exe -OutFile cogbox.exe"
 \`\`\`
 
 </TabItem>
 </Tabs>
 
-After installing the Daytona CLI, use the \`daytona\` command to interact with Daytona sandboxes from the command line.
+After installing the Cogbox CLI, use the \`cogbox\` command to interact with Cogbox sandboxes from the command line.
 `
 
 // content to appear below the commands outline
 const append = ``
 
 const notes = {
-  'daytona autocomplete': `\n<Aside type="note">
+  'cogbox autocomplete': `\n<Aside type="note">
 If using bash shell environment, make sure you have bash-completion installed in order to get full autocompletion functionality.
 Linux Installation: \`\`\`sudo apt-get install bash-completion\`\`\`
 macOS Installation: \`\`\`brew install bash-completion\`\`\`

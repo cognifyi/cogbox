@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -7,8 +8,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from daytona.common.volume import Volume
-from daytona_api_client import VolumeDto
+from cogbox.common.volume import Volume
+from cogbox_api_client import VolumeDto
 
 
 def _make_volume_dto(name="test-vol", vol_id="vol-123"):
@@ -39,7 +40,7 @@ def _make_volume(name="test-vol", vol_id="vol-123"):
 
 class TestSyncVolumeService:
     def _make_service(self):
-        from daytona._sync.volume import VolumeService
+        from cogbox._sync.volume import VolumeService
 
         mock_api = MagicMock()
         return VolumeService(mock_api), mock_api
@@ -58,7 +59,7 @@ class TestSyncVolumeService:
         assert isinstance(result, Volume)
 
     def test_get_with_create(self):
-        from daytona_api_client.exceptions import NotFoundException
+        from cogbox_api_client.exceptions import NotFoundException
 
         service, api = self._make_service()
         api.get_volume_by_name.side_effect = NotFoundException(status=404, reason="Not found")
@@ -68,7 +69,7 @@ class TestSyncVolumeService:
         api.create_volume.assert_called_once()
 
     def test_get_not_found_raises(self):
-        from daytona_api_client.exceptions import NotFoundException
+        from cogbox_api_client.exceptions import NotFoundException
 
         service, api = self._make_service()
         api.get_volume_by_name.side_effect = NotFoundException(status=404, reason="Not found")
@@ -91,7 +92,7 @@ class TestSyncVolumeService:
 
 class TestAsyncVolumeService:
     def _make_service(self):
-        from daytona._async.volume import AsyncVolumeService
+        from cogbox._async.volume import AsyncVolumeService
 
         mock_api = AsyncMock()
         return AsyncVolumeService(mock_api), mock_api
@@ -127,7 +128,7 @@ class TestAsyncVolumeService:
 
     @pytest.mark.asyncio
     async def test_get_with_create(self):
-        from daytona_api_client_async.exceptions import NotFoundException
+        from cogbox_api_client_async.exceptions import NotFoundException
 
         service, api = self._make_service()
         api.get_volume_by_name.side_effect = NotFoundException(status=404, reason="Not found")

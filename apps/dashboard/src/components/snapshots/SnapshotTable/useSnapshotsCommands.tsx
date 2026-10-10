@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { pluralize } from '@/lib/utils'
-import { SnapshotDto, SnapshotState } from '@daytona/api-client'
+import { SnapshotDto, SnapshotState } from '@cogbox/api-client'
 import { CheckSquare2Icon, MinusSquareIcon, PauseIcon, PlayIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { CommandConfig, useRegisterCommands } from '../../CommandPalette'

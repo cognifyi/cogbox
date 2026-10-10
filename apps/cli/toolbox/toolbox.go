@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package toolbox
@@ -100,7 +101,7 @@ func (c *Client) executeCommandViaProxy(ctx context.Context, proxyURL, sandboxId
 	}
 
 	if activeProfile.ActiveOrganizationId != nil {
-		req.Header.Set("X-Daytona-Organization-ID", *activeProfile.ActiveOrganizationId)
+		req.Header.Set("X-Cogbox-Organization-ID", *activeProfile.ActiveOrganizationId)
 	}
 
 	client := &http.Client{}

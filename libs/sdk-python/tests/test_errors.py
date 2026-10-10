@@ -1,70 +1,71 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tests for daytona.common.errors module."""
+"""Tests for cogbox.common.errors module."""
 
 from __future__ import annotations
 
 import pytest
 
-from daytona.common.errors import (
-    DaytonaError,
-    DaytonaNotFoundError,
-    DaytonaRateLimitError,
-    DaytonaTimeoutError,
-    create_daytona_error,
+from cogbox.common.errors import (
+    CogboxError,
+    CogboxNotFoundError,
+    CogboxRateLimitError,
+    CogboxTimeoutError,
+    create_cogbox_error,
     error_class_from_status_code,
 )
 
 
-class TestDaytonaError:
+class TestCogboxError:
     def test_basic_error(self):
-        err = DaytonaError("something went wrong")
+        err = CogboxError("something went wrong")
         assert str(err) == "something went wrong"
         assert err.status_code is None
         assert err.headers == {}
 
     def test_with_status_code(self):
-        err = DaytonaError("bad request", status_code=400)
+        err = CogboxError("bad request", status_code=400)
         assert err.status_code == 400
         assert str(err) == "bad request"
 
     def test_with_headers(self):
         headers = {"X-RateLimit-Remaining": "0", "Retry-After": "60"}
-        err = DaytonaError("rate limited", status_code=429, headers=headers)
+        err = CogboxError("rate limited", status_code=429, headers=headers)
         assert err.status_code == 429
         assert err.headers["X-RateLimit-Remaining"] == "0"
         assert err.headers["Retry-After"] == "60"
 
     def test_is_exception(self):
-        err = DaytonaError("test")
+        err = CogboxError("test")
         assert isinstance(err, Exception)
 
     def test_none_headers_becomes_empty_dict(self):
-        err = DaytonaError("msg", headers=None)
+        err = CogboxError("msg", headers=None)
         assert err.headers == {}
 
 
-class TestDaytonaNotFoundError:
-    def test_inherits_daytona_error(self):
-        err = DaytonaNotFoundError("sandbox not found", status_code=404)
-        assert isinstance(err, DaytonaError)
+class TestCogboxNotFoundError:
+    def test_inherits_cogbox_error(self):
+        err = CogboxNotFoundError("sandbox not found", status_code=404)
+        assert isinstance(err, CogboxError)
         assert isinstance(err, Exception)
         assert err.status_code == 404
 
     def test_message(self):
-        err = DaytonaNotFoundError("not found")
+        err = CogboxNotFoundError("not found")
         assert str(err) == "not found"
 
 
-class TestDaytonaRateLimitError:
-    def test_inherits_daytona_error(self):
-        err = DaytonaRateLimitError("rate limit exceeded", status_code=429)
-        assert isinstance(err, DaytonaError)
+class TestCogboxRateLimitError:
+    def test_inherits_cogbox_error(self):
+        err = CogboxRateLimitError("rate limit exceeded", status_code=429)
+        assert isinstance(err, CogboxError)
         assert err.status_code == 429
 
     def test_with_retry_header(self):
-        err = DaytonaRateLimitError(
+        err = CogboxRateLimitError(
             "rate limit",
             status_code=429,
             headers={"Retry-After": "30"},
@@ -72,47 +73,47 @@ class TestDaytonaRateLimitError:
         assert err.headers["Retry-After"] == "30"
 
 
-class TestDaytonaTimeoutError:
-    def test_inherits_daytona_error(self):
-        err = DaytonaTimeoutError("operation timed out")
-        assert isinstance(err, DaytonaError)
+class TestCogboxTimeoutError:
+    def test_inherits_cogbox_error(self):
+        err = CogboxTimeoutError("operation timed out")
+        assert isinstance(err, CogboxError)
         assert str(err) == "operation timed out"
 
     def test_with_status_code(self):
-        err = DaytonaTimeoutError("timeout", status_code=504)
+        err = CogboxTimeoutError("timeout", status_code=504)
         assert err.status_code == 504
 
 
 class TestErrorHierarchy:
     def test_catch_all_with_base_class(self):
         errors = [
-            DaytonaError("base"),
-            DaytonaNotFoundError("not found"),
-            DaytonaRateLimitError("rate limit"),
-            DaytonaTimeoutError("timeout"),
+            CogboxError("base"),
+            CogboxNotFoundError("not found"),
+            CogboxRateLimitError("rate limit"),
+            CogboxTimeoutError("timeout"),
         ]
         for err in errors:
-            with pytest.raises(DaytonaError):
+            with pytest.raises(CogboxError):
                 raise err
 
     def test_specific_catch(self):
-        with pytest.raises(DaytonaNotFoundError):
-            raise DaytonaNotFoundError("not found")
+        with pytest.raises(CogboxNotFoundError):
+            raise CogboxNotFoundError("not found")
 
-        with pytest.raises(DaytonaRateLimitError):
-            raise DaytonaRateLimitError("rate limit")
+        with pytest.raises(CogboxRateLimitError):
+            raise CogboxRateLimitError("rate limit")
 
-        with pytest.raises(DaytonaTimeoutError):
-            raise DaytonaTimeoutError("timeout")
+        with pytest.raises(CogboxTimeoutError):
+            raise CogboxTimeoutError("timeout")
 
 
 class TestErrorFactories:
     def test_error_class_from_status_code(self):
-        assert error_class_from_status_code(404) is DaytonaNotFoundError
-        assert error_class_from_status_code(None) is DaytonaError
+        assert error_class_from_status_code(404) is CogboxNotFoundError
+        assert error_class_from_status_code(None) is CogboxError
 
-    def test_create_daytona_error_uses_specific_subclass(self):
-        error = create_daytona_error("missing", status_code=404, error_code="NOT_FOUND")
+    def test_create_cogbox_error_uses_specific_subclass(self):
+        error = create_cogbox_error("missing", status_code=404, error_code="NOT_FOUND")
 
-        assert isinstance(error, DaytonaNotFoundError)
+        assert isinstance(error, CogboxNotFoundError)
         assert error.error_code == "NOT_FOUND"

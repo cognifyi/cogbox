@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -25,7 +26,7 @@ import {
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
 import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
-import { OrganizationInvitation, UpdateOrganizationInvitationRoleEnum } from '@daytona/api-client'
+import { OrganizationInvitation, UpdateOrganizationInvitationRoleEnum } from '@cogbox/api-client'
 import {
   ColumnDef,
   flexRender,

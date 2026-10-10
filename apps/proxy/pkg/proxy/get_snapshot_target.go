@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package proxy
@@ -66,8 +67,8 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 	target.RawQuery = queryParams.Encode()
 
 	return target, map[string]string{
-		"X-Daytona-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
-		"X-Forwarded-Host":        ctx.Request.Host,
+		"X-Cogbox-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
+		"X-Forwarded-Host":       ctx.Request.Host,
 	}, nil
 }
 

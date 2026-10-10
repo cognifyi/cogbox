@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package tools
@@ -20,13 +21,13 @@ type DestroySandboxArgs struct {
 
 func GetDestroySandboxTool() mcp.Tool {
 	return mcp.NewTool("destroy_sandbox",
-		mcp.WithDescription("Destroy a sandbox with Daytona"),
+		mcp.WithDescription("Destroy a sandbox with Cogbox"),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to destroy.")),
 	)
 }
 
 func DestroySandbox(ctx context.Context, request mcp.CallToolRequest, args DestroySandboxArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient.GetApiClient(nil, cogboxMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -33,7 +34,7 @@ import {
   ToolboxApi,
   UpdateNetworkSettingsDTO,
   RecoverSandboxDTO,
-} from '@daytona/runner-api-client'
+} from '@cogbox/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'

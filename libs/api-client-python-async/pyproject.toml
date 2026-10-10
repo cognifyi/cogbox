@@ -1,13 +1,13 @@
 [project]
-name = "daytona_api_client_async"
+name = "cogbox_api_client_async"
 version = "0.0.0-dev"
-description = "Daytona"
+description = "Cogbox"
 authors = [
-  {name = "Daytona Platforms Inc.",email = "support@daytona.com"},
+  {name = "Cogbox Platforms Inc.",email = "support@cogbox.com"},
 ]
 license = { text = "Apache-2.0" }
 readme = "README.md"
-keywords = ["OpenAPI", "OpenAPI-Generator", "Daytona"]
+keywords = ["OpenAPI", "OpenAPI-Generator", "Cogbox"]
 requires-python = ">=3.9"
 
 dependencies = [
@@ -42,7 +42,7 @@ extension-pkg-whitelist = "pydantic"
 
 [tool.mypy]
 files = [
-  "daytona_api_client_async",
+  "cogbox_api_client_async",
   #"test",  # auto-generated tests
   "tests", # hand-written tests
 ]
@@ -80,7 +80,7 @@ disallow_any_generics = true
 
 [[tool.mypy.overrides]]
 module = [
-  "daytona_api_client_async.configuration",
+  "cogbox_api_client_async.configuration",
 ]
 warn_unused_ignores = true
 strict_equality = true

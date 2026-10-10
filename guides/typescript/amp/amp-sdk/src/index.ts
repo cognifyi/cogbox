@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytona/sdk'
+import { Cogbox, Sandbox } from '@cogbox/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 import { AmpSession } from './session.js'
@@ -17,12 +18,12 @@ function formatCommandPreview(input: string, maxLength = 80): string {
 }
 
 async function main() {
-  // Get the Daytona API key from environment variables
-  const apiKey = process.env.DAYTONA_API_KEY
+  // Get the Cogbox API key from environment variables
+  const apiKey = process.env.COGBOX_API_KEY
 
   if (!apiKey) {
-    console.error('Error: DAYTONA_API_KEY environment variable is not set')
-    console.error('Please create a .env file with your Daytona API key')
+    console.error('Error: COGBOX_API_KEY environment variable is not set')
+    console.error('Please create a .env file with your Cogbox API key')
     process.exit(1)
   }
 
@@ -36,8 +37,8 @@ async function main() {
     process.exit(1)
   }
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey })
+  // Initialize the Cogbox client
+  const cogbox = new Cogbox({ apiKey })
 
   let sandbox: Sandbox | undefined
 
@@ -54,9 +55,9 @@ async function main() {
   }
 
   try {
-    // Create a new Daytona sandbox with Amp API key
+    // Create a new Cogbox sandbox with Amp API key
     console.log('Creating sandbox...')
-    sandbox = await daytona.create({
+    sandbox = await cogbox.create({
       envVars: { AMP_API_KEY: process.env.SANDBOX_AMP_API_KEY },
     })
     const activeSandbox = sandbox
@@ -71,16 +72,16 @@ async function main() {
       throw new Error('Error installing Amp CLI: ' + installResult.result)
     }
 
-    // Daytona-aware system prompt.
+    // Cogbox-aware system prompt.
     // We ask Amp to write server commands to start.sh instead of running them directly,
     // because background server commands in Amp execute mode can block/hang the turn.
     const previewLink = await sandbox.getPreviewLink(1234)
     const previewUrlPattern = previewLink.url.replace(/1234/, '{PORT}')
     const defaultSystemPrompt = [
-      'You are running in a Daytona sandbox.',
+      'You are running in a Cogbox sandbox.',
       `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
       'When you need to start a server, DO NOT run it directly.',
-      'Instead, write only the server start command to /home/daytona/start.sh (one command, no markdown).',
+      'Instead, write only the server start command to /home/cogbox/start.sh (one command, no markdown).',
       'After writing the start command, provide the preview URL to the user.',
       'Start the conversation with a greeting and ask the user what they would like to do.',
     ].join(' ')
@@ -93,12 +94,12 @@ async function main() {
 
     const startServerFromScript = async () => {
       // Only run when Amp has produced a start script for this turn.
-      const startScriptCheck = await activeSandbox.process.executeCommand('test -f /home/daytona/start.sh')
+      const startScriptCheck = await activeSandbox.process.executeCommand('test -f /home/cogbox/start.sh')
       if (startScriptCheck.exitCode !== 0) {
         return
       }
 
-      const startScriptContents = (await activeSandbox.fs.downloadFile('/home/daytona/start.sh')).toString('utf-8')
+      const startScriptContents = (await activeSandbox.fs.downloadFile('/home/cogbox/start.sh')).toString('utf-8')
       const clippedStartScript = formatCommandPreview(startScriptContents)
       console.log(`Running \`${clippedStartScript}\` via session command...`)
       // Execute server startup outside Amp so long-running/background commands
@@ -108,7 +109,7 @@ async function main() {
       serverSessions.push(sessionId)
 
       await activeSandbox.process.executeSessionCommand(sessionId, {
-        command: 'cd /home/daytona && chmod +x start.sh && ./start.sh',
+        command: 'cd /home/cogbox && chmod +x start.sh && ./start.sh',
         runAsync: true,
       })
     }

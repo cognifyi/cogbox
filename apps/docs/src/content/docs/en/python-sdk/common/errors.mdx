@@ -3,20 +3,20 @@ title: "Errors"
 hideTitleOnPage: true
 ---
 
-## DaytonaError
+## CogboxError
 
 ```python
-class DaytonaError(Exception)
+class CogboxError(Exception)
 ```
 
-Base error for Daytona SDK.
+Base error for Cogbox SDK.
 
 **Example**:
 
 ```python
 try:
-    sandbox = daytona.get("missing-sandbox")
-except DaytonaError as exc:
+    sandbox = cogbox.get("missing-sandbox")
+except CogboxError as exc:
     print(exc.status_code)
     print(exc.error_code)
     print(exc.message)
@@ -30,7 +30,7 @@ except DaytonaError as exc:
 - `error_code` _str | None_ - Machine-readable error code if available
 - `headers` _dict[str, Any]_ - Response headers
 
-#### DaytonaError.\_\_init\_\_
+#### CogboxError.\_\_init\_\_
 
 ```python
 def __init__(message: str,
@@ -39,7 +39,7 @@ def __init__(message: str,
              error_code: str | None = None)
 ```
 
-Initialize Daytona error.
+Initialize Cogbox error.
 
 **Arguments**:
 
@@ -49,10 +49,10 @@ Initialize Daytona error.
 - `error_code` _str | None_ - Machine-readable error code if available
 
 
-## DaytonaNotFoundError
+## CogboxNotFoundError
 
 ```python
-class DaytonaNotFoundError(DaytonaError)
+class CogboxNotFoundError(CogboxError)
 ```
 
 Error for when a resource is not found (HTTP 404).
@@ -62,14 +62,14 @@ Error for when a resource is not found (HTTP 404).
 ```python
 try:
     sandbox.fs.download_file("/workspace/missing.txt")
-except DaytonaNotFoundError as exc:
+except CogboxNotFoundError as exc:
     print(exc.status_code)
 ```
 
-## DaytonaAuthenticationError
+## CogboxAuthenticationError
 
 ```python
-class DaytonaAuthenticationError(DaytonaError)
+class CogboxAuthenticationError(CogboxError)
 ```
 
 Error for when authentication fails (HTTP 401).
@@ -78,16 +78,16 @@ Error for when authentication fails (HTTP 401).
 
 ```python
 try:
-    for sandbox in daytona.list():
+    for sandbox in cogbox.list():
         print(sandbox.id)
-except DaytonaAuthenticationError as exc:
+except CogboxAuthenticationError as exc:
     print(exc.status_code)
 ```
 
-## DaytonaAuthorizationError
+## CogboxAuthorizationError
 
 ```python
-class DaytonaAuthorizationError(DaytonaError)
+class CogboxAuthorizationError(CogboxError)
 ```
 
 Error for when the request is forbidden (HTTP 403).
@@ -96,15 +96,15 @@ Error for when the request is forbidden (HTTP 403).
 
 ```python
 try:
-    daytona.get("sandbox-without-access")
-except DaytonaAuthorizationError as exc:
+    cogbox.get("sandbox-without-access")
+except CogboxAuthorizationError as exc:
     print(exc.message)
 ```
 
-## DaytonaRateLimitError
+## CogboxRateLimitError
 
 ```python
-class DaytonaRateLimitError(DaytonaError)
+class CogboxRateLimitError(CogboxError)
 ```
 
 Error for when rate limit is exceeded (HTTP 429).
@@ -113,16 +113,16 @@ Error for when rate limit is exceeded (HTTP 429).
 
 ```python
 try:
-    for sandbox in daytona.list():
+    for sandbox in cogbox.list():
         print(sandbox.id)
-except DaytonaRateLimitError as exc:
+except CogboxRateLimitError as exc:
     print(exc.error_code)
 ```
 
-## DaytonaConflictError
+## CogboxConflictError
 
 ```python
-class DaytonaConflictError(DaytonaError)
+class CogboxConflictError(CogboxError)
 ```
 
 Error for when a resource conflict occurs (HTTP 409).
@@ -132,15 +132,15 @@ Error for when a resource conflict occurs (HTTP 409).
 ```python
 try:
     params = CreateSandboxFromSnapshotParams(name="existing-sandbox")
-    daytona.create(params)
-except DaytonaConflictError as exc:
+    cogbox.create(params)
+except CogboxConflictError as exc:
     print(exc.error_code)
 ```
 
-## DaytonaValidationError
+## CogboxValidationError
 
 ```python
-class DaytonaValidationError(DaytonaError)
+class CogboxValidationError(CogboxError)
 ```
 
 Error for when input validation fails (HTTP 400 or client-side validation).
@@ -150,14 +150,14 @@ Error for when input validation fails (HTTP 400 or client-side validation).
 ```python
 try:
     Image.debian_slim("3.8")
-except DaytonaValidationError as exc:
+except CogboxValidationError as exc:
     print(exc.message)
 ```
 
-## DaytonaTimeoutError
+## CogboxTimeoutError
 
 ```python
-class DaytonaTimeoutError(DaytonaError)
+class CogboxTimeoutError(CogboxError)
 ```
 
 Error for when a timeout occurs.
@@ -167,14 +167,14 @@ Error for when a timeout occurs.
 ```python
 try:
     sandbox.wait_for_sandbox_start(timeout=1)
-except DaytonaTimeoutError as exc:
+except CogboxTimeoutError as exc:
     print(exc.message)
 ```
 
-## DaytonaConnectionError
+## CogboxConnectionError
 
 ```python
-class DaytonaConnectionError(DaytonaError)
+class CogboxConnectionError(CogboxError)
 ```
 
 Error for when a network connection fails.
@@ -184,27 +184,26 @@ Error for when a network connection fails.
 ```python
 try:
     pty_handle.wait_for_connection()
-except DaytonaConnectionError as exc:
+except CogboxConnectionError as exc:
     print(exc.message)
 ```
 
 #### error\_class\_from\_status\_code
 
 ```python
-def error_class_from_status_code(
-        status_code: int | None) -> type[DaytonaError]
+def error_class_from_status_code(status_code: int | None) -> type[CogboxError]
 ```
 
-Map an HTTP status code to the corresponding DaytonaError subclass.
+Map an HTTP status code to the corresponding CogboxError subclass.
 
-#### create\_daytona\_error
+#### create\_cogbox\_error
 
 ```python
-def create_daytona_error(message: str,
-                         status_code: int | None = None,
-                         headers: Mapping[str, Any] | None = None,
-                         error_code: str | None = None) -> DaytonaError
+def create_cogbox_error(message: str,
+                        status_code: int | None = None,
+                        headers: Mapping[str, Any] | None = None,
+                        error_code: str | None = None) -> CogboxError
 ```
 
-Create the appropriate DaytonaError subclass from structured error metadata.
+Create the appropriate CogboxError subclass from structured error metadata.
 

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -23,7 +24,7 @@ import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { OrganizationUserRoleEnum } from '@daytona/api-client'
+import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import React, { useRef } from 'react'
 import { toast } from 'sonner'
 

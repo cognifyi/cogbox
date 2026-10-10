@@ -1,4 +1,5 @@
 # Copyright 2025 Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 """Tree-structured JSON logger for deeper-rlm."""

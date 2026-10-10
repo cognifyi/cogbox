@@ -1,0 +1,13 @@
+name: cogbox volume
+synopsis: Manage Cogbox volumes
+description: Commands for managing Cogbox volumes
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI
+  - cogbox volume create - Create a volume
+  - cogbox volume delete - Delete a volume
+  - cogbox volume get - Get volume details
+  - cogbox volume list - List all volumes

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -12,7 +13,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { SandboxClass } from '@daytona/api-client'
+import { SandboxClass } from '@cogbox/api-client'
 import { X } from 'lucide-react'
 import { SANDBOX_CLASS_OPTIONS, getSandboxClassLabel } from '../constants'
 

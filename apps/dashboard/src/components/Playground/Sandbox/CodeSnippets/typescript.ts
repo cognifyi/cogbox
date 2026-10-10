@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -10,24 +11,24 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
   getImports(p) {
     return (
       [
-        'import { Daytona',
-        p.actions.useConfigObject ? 'DaytonaConfig' : '',
+        'import { Cogbox',
+        p.actions.useConfigObject ? 'CogboxConfig' : '',
         p.config.createSandboxFromImage ? 'Image' : '',
       ]
         .filter(Boolean)
-        .join(', ') + " } from '@daytona/sdk'\n"
+        .join(', ') + " } from '@cogbox/sdk'\n"
     )
   },
 
   getConfig(p) {
     if (!p.actions.useConfigObject) return ''
-    return ['\n// Define the configuration', 'const config: DaytonaConfig = { }'].filter(Boolean).join('\n') + '\n'
+    return ['\n// Define the configuration', 'const config: CogboxConfig = { }'].filter(Boolean).join('\n') + '\n'
   },
 
   getClientInit(p) {
     return [
-      '\t// Initialize the Daytona client',
-      `\tconst daytona = new Daytona(${p.actions.useConfigObject ? 'config' : ''})`,
+      '\t// Initialize the Cogbox client',
+      `\tconst cogbox = new Cogbox(${p.actions.useConfigObject ? 'config' : ''})`,
     ]
       .filter(Boolean)
       .join('\n')
@@ -84,7 +85,7 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
   getSandboxCreate(p) {
     return [
       '\t\t// Create the Sandbox instance',
-      `\t\tconst sandbox = await daytona.create(${p.config.useSandboxCreateParams ? this.getSandboxParams(p) : ''})`,
+      `\t\tconst sandbox = await cogbox.create(${p.config.useSandboxCreateParams ? this.getSandboxParams(p) : ''})`,
     ].join('\n')
   },
 

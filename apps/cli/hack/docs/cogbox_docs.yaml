@@ -1,0 +1,9 @@
+name: cogbox docs
+synopsis: Opens the Cogbox documentation in your default browser.
+usage: cogbox docs [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI

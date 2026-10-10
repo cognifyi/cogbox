@@ -1,58 +1,58 @@
 ---
-title: Run Claude Code in a Daytona Sandbox via CLI
-description: Learn how to run Claude Code inside a Daytona sandbox using the Daytona CLI for secure and isolated task execution.
+title: Run Claude Code in a Cogbox Sandbox via CLI
+description: Learn how to run Claude Code inside a Cogbox sandbox using the Cogbox CLI for secure and isolated task execution.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-This guide walks you through running Claude Code inside a Daytona sandbox using the Daytona CLI.
+This guide walks you through running Claude Code inside a Cogbox sandbox using the Cogbox CLI.
 
 ### Prerequisites
 
-- Daytona account and API key (Get it from [Daytona Dashboard](https://app.daytona.io/dashboard/keys))
+- Cogbox account and API key (Get it from [Cogbox Dashboard](https://cogbox.pazity.com/dashboard/keys))
 - Local terminal (macOS, Linux, or Windows)
 
-### Install the Daytona CLI
+### Install the Cogbox CLI
 
 <Tabs syncKey="os">
   <TabItem label="Mac/Linux">
     ```bash 
-    OS=$(uname -s | tr '[:upper:]' '[:lower:]'); ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/'); sudo curl -fL "https://github.com/cognifyi/cogbox/releases/latest/download/daytona-${OS}-${ARCH}" -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]'); ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/'); sudo curl -fL "https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-${OS}-${ARCH}" -o /usr/local/bin/cogbox && sudo chmod +x /usr/local/bin/cogbox
     ```
   </TabItem>
   <TabItem label="Windows">
     ```bash
-    powershell -Command "Invoke-WebRequest -Uri https://github.com/cognifyi/cogbox/releases/latest/download/daytona-windows-amd64.exe -OutFile daytona.exe" 
+    powershell -Command "Invoke-WebRequest -Uri https://github.com/cognifyi/cogbox/releases/latest/download/cogbox-windows-amd64.exe -OutFile cogbox.exe" 
     ```
   </TabItem>
 </Tabs>
 
 :::note
-Already have the CLI? Check your version with `daytona --version`. If it's below **0.135.0**, [upgrade to the latest version](https://www.daytona.io/docs/en/getting-started/#cli).
+Already have the CLI? Check your version with `cogbox --version`. If it's below **0.135.0**, [upgrade to the latest version](https://cogbox.pazity.com/docs/en/getting-started/#cli).
 :::
 
-### Authenticate with Daytona
+### Authenticate with Cogbox
 
-Log in to your Daytona account using your API key:
+Log in to your Cogbox account using your API key:
 
 ```bash
-daytona login --api-key=YOUR_API_KEY
+cogbox login --api-key=YOUR_API_KEY
 ```
 
-Replace `YOUR_API_KEY` with your actual Daytona API key.
+Replace `YOUR_API_KEY` with your actual Cogbox API key.
 
 ### Create a Sandbox
 
 Create a new sandbox for running Claude Code:
 
 ```bash
-daytona sandbox create --name claude-sandbox
+cogbox sandbox create --name claude-sandbox
 ```
 
-This creates a sandbox named `claude-sandbox`, visible in your [Dashboard](https://app.daytona.io/dashboard/sandboxes). The default Daytona snapshot includes Claude Code, so the command above is all you need.
+This creates a sandbox named `claude-sandbox`, visible in your [Dashboard](https://cogbox.pazity.com/dashboard/sandboxes). The default Cogbox snapshot includes Claude Code, so the command above is all you need.
 
 :::tip
-Need more power? Pass `--snapshot daytona-large` or `--snapshot daytona-medium` flag to increase your sandbox resources. See [default snapshots](https://www.daytona.io/docs/en/snapshots/#default-snapshots) for resource details.
+Need more power? Pass `--snapshot cogbox-large` or `--snapshot cogbox-medium` flag to increase your sandbox resources. See [default snapshots](https://cogbox.pazity.com/docs/en/snapshots/#default-snapshots) for resource details.
 :::
 
 ### Connect to the Sandbox
@@ -60,7 +60,7 @@ Need more power? Pass `--snapshot daytona-large` or `--snapshot daytona-medium` 
 SSH into your sandbox:
 
 ```bash
-daytona ssh claude-sandbox
+cogbox ssh claude-sandbox
 ```
 
 You now have an interactive terminal session inside the sandbox.

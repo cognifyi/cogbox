@@ -1,0 +1,13 @@
+name: cogbox organization create
+synopsis: Create a new organization and set it as active
+usage: cogbox organization create [ORGANIZATION_NAME] [flags]
+options:
+  - name: region
+    shorthand: r
+    usage: Default region (id or name) for the organization
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox organization - Manage Cogbox organizations

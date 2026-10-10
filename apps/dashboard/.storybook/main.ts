@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -22,7 +23,7 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
-            find: '@daytona/sdk',
+            find: '@cogbox/sdk',
             replacement: path.resolve(__dirname, '../../../libs/sdk-typescript/src'),
           },
           {

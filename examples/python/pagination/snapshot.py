@@ -1,10 +1,10 @@
-from daytona import Daytona
+from cogbox import Cogbox
 
 
 def main():
-    daytona = Daytona()
+    cogbox = Cogbox()
 
-    result = daytona.snapshot.list(page=2, limit=10)
+    result = cogbox.snapshot.list(page=2, limit=10)
     for snapshot in result.items:
         print(f"{snapshot.name} ({snapshot.image_name})")
 

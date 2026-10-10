@@ -1,12 +1,13 @@
 /**
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
  * Resilience layer for sandbox operations.
  *
- * A sandbox can become unavailable mid-session: Daytona auto-stops it after an
+ * A sandbox can become unavailable mid-session: Cogbox auto-stops it after an
  * idle period, or it gets reaped/removed. A stopped sandbox is recoverable
  * (its filesystem is preserved) — we just need to start it again. A deleted one
  * is gone for good.
@@ -18,14 +19,14 @@
  * fails loudly — it never silently falls back to the host.
  */
 
-import type { Sandbox } from '@daytona/sdk'
+import type { Sandbox } from '@cogbox/sdk'
 
 export class SandboxUnavailableError extends Error {
   constructor(public readonly sandboxId: string) {
     super(
-      `Daytona sandbox ${sandboxId.slice(0, 8)} is no longer available — it was likely ` +
+      `Cogbox sandbox ${sandboxId.slice(0, 8)} is no longer available — it was likely ` +
         `reaped after inactivity or removed. Tool execution is paused (it was NOT run ` +
-        `locally). Restart Pi with --daytona to get a fresh sandbox.`,
+        `locally). Restart Pi with --cogbox to get a fresh sandbox.`,
     )
     this.name = 'SandboxUnavailableError'
   }

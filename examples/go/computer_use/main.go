@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -10,15 +11,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/options"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 )
 
 func main() {
-	// Create a new Daytona client using environment variables
-	// Set DAYTONA_API_KEY before running
-	client, err := daytona.NewClient()
+	// Create a new Cogbox client using environment variables
+	// Set COGBOX_API_KEY before running
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -126,10 +127,10 @@ func main() {
 	log.Println("\n=== Keyboard Operations ===")
 
 	// Type text
-	if err := sandbox.ComputerUse.Keyboard().Type(ctx, "Hello, Daytona!", nil); err != nil {
+	if err := sandbox.ComputerUse.Keyboard().Type(ctx, "Hello, Cogbox!", nil); err != nil {
 		log.Fatalf("Failed to type text: %v", err)
 	}
-	log.Println("✓ Typed: 'Hello, Daytona!'")
+	log.Println("✓ Typed: 'Hello, Cogbox!'")
 
 	// Type with delay between characters
 	delay := 50 // milliseconds

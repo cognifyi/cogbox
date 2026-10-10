@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { GpuType } from '@daytona/api-client'
+import { GpuType } from '@cogbox/api-client'
 
 export const GPU_TYPE_LABELS: Record<GpuType, string> = {
   [GpuType.H100]: 'NVIDIA H100',

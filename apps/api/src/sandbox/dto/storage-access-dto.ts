@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -38,7 +39,7 @@ export class StorageAccessDto {
 
   @ApiProperty({
     description: 'S3 bucket name',
-    example: 'daytona',
+    example: 'cogbox',
   })
   bucket: string
 }

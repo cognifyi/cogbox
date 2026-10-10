@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 # pylint: disable=no-member
@@ -9,6 +10,7 @@ Create a long-lived agent.
 Fails if an agent with the given name already exists, so it is safe to run
 more than once.
 """
+
 import argparse
 import os
 import sys

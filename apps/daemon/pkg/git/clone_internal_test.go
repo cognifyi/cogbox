@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package git
@@ -170,13 +171,13 @@ func TestBuildCloneEnv_OverridesBaseEnv(t *testing.T) {
 		"GIT_ASKPASS=/wrong/path",
 		"GIT_USERNAME=inherited-user",
 		"GIT_PASSWORD=inherited-pass",
-		"HOME=/home/daytona",
+		"HOME=/home/cogbox",
 	}
 	env := buildCloneEnv(base, "/tmp/askpass.sh", testCreds)
 
 	// Base env unrelated to git is preserved.
 	require.Contains(t, env, "PATH=/usr/bin")
-	require.Contains(t, env, "HOME=/home/daytona")
+	require.Contains(t, env, "HOME=/home/cogbox")
 
 	// Managed keys from baseEnv are dropped; our values are the only ones.
 	countPrefix := func(prefix string) int {
@@ -198,11 +199,11 @@ func TestBuildCloneEnv_OverridesBaseEnv(t *testing.T) {
 }
 
 func TestBuildCloneEnv_PreservesBaseEnv(t *testing.T) {
-	base := []string{"PATH=/usr/bin", "HOME=/home/daytona"}
+	base := []string{"PATH=/usr/bin", "HOME=/home/cogbox"}
 	env := buildCloneEnv(base, "/tmp/askpass.sh", nil)
 
 	require.Contains(t, env, "PATH=/usr/bin")
-	require.Contains(t, env, "HOME=/home/daytona")
+	require.Contains(t, env, "HOME=/home/cogbox")
 }
 
 func TestBuildCheckoutArgs(t *testing.T) {

@@ -1,12 +1,13 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytona/api-client'
+import { PaginatedSnapshots, SnapshotDto, SnapshotState } from '@cogbox/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 

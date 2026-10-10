@@ -1,9 +1,11 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 # pylint: disable=no-member
 
 """FastAPI webhook entrypoint for the shared host orchestrator."""
+
 from __future__ import annotations
 
 import math

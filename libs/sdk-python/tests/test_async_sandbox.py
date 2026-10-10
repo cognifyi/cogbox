@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -8,14 +9,14 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from daytona.common.errors import DaytonaError, DaytonaValidationError
-from daytona_api_client import SandboxState
+from cogbox.common.errors import CogboxError, CogboxValidationError
+from cogbox_api_client import SandboxState
 
 from .conftest import make_sandbox_dto
 
 
 def make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api):
-    from daytona._async.sandbox import AsyncSandbox
+    from cogbox._async.sandbox import AsyncSandbox
 
     return AsyncSandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api, "python")
 
@@ -43,7 +44,7 @@ class TestAsyncSandboxLifecycleSettings:
         self, sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api
     ):
         sandbox = make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
-        with pytest.raises(DaytonaValidationError, match="Auto-stop interval must be a non-negative"):
+        with pytest.raises(CogboxValidationError, match="Auto-stop interval must be a non-negative"):
             await sandbox.set_autostop_interval(-1)
 
     @pytest.mark.asyncio
@@ -58,7 +59,7 @@ class TestAsyncSandboxLifecycleSettings:
         self, sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api
     ):
         sandbox = make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
-        with pytest.raises(DaytonaValidationError, match="Auto-archive interval must be a non-negative"):
+        with pytest.raises(CogboxValidationError, match="Auto-archive interval must be a non-negative"):
             await sandbox.set_auto_archive_interval(-1)
 
     @pytest.mark.asyncio
@@ -88,7 +89,7 @@ class TestAsyncSandboxOperations:
         assert result == new_labels
 
     def test_create_lsp_server(self, sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api):
-        from daytona._async.lsp_server import AsyncLspServer
+        from cogbox._async.lsp_server import AsyncLspServer
 
         sandbox = make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
         lsp = sandbox.create_lsp_server("python", "/workspace/project")
@@ -105,8 +106,8 @@ class TestAsyncSandboxOperations:
     @pytest.mark.asyncio
     async def test_get_user_home_dir(self, sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api):
         sandbox = make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
-        sandbox._info_api = AsyncMock(get_user_home_dir=AsyncMock(return_value=MagicMock(dir="/home/daytona")))
-        assert await sandbox.get_user_home_dir() == "/home/daytona"
+        sandbox._info_api = AsyncMock(get_user_home_dir=AsyncMock(return_value=MagicMock(dir="/home/cogbox")))
+        assert await sandbox.get_user_home_dir() == "/home/cogbox"
 
     @pytest.mark.asyncio
     async def test_get_work_dir(self, sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api):
@@ -119,11 +120,11 @@ class TestAsyncSandboxOperations:
         self, sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api
     ):
         sandbox = make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
-        sandbox._info_api = AsyncMock(get_user_home_dir=AsyncMock(return_value=MagicMock(dir="/home/daytona")))
+        sandbox._info_api = AsyncMock(get_user_home_dir=AsyncMock(return_value=MagicMock(dir="/home/cogbox")))
 
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
-            assert await sandbox.get_user_root_dir() == "/home/daytona"
+            assert await sandbox.get_user_root_dir() == "/home/cogbox"
 
     @pytest.mark.asyncio
     async def test_preview_and_ssh_operations_delegate(
@@ -153,5 +154,5 @@ class TestAsyncSandboxWaitForStart:
         error_dto = make_sandbox_dto(state=SandboxState.ERROR, error_reason="build failed")
         sandbox = make_async_sandbox(error_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
         mock_async_sandbox_api.get_sandbox = AsyncMock(return_value=error_dto)
-        with pytest.raises(DaytonaError, match="failed to start"):
+        with pytest.raises(CogboxError, match="failed to start"):
             await sandbox.wait_for_sandbox_start(timeout=0)

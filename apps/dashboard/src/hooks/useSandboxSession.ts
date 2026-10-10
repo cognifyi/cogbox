@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -10,9 +11,9 @@ import {
   CreateSandboxBaseParams,
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
-  Daytona,
+  Cogbox,
   Sandbox,
-} from '@daytona/sdk'
+} from '@cogbox/sdk'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
@@ -95,7 +96,7 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
 
   const client = useMemo(() => {
     if (!user?.access_token || !selectedOrganization?.id) return null
-    return new Daytona({
+    return new Cogbox({
       jwtToken: user.access_token,
       apiUrl,
       organizationId: selectedOrganization.id,
@@ -105,7 +106,7 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   const createMutation = useMutation<Sandbox, Error, CreateSandboxParams | undefined>({
     mutationKey: ['create-sandbox', scope ?? 'default'],
     mutationFn: async (params) => {
-      if (!client) throw new Error('Unable to create Daytona client: missing access token or organization ID.')
+      if (!client) throw new Error('Unable to create Cogbox client: missing access token or organization ID.')
       return await client.create(params ?? createParams)
     },
     onSuccess: (newSandbox) => {

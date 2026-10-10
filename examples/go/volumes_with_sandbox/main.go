@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -9,14 +10,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/options"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 )
 
 func main() {
-	// Create Daytona client (uses DAYTONA_API_KEY from environment)
-	client, err := daytona.NewClient()
+	// Create Cogbox client (uses COGBOX_API_KEY from environment)
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}

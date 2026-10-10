@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -87,7 +88,7 @@ export const useDocsSearchQuery = ({ search, enabled }: { search: string; enable
 }
 
 const openDocs = (path = '') => {
-  window.open(`https://www.daytona.io/docs${path}`, '_blank')
+  window.open(`https://cogbox.pazity.com/docs${path}`, '_blank')
 }
 
 const SearchSnippet = ({
@@ -138,7 +139,7 @@ const parseSDKLanguage = (hit: AlgoliaHit) => {
 }
 
 const handleSelect = (hit: AlgoliaHit) => {
-  const url = `https://www.daytona.io${hit.url}`
+  const url = `https://cogbox.pazity.com${hit.url}`
   window.open(url, '_blank')
 }
 

@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package main
@@ -56,7 +57,7 @@ func run() int {
 		return 2
 	}
 
-	configDir := filepath.Join(homeDir, ".daytona")
+	configDir := filepath.Join(homeDir, ".cogbox")
 	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
 		logger.Error("Failed to create config directory", "path", configDir, "error", err)

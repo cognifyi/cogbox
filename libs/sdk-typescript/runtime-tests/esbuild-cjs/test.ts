@@ -1,11 +1,12 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 // Verifies dynamicRequire still works after esbuild re-bundles the ESM build
 // to CJS. pipInstallFromRequirements is a synchronous, no-network path that
 // exercises dynamicRequire('fs').
 
-import { Daytona, Image } from '@daytona/sdk'
+import { Cogbox, Image } from '@cogbox/sdk'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
@@ -15,8 +16,8 @@ async function main() {
   if (!image.dockerfile.includes('FROM alpine')) throw new Error('Image.base failed')
   if (!image.dockerfile.includes('ENV FOO')) throw new Error('Image.env failed')
 
-  const daytona = new Daytona()
-  const iter = daytona.list()
+  const cogbox = new Cogbox()
+  const iter = cogbox.list()
   if (typeof iter[Symbol.asyncIterator] !== 'function') {
     throw new Error('list() did not return an async iterator')
   }
@@ -25,7 +26,7 @@ async function main() {
     throw new Error('list() iterator did not yield a valid result')
   }
 
-  const reqPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'daytona-esbuild-cjs-')), 'requirements.txt')
+  const reqPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cogbox-esbuild-cjs-')), 'requirements.txt')
   fs.writeFileSync(reqPath, 'requests==2.31.0\n')
   const built = Image.debianSlim('3.12').pipInstallFromRequirements(reqPath)
   if (!built.dockerfile.includes('pip install -r /.requirements.txt')) {

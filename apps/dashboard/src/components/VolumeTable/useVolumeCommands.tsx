@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { pluralize } from '@/lib/utils'
-import { VolumeDto, VolumeState } from '@daytona/api-client'
+import { VolumeDto, VolumeState } from '@cogbox/api-client'
 import { CheckSquare2Icon, MinusSquareIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { CommandConfig, useRegisterCommands } from '../CommandPalette'

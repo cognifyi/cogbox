@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SnapshotManagerCredentials } from '@daytona/api-client'
+import { SnapshotManagerCredentials } from '@cogbox/api-client'
 import { useMutation } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { mutationKeys } from './mutationKeys'

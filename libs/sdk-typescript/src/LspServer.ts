@@ -1,11 +1,12 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LspApi } from '@daytona/toolbox-api-client'
-import type { CompletionList, LspSymbol } from '@daytona/toolbox-api-client'
-import { DaytonaValidationError } from './errors/DaytonaError'
+import { LspApi } from '@cogbox/toolbox-api-client'
+import type { CompletionList, LspSymbol } from '@cogbox/toolbox-api-client'
+import { CogboxValidationError } from './errors/CogboxError'
 import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
@@ -56,7 +57,7 @@ export class LspServer {
     private readonly apiClient: LspApi,
   ) {
     if (!Object.values(LspLanguageId).includes(this.languageId)) {
-      throw new DaytonaValidationError(
+      throw new CogboxValidationError(
         `Invalid languageId: ${this.languageId}. Supported values are: ${Object.values(LspLanguageId).join(', ')}`,
       )
     }

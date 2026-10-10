@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -44,7 +45,7 @@ func (d *DockerClient) PullSnapshot(ctx context.Context, req dto.PullSnapshotReq
 				return err
 			}
 
-			ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
+			ref := "cogbox-" + getHashWithoutPrefix(imageInfo.Hash) + ":cogbox"
 			targetRef = fmt.Sprintf("%s/%s/%s", req.DestinationRegistry.Url, *req.DestinationRegistry.Project, ref)
 		}
 

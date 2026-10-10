@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -85,7 +86,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 			return "", "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
-		// Android-device sandboxes do not run the daytona daemon; their readiness is
+		// Android-device sandboxes do not run the cogbox daemon; their readiness is
 		// signaled by the ADB port accepting TCP connections. Match Start's behavior
 		// by branching on the inspected container label rather than the DTO.
 		if isAndroidDeviceContainer(c) {
@@ -159,7 +160,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 
 	// Pin GPU sandboxes to a single physical card. The allocator mutex must
 	// be held across ContainerCreate so concurrent creators see the new
-	// daytona.gpu_index label on their next scan and skip this index, but it
+	// cogbox.gpu_index label on their next scan and skip this index, but it
 	// must NOT be held across the subsequent Start() / network setup which
 	// can take seconds and would otherwise serialize every GPU sandbox
 	// creation on the runner.
@@ -200,7 +201,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", "", err
 	}
 
-	// Container with the daytona.gpu_index label now exists; concurrent
+	// Container with the cogbox.gpu_index label now exists; concurrent
 	// allocator scans will see it, so the mutex can be released even though
 	// Start() has not run yet.
 	if releaseGpu != nil {

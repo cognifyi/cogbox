@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -7,7 +8,7 @@ import warnings
 
 import pytest
 
-from daytona.common.charts import (
+from cogbox.common.charts import (
     BarChart,
     BoxAndWhiskerChart,
     Chart,
@@ -19,15 +20,15 @@ from daytona.common.charts import (
     ScatterChart,
     parse_chart,
 )
-from daytona.common.computer_use import ScreenshotOptions
-from daytona.common.daytona import (
+from cogbox.common.cogbox import (
     CodeLanguage,
+    CogboxConfig,
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,
-    DaytonaConfig,
 )
-from daytona.common.errors import DaytonaNotFoundError, DaytonaValidationError
-from daytona.common.filesystem import (
+from cogbox.common.computer_use import ScreenshotOptions
+from cogbox.common.errors import CogboxNotFoundError, CogboxValidationError
+from cogbox.common.filesystem import (
     FileDownloadErrorDetails,
     FileDownloadRequest,
     FileDownloadResponse,
@@ -35,10 +36,10 @@ from daytona.common.filesystem import (
     create_file_download_error,
     parse_file_download_error_payload,
 )
-from daytona.common.git import GitCommitResponse
-from daytona.common.image import Image
-from daytona.common.lsp_server import LspCompletionPosition, LspLanguageId
-from daytona.common.process import (
+from cogbox.common.git import GitCommitResponse
+from cogbox.common.image import Image
+from cogbox.common.lsp_server import LspCompletionPosition, LspLanguageId
+from cogbox.common.process import (
     STDERR_PREFIX,
     STDOUT_PREFIX,
     CodeRunParams,
@@ -48,23 +49,23 @@ from daytona.common.process import (
     SessionExecuteRequest,
     SessionExecuteResponse,
 )
-from daytona.common.pty import PtyResult, PtySize
-from daytona.common.sandbox import Resources
-from daytona.common.snapshot import CreateSnapshotParams
-from daytona.common.volume import Volume, VolumeMount
-from daytona_toolbox_api_client import Chart as GeneratedChart
-from daytona_toolbox_api_client import ChartElement as GeneratedChartElement
+from cogbox.common.pty import PtyResult, PtySize
+from cogbox.common.sandbox import Resources
+from cogbox.common.snapshot import CreateSnapshotParams
+from cogbox.common.volume import Volume, VolumeMount
+from cogbox_toolbox_api_client import Chart as GeneratedChart
+from cogbox_toolbox_api_client import ChartElement as GeneratedChartElement
 
 
-class TestDaytonaConfig:
+class TestCogboxConfig:
     def test_basic_config(self):
-        config = DaytonaConfig(api_key="key123", api_url="https://api.test.io")
+        config = CogboxConfig(api_key="key123", api_url="https://api.test.io")
         assert config.api_key == "key123"
         assert config.api_url == "https://api.test.io"
         assert config.target is None
 
     def test_config_with_all_fields(self):
-        config = DaytonaConfig(
+        config = CogboxConfig(
             api_key="key",
             api_url="https://api.test.io",
             target="us",
@@ -80,14 +81,14 @@ class TestDaytonaConfig:
     def test_deprecated_server_url_sets_api_url(self):
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
-            config = DaytonaConfig(server_url="https://old.api.io")
+            config = CogboxConfig(server_url="https://old.api.io")
         assert config.api_url == "https://old.api.io"
         assert any("deprecated" in str(w.message).lower() for w in caught)
 
     def test_api_url_takes_precedence_over_server_url(self):
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
-            config = DaytonaConfig(api_url="https://new.api.io", server_url="https://old.api.io")
+            config = CogboxConfig(api_url="https://new.api.io", server_url="https://old.api.io")
         assert config.api_url == "https://new.api.io"
 
 
@@ -222,7 +223,7 @@ class TestFilesystemTypes:
         assert details is None
 
     def test_create_file_download_error_requires_error_message(self):
-        with pytest.raises(DaytonaValidationError, match="must not be None"):
+        with pytest.raises(CogboxValidationError, match="must not be None"):
             create_file_download_error(FileDownloadResponse(source="/tmp/file"))
 
     def test_parse_file_download_error_payload_supports_snake_case_keys(self):
@@ -241,7 +242,7 @@ class TestFilesystemTypes:
                 error_details=FileDownloadErrorDetails(message="missing", status_code=404, error_code="NOT_FOUND"),
             )
         )
-        assert isinstance(error, DaytonaNotFoundError)
+        assert isinstance(error, CogboxNotFoundError)
 
 
 class TestProcessTypes:

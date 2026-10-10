@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'daytona'
+require 'cogbox'
 
-daytona = Daytona::Daytona.new
+cogbox = Cogbox::Cogbox.new
 
 # Auto delete disabled by default
-first_sandbox = daytona.create
+first_sandbox = cogbox.create
 puts "Default auto delete interval: #{first_sandbox.auto_delete_interval}"
 
 # Auto delete after the Sandbox has been stopped for 1 hour
@@ -21,8 +21,8 @@ first_sandbox.auto_delete_interval = -1
 puts "Auto delete interval: #{first_sandbox.auto_delete_interval}"
 
 # Auto delete after the Sandbox has been stopped for 1 day
-second_sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(auto_delete_interval: 24 * 60))
+second_sandbox = cogbox.create(Cogbox::CreateSandboxFromSnapshotParams.new(auto_delete_interval: 24 * 60))
 puts "Auto delete interval: #{second_sandbox.auto_delete_interval}"
 
-daytona.delete(first_sandbox)
-daytona.delete(second_sandbox)
+cogbox.delete(first_sandbox)
+cogbox.delete(second_sandbox)

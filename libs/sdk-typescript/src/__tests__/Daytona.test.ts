@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 import { createApiResponse } from './helpers'
@@ -39,7 +40,7 @@ jest.mock('axios', () => {
 })
 
 jest.mock(
-  '@daytona/api-client',
+  '@cogbox/api-client',
   () => ({
     __esModule: true,
     Configuration: mockConfigurationCtor,
@@ -60,19 +61,19 @@ jest.mock(
 )
 
 // Constructor-time auth/url resolution must be deterministic in tests, so
-// short-circuit DaytonaEnvReader to read process.env only — never the
+// short-circuit CogboxEnvReader to read process.env only — never the
 // developer's .env / .env.local files.
 jest.mock('../utils/Runtime', () => {
   const actual = jest.requireActual('../utils/Runtime')
   class TestEnvReader {
     get(name: string): string | undefined {
-      if (!name.startsWith('DAYTONA_')) {
-        throw new Error(`DaytonaEnvReader: variable name must start with 'DAYTONA_', got '${name}'`)
+      if (!name.startsWith('COGBOX_')) {
+        throw new Error(`CogboxEnvReader: variable name must start with 'COGBOX_', got '${name}'`)
       }
       return process.env[name]
     }
   }
-  return { ...actual, DaytonaEnvReader: TestEnvReader }
+  return { ...actual, CogboxEnvReader: TestEnvReader }
 })
 
 jest.mock('../Snapshot', () => {
@@ -112,17 +113,17 @@ jest.mock('../Sandbox', () => ({
   }),
 }))
 
-describe('Daytona', () => {
+describe('Cogbox', () => {
   beforeEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
 
-    delete process.env.DAYTONA_API_KEY
-    delete process.env.DAYTONA_JWT_TOKEN
-    delete process.env.DAYTONA_ORGANIZATION_ID
-    delete process.env.DAYTONA_API_URL
-    delete process.env.DAYTONA_SERVER_URL
-    delete process.env.DAYTONA_TARGET
+    delete process.env.COGBOX_API_KEY
+    delete process.env.COGBOX_JWT_TOKEN
+    delete process.env.COGBOX_ORGANIZATION_ID
+    delete process.env.COGBOX_API_URL
+    delete process.env.COGBOX_SERVER_URL
+    delete process.env.COGBOX_TARGET
 
     mockAxiosCreate.mockReturnValue({
       defaults: { baseURL: 'http://sandbox-proxy/' },
@@ -134,11 +135,11 @@ describe('Daytona', () => {
   })
 
   it('uses explicit api key config and builds dependent services', async () => {
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    const instance = new Daytona({
+    const instance = new Cogbox({
       apiKey: 'api-key',
-      apiUrl: 'https://example.daytona.test/api',
+      apiUrl: 'https://example.cogbox.test/api',
       target: 'eu',
     })
 
@@ -149,77 +150,77 @@ describe('Daytona', () => {
   })
 
   it('reads constructor values from env when config omitted', async () => {
-    process.env.DAYTONA_API_KEY = 'env-key'
-    process.env.DAYTONA_API_URL = 'https://env.daytona/api'
-    process.env.DAYTONA_TARGET = 'us'
+    process.env.COGBOX_API_KEY = 'env-key'
+    process.env.COGBOX_API_URL = 'https://env.cogbox/api'
+    process.env.COGBOX_TARGET = 'us'
 
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    new Daytona()
+    new Cogbox()
 
     const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
       baseOptions: { headers: Record<string, string> }
     }
 
-    expect(firstConfigArg.basePath).toBe('https://env.daytona/api')
+    expect(firstConfigArg.basePath).toBe('https://env.cogbox/api')
     expect(firstConfigArg.baseOptions.headers.Authorization).toBe('Bearer env-key')
   })
 
   it('falls back to the default api url when none is provided', async () => {
-    process.env.DAYTONA_API_KEY = 'env-key'
-    process.env.DAYTONA_TARGET = 'us'
+    process.env.COGBOX_API_KEY = 'env-key'
+    process.env.COGBOX_TARGET = 'us'
 
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    new Daytona()
+    new Cogbox()
 
     const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
     }
 
-    expect(firstConfigArg.basePath).toBe('https://app.daytona.io/api')
+    expect(firstConfigArg.basePath).toBe('https://cogbox.pazity.com/api')
   })
 
   it('supports deprecated serverUrl config', async () => {
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    new Daytona({ apiKey: 'k', serverUrl: 'https://legacy.daytona/api', target: 'us' })
+    new Cogbox({ apiKey: 'k', serverUrl: 'https://legacy.cogbox/api', target: 'us' })
 
     const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
     }
 
-    expect(firstConfigArg.basePath).toBe('https://legacy.daytona/api')
+    expect(firstConfigArg.basePath).toBe('https://legacy.cogbox/api')
   })
 
   it('reads deprecated server url from env and warns once', async () => {
-    process.env.DAYTONA_API_KEY = 'env-key'
-    process.env.DAYTONA_SERVER_URL = 'https://server.daytona/api'
-    process.env.DAYTONA_TARGET = 'us'
+    process.env.COGBOX_API_KEY = 'env-key'
+    process.env.COGBOX_SERVER_URL = 'https://server.cogbox/api'
+    process.env.COGBOX_TARGET = 'us'
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
 
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    new Daytona()
+    new Cogbox()
 
     const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
     }
 
-    expect(firstConfigArg.basePath).toBe('https://server.daytona/api')
+    expect(firstConfigArg.basePath).toBe('https://server.cogbox/api')
     expect(warnSpy).toHaveBeenCalledTimes(1)
 
     warnSpy.mockRestore()
   })
 
   it('supports jwt auth with organization header', async () => {
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    new Daytona({
+    new Cogbox({
       jwtToken: 'jwt-token',
       organizationId: 'org-1',
-      apiUrl: 'https://jwt.daytona/api',
+      apiUrl: 'https://jwt.cogbox/api',
       target: 'us',
     })
 
@@ -227,51 +228,51 @@ describe('Daytona', () => {
       baseOptions: { headers: Record<string, string> }
     }
     expect(firstConfigArg.baseOptions.headers.Authorization).toBe('Bearer jwt-token')
-    expect(firstConfigArg.baseOptions.headers['X-Daytona-Organization-ID']).toBe('org-1')
+    expect(firstConfigArg.baseOptions.headers['X-Cogbox-Organization-ID']).toBe('org-1')
   })
 
   it('throws when no credentials are provided', async () => {
-    const { Daytona } = await import('../Daytona')
-    delete process.env.DAYTONA_API_KEY
-    delete process.env.DAYTONA_JWT_TOKEN
-    delete process.env.DAYTONA_ORGANIZATION_ID
-    expect(() => new Daytona()).toThrow('Authentication credentials not found.')
+    const { Cogbox } = await import('../Cogbox')
+    delete process.env.COGBOX_API_KEY
+    delete process.env.COGBOX_JWT_TOKEN
+    delete process.env.COGBOX_ORGANIZATION_ID
+    expect(() => new Cogbox()).toThrow('Authentication credentials not found.')
   })
 
   it('throws when jwt auth has no organization id', async () => {
-    const { Daytona } = await import('../Daytona')
-    delete process.env.DAYTONA_ORGANIZATION_ID
+    const { Cogbox } = await import('../Cogbox')
+    delete process.env.COGBOX_ORGANIZATION_ID
     expect(
       () =>
-        new Daytona({
+        new Cogbox({
           jwtToken: 'jwt-token',
-          apiUrl: 'https://jwt.daytona/api',
+          apiUrl: 'https://jwt.cogbox/api',
           target: 'us',
         }),
-    ).toThrow('DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN.')
+    ).toThrow('COGBOX_ORGANIZATION_ID is required when authenticating with COGBOX_JWT_TOKEN.')
   })
 
   it('reads jwt credentials from env when config omits them', async () => {
-    process.env.DAYTONA_JWT_TOKEN = 'env-jwt'
-    process.env.DAYTONA_ORGANIZATION_ID = 'env-org'
-    process.env.DAYTONA_API_URL = 'https://env-jwt.daytona/api'
-    process.env.DAYTONA_TARGET = 'eu'
+    process.env.COGBOX_JWT_TOKEN = 'env-jwt'
+    process.env.COGBOX_ORGANIZATION_ID = 'env-org'
+    process.env.COGBOX_API_URL = 'https://env-jwt.cogbox/api'
+    process.env.COGBOX_TARGET = 'eu'
 
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
 
-    new Daytona()
+    new Cogbox()
 
     const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       baseOptions: { headers: Record<string, string> }
     }
 
     expect(firstConfigArg.baseOptions.headers.Authorization).toBe('Bearer env-jwt')
-    expect(firstConfigArg.baseOptions.headers['X-Daytona-Organization-ID']).toBe('env-org')
+    expect(firstConfigArg.baseOptions.headers['X-Cogbox-Organization-ID']).toBe('env-org')
   })
 
   it('throws unsupported language in create', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     await expect(instance.create({ language: 'rust' })).rejects.toThrow('Invalid code-toolbox-language: rust')
   })
@@ -283,15 +284,15 @@ describe('Daytona', () => {
     [{}, 'autoStopInterval must be a non-negative integer', { autoStopInterval: -1 }],
     [{}, 'autoArchiveInterval must be a non-negative integer', { autoArchiveInterval: -1 }],
   ])('validates create input %#', async (optionsPart, message, params) => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     await expect(instance.create(params, optionsPart)).rejects.toThrow(message)
   })
 
   it('forces autoDeleteInterval to 0 for ephemeral sandboxes', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.createSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-1', state: 'started', labels: { 'code-toolbox-language': 'python' } }),
@@ -304,8 +305,8 @@ describe('Daytona', () => {
   })
 
   it('defaults create params and timeout when omitted', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.createSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-default', state: 'started', labels: { 'code-toolbox-language': 'python' } }),
@@ -324,8 +325,8 @@ describe('Daytona', () => {
   })
 
   it('creates sandboxes from image names using buildInfo dockerfile content', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.createSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-image', state: 'started', labels: { 'code-toolbox-language': 'python' } }),
@@ -345,9 +346,9 @@ describe('Daytona', () => {
   })
 
   it('creates sandboxes from declarative images using image context hashes', async () => {
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
     const { Image } = await import('../Image')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockProcessImageContext.mockResolvedValue(['ctx-hash'])
     mockSandboxApi.createSandbox.mockResolvedValue(
@@ -373,9 +374,9 @@ describe('Daytona', () => {
   })
 
   it('waits for non-started sandboxes returned by create', async () => {
-    const { Daytona } = await import('../Daytona')
+    const { Cogbox } = await import('../Cogbox')
     const { Sandbox } = await import('../Sandbox')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.createSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-wait', state: 'starting', labels: { 'code-toolbox-language': 'python' } }),
@@ -388,11 +389,11 @@ describe('Daytona', () => {
     expect(createdSandbox.waitUntilStarted).toHaveBeenCalled()
   })
 
-  it('wraps DaytonaTimeoutError from sandbox startup in create', async () => {
-    const { Daytona } = await import('../Daytona')
+  it('wraps CogboxTimeoutError from sandbox startup in create', async () => {
+    const { Cogbox } = await import('../Cogbox')
     const { Sandbox } = await import('../Sandbox')
-    const { DaytonaTimeoutError } = await import('../errors/DaytonaError')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { CogboxTimeoutError } = await import('../errors/CogboxError')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.createSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-timeout', state: 'starting', labels: { 'code-toolbox-language': 'python' } }),
@@ -402,7 +403,7 @@ describe('Daytona', () => {
       start: jest.fn(),
       stop: jest.fn(),
       delete: jest.fn(),
-      waitUntilStarted: jest.fn().mockRejectedValue(new DaytonaTimeoutError('slow start')),
+      waitUntilStarted: jest.fn().mockRejectedValue(new CogboxTimeoutError('slow start')),
       _experimental_fork: jest.fn(),
     }))
 
@@ -412,8 +413,8 @@ describe('Daytona', () => {
   })
 
   it('gives each listed sandbox its own Configuration instance', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.listSandboxes.mockResolvedValue(
       createApiResponse({
@@ -436,8 +437,8 @@ describe('Daytona', () => {
   })
 
   it('serializes label filters when listing sandboxes', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.listSandboxes.mockResolvedValue(createApiResponse({ items: [], nextCursor: null }))
 
@@ -456,8 +457,8 @@ describe('Daytona', () => {
   })
 
   it('delegates experimental fork to the sandbox instance', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     const sandbox = {
       _experimental_fork: jest.fn().mockResolvedValue({ id: 'forked' }),
@@ -470,8 +471,8 @@ describe('Daytona', () => {
   })
 
   it('delegates get/list/start/stop/delete methods', async () => {
-    const { Daytona } = await import('../Daytona')
-    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+    const { Cogbox } = await import('../Cogbox')
+    const instance = new Cogbox({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
     mockSandboxApi.getSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-1', labels: { 'code-toolbox-language': 'python' } }),

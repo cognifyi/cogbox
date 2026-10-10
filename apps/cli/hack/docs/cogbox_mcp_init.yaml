@@ -1,0 +1,10 @@
+name: cogbox mcp init
+synopsis: |
+  Initialize Cogbox MCP Server with an agent (currently supported: claude, windsurf, cursor)
+usage: cogbox mcp init [AGENT_NAME] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox mcp - Manage Cogbox MCP Server

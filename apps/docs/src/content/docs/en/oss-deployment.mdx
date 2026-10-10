@@ -1,23 +1,23 @@
 ---
 title: Open Source Deployment
-description: Run Daytona Open Source locally using Docker Compose.
+description: Run Cogbox Open Source locally using Docker Compose.
 ---
 
-This guide will walk you through running Daytona Open Source using Docker Compose locally on your machine or on a server behind a public domain with HTTPS.
+This guide will walk you through running Cogbox Open Source using Docker Compose locally on your machine or on a server behind a public domain with HTTPS.
 
-The compose file can be found in the [docker](https://github.com/cognifyi/cogbox/tree/main/docker) folder of the Daytona repository.
+The compose file can be found in the [docker](https://github.com/cognifyi/cogbox/tree/main/docker) folder of the Cogbox repository.
 
 :::note
-Daytona is open source under the AGPL 3.0 license. You are free to deploy and run it in any environment. If you modify Daytona, and make it available over a network, AGPL 3.0 license requires you to release your modifications under the same license. Self-hosted deployments are community-supported via GitHub and Slack. For self-hosted deployments with dedicated support, contact [support@daytona.io](mailto:support@daytona.io).
+Cogbox is open source under the AGPL 3.0 license. You are free to deploy and run it in any environment. If you modify Cogbox, and make it available over a network, AGPL 3.0 license requires you to release your modifications under the same license. Self-hosted deployments are community-supported via GitHub and Slack. For self-hosted deployments with dedicated support, contact [support@pazity.com](mailto:support@pazity.com).
 :::
 
 ## Overview
 
-The Docker Compose configuration includes all the necessary services to run Daytona:
+The Docker Compose configuration includes all the necessary services to run Cogbox:
 
-- **API**: Main Daytona application server
+- **API**: Main Cogbox application server
 - **Proxy**: Request proxy service
-- **Runner**: Service that hosts the Daytona Runner
+- **Runner**: Service that hosts the Cogbox Runner
 - **SSH Gateway**: Service that handles sandbox SSH access
 - **Database**: PostgreSQL database for data persistence
 - **Redis**: In-memory data store for caching and sessions
@@ -30,17 +30,17 @@ The Docker Compose configuration includes all the necessary services to run Dayt
 
 ## Local Deployment Quick Start
 
-1. Clone the [Daytona repository](https://github.com/cognifyi/cogbox)
+1. Clone the [Cogbox repository](https://github.com/cognifyi/cogbox)
 2. [Install Docker and Docker Compose](https://docs.docker.com/get-docker/)
-3. Run the following command (from the root of the Daytona repo) to start all services:
+3. Run the following command (from the root of the Cogbox repo) to start all services:
 
    ```bash
    docker compose -f docker/docker-compose.yaml up -d
    ```
 
 4. Access the services:
-   - Daytona Dashboard: http://localhost:3000
-     - Access Credentials: dev@daytona.io `password`
+   - Cogbox Dashboard: http://localhost:3000
+     - Access Credentials: dev@pazity.com `password`
      - Make sure that the default snapshot is active at http://localhost:3000/dashboard/snapshots
    - PgAdmin: http://localhost:5050
    - Registry UI: http://localhost:5100
@@ -48,7 +48,7 @@ The Docker Compose configuration includes all the necessary services to run Dayt
 
 ## Domain Deployment Quick Start
 
-This path deploys Daytona on a server behind a public domain with HTTPS, using Caddy as the reverse proxy and Let's Encrypt for TLS certificates.
+This path deploys Cogbox on a server behind a public domain with HTTPS, using Caddy as the reverse proxy and Let's Encrypt for TLS certificates.
 
 ### Prerequisites
 
@@ -63,7 +63,7 @@ This path deploys Daytona on a server behind a public domain with HTTPS, using C
    >
    > **Network isolation (recommended):** The Mac will share a network segment with every other device on the LAN. If your router supports VLANs or a guest/DMZ network, place the Mac on an isolated segment to prevent lateral access to other devices in the event of a compromise.
 
-2. **A registered domain name.** This guide uses `daytona.example.com` as a placeholder — replace it everywhere with your actual domain.
+2. **A registered domain name.** This guide uses `cogbox.example.com` as a placeholder — replace it everywhere with your actual domain.
 
 3. **A DNS provider API token** for automated wildcard TLS certificate provisioning. Wildcard certificates require a DNS-01 challenge, which means your certificate tool must be able to create DNS TXT records programmatically. See the [DNS Provider Reference](#dns-provider-reference) section for provider-specific instructions.
 
@@ -75,7 +75,7 @@ This path deploys Daytona on a server behind a public domain with HTTPS, using C
 
 ### Steps
 
-1. Clone the [Daytona repository](https://github.com/cognifyi/cogbox)
+1. Clone the [Cogbox repository](https://github.com/cognifyi/cogbox)
 2. [Install Docker and Docker Compose](https://docs.docker.com/get-docker/)
 3. Configure DNS records at your DNS provider — see [DNS
    Configuration](#domain-deployment). This step must be done manually before proceeding.
@@ -88,13 +88,13 @@ This path deploys Daytona on a server behind a public domain with HTTPS, using C
 5. During the setup process, input your domain, email address, password, and credentials for the databases you wish to use.
 
 6. Access the services:
-   - Daytona Dashboard: https://daytona.example.com
+   - Cogbox Dashboard: https://cogbox.example.com
      - Username: Chosen during setup
      - Password: Chosen during setup
-     - Make sure that the default snapshot is active at https://daytona.example.com/dashboard/snapshots
-   - PgAdmin: https://daytona.example.com:5050 (credentials set during setup)
-   - Registry UI: https://daytona.example.com:5100 (admin credentials set during setup)
-   - MinIO Console: https://daytona.example.com:9001 (credentials set during setup)
+     - Make sure that the default snapshot is active at https://cogbox.example.com/dashboard/snapshots
+   - PgAdmin: https://cogbox.example.com:5050 (credentials set during setup)
+   - Registry UI: https://cogbox.example.com:5100 (admin credentials set during setup)
+   - MinIO Console: https://cogbox.example.com:9001 (credentials set during setup)
 
 ## DNS Setup for Proxy URLs
 
@@ -116,19 +116,19 @@ For domain deployments, create DNS records at your DNS provider pointing to your
 
 | Record Type           | Name                          | Value                                                 | Proxy Status         |
 | --------------------- | ----------------------------- | ----------------------------------------------------- | -------------------- |
-| A                     | `daytona.example.com`         | `YOUR_SERVER_IP`                                      | See note below       |
-| A or CNAME            | `proxy.daytona.example.com`   | `YOUR_SERVER_IP` (A) or `daytona.example.com` (CNAME) | **Must be DNS-only** |
-| A or CNAME (wildcard) | `*.proxy.daytona.example.com` | `YOUR_SERVER_IP` (A) or `daytona.example.com` (CNAME) | **Must be DNS-only** |
+| A                     | `cogbox.example.com`         | `YOUR_SERVER_IP`                                      | See note below       |
+| A or CNAME            | `proxy.cogbox.example.com`   | `YOUR_SERVER_IP` (A) or `cogbox.example.com` (CNAME) | **Must be DNS-only** |
+| A or CNAME (wildcard) | `*.proxy.cogbox.example.com` | `YOUR_SERVER_IP` (A) or `cogbox.example.com` (CNAME) | **Must be DNS-only** |
 
-The wildcard `*.proxy.daytona.example.com` covers subdomains like `8080-sandboxid.proxy.daytona.example.com`, but it does **not** cover the bare `proxy.daytona.example.com` itself. The proxy service uses the bare domain for OIDC callbacks (e.g., `proxy.daytona.example.com/callback`), so it needs its own record.
+The wildcard `*.proxy.cogbox.example.com` covers subdomains like `8080-sandboxid.proxy.cogbox.example.com`, but it does **not** cover the bare `proxy.cogbox.example.com` itself. The proxy service uses the bare domain for OIDC callbacks (e.g., `proxy.cogbox.example.com/callback`), so it needs its own record.
 
-Either A records or CNAME records work. CNAME records point to another hostname instead of an IP, so if your server IP changes you only update one A record. The Daytona team recommends CNAME for the proxy records.
+Either A records or CNAME records work. CNAME records point to another hostname instead of an IP, so if your server IP changes you only update one A record. The Cogbox team recommends CNAME for the proxy records.
 
 #### Cloudflare-Specific Warning
 
-If you use Cloudflare, the wildcard record for `*.proxy.daytona.example.com` **must** have the proxy toggled OFF (grey cloud / "DNS only"). Cloudflare's free Universal SSL certificate covers `*.example.com` but does **not** cover sub-subdomain wildcards like `*.proxy.example.com`. If the orange cloud proxy is enabled, Cloudflare will intercept the traffic but fail the TLS handshake because it has no certificate for that depth.
+If you use Cloudflare, the wildcard record for `*.proxy.cogbox.example.com` **must** have the proxy toggled OFF (grey cloud / "DNS only"). Cloudflare's free Universal SSL certificate covers `*.example.com` but does **not** cover sub-subdomain wildcards like `*.proxy.example.com`. If the orange cloud proxy is enabled, Cloudflare will intercept the traffic but fail the TLS handshake because it has no certificate for that depth.
 
-The base domain record (`daytona.example.com`) can be either proxied or DNS-only. For simplicity, setting all records to DNS-only is recommended so Caddy handles all TLS uniformly.
+The base domain record (`cogbox.example.com`) can be either proxied or DNS-only. For simplicity, setting all records to DNS-only is recommended so Caddy handles all TLS uniformly.
 
 This limitation is Cloudflare-specific to the free tier. Other DNS providers that do not act as a TLS-terminating proxy (DigitalOcean DNS, AWS Route 53, Namecheap, etc.) do not have this issue.
 
@@ -138,9 +138,9 @@ Wait 1-5 minutes for DNS propagation, then:
 
 ```bash
 # All three should return your server's actual IP (NOT Cloudflare IPs like 104.x.x.x)
-dig +short daytona.example.com
-dig +short proxy.daytona.example.com
-dig +short anything.proxy.daytona.example.com
+dig +short cogbox.example.com
+dig +short proxy.cogbox.example.com
+dig +short anything.proxy.cogbox.example.com
 ```
 
 ## Domain Deployment: What the Setup Script Does
@@ -159,7 +159,7 @@ Three services must be reachable from the internet:
 
 Caddy sits in front of the API and Proxy, terminates TLS, and routes requests based on hostname. Dex (the OIDC provider) is proxied through Caddy at the `/dex/*` path on the main domain. The SSH Gateway on port 2222 is TCP (not HTTP) and bypasses Caddy — it is exposed directly through the firewall.
 
-Sandbox preview URLs use the pattern `{{PORT}}-{{sandboxId}}.proxy.daytona.example.com`, which is why a wildcard DNS record is required.
+Sandbox preview URLs use the pattern `{{PORT}}-{{sandboxId}}.proxy.cogbox.example.com`, which is why a wildcard DNS record is required.
 
 ### Security Credentials
 
@@ -167,7 +167,7 @@ The default Docker Compose file ships with placeholder secrets not safe for any 
 
 - `ENCRYPTION_KEY` and `ENCRYPTION_SALT`
 - `PROXY_API_KEY`
-- `RUNNER_API_KEY` (used as both `DEFAULT_RUNNER_API_KEY` and `DAYTONA_RUNNER_TOKEN`)
+- `RUNNER_API_KEY` (used as both `DEFAULT_RUNNER_API_KEY` and `COGBOX_RUNNER_TOKEN`)
 - `SSH_GATEWAY_API_KEY`
 
 To generate these manually:
@@ -200,7 +200,7 @@ The script updates several environment variables in `docker/docker-compose.yaml`
 
 - **API**: `PROXY_DOMAIN`, `PROXY_PROTOCOL`, `PROXY_TEMPLATE_URL`, `DASHBOARD_URL`, `DASHBOARD_BASE_API_URL`, `PUBLIC_OIDC_DOMAIN`, `SSH_GATEWAY_URL`, `SSH_GATEWAY_COMMAND`, and all security key variables
 - **Proxy**: `PROXY_PROTOCOL`, `COOKIE_DOMAIN`, `OIDC_PUBLIC_DOMAIN`, and `PROXY_API_KEY`
-- **Runner**: `DAYTONA_RUNNER_TOKEN`
+- **Runner**: `COGBOX_RUNNER_TOKEN`
 - **SSH Gateway**: `API_KEY`
 
 ### Caddy Installation and Configuration
@@ -302,7 +302,7 @@ PgAdmin and Registry UI are protected by Caddy's HTTP Basic Auth — nothing is 
 
 ### HTTP Proxy
 
-To configurate an outbound HTTP proxy for the Daytona services, you can set the following environment variables in the `docker-compose.yaml` file for each service that requires proxy access (the API service is the only that requires outbound access to pull images):
+To configurate an outbound HTTP proxy for the Cogbox services, you can set the following environment variables in the `docker-compose.yaml` file for each service that requires proxy access (the API service is the only that requires outbound access to pull images):
 
 - `HTTP_PROXY`: URL of the HTTP proxy server
 - `HTTPS_PROXY`: URL of the HTTPS proxy server
@@ -344,20 +344,20 @@ Below is a full list of environment variables with their default values:
 | `DB_PORT`                                  | number  | `5432`                                               | PostgreSQL database port                                                                                                                                  |
 | `DB_USERNAME`                              | string  | `user`                                               | PostgreSQL database username                                                                                                                              |
 | `DB_PASSWORD`                              | string  | `pass`                                               | PostgreSQL database password                                                                                                                              |
-| `DB_DATABASE`                              | string  | `daytona`                                            | PostgreSQL database name                                                                                                                                  |
+| `DB_DATABASE`                              | string  | `cogbox`                                            | PostgreSQL database name                                                                                                                                  |
 | `DB_TLS_ENABLED`                           | boolean | `false`                                              | Enable TLS for database connection                                                                                                                        |
 | `DB_TLS_REJECT_UNAUTHORIZED`               | boolean | `true`                                               | Reject unauthorized TLS certificates                                                                                                                      |
 | `REDIS_HOST`                               | string  | `redis`                                              | Redis server hostname                                                                                                                                     |
 | `REDIS_PORT`                               | number  | `6379`                                               | Redis server port                                                                                                                                         |
-| `OIDC_CLIENT_ID`                           | string  | `daytona`                                            | OIDC client identifier                                                                                                                                    |
+| `OIDC_CLIENT_ID`                           | string  | `cogbox`                                            | OIDC client identifier                                                                                                                                    |
 | `OIDC_ISSUER_BASE_URL`                     | string  | `http://dex:5556/dex`                                | OIDC issuer base URL                                                                                                                                      |
 | `PUBLIC_OIDC_DOMAIN`                       | string  | `http://localhost:5556/dex`                          | Public OIDC domain                                                                                                                                        |
-| `OIDC_AUDIENCE`                            | string  | `daytona`                                            | OIDC audience identifier                                                                                                                                  |
+| `OIDC_AUDIENCE`                            | string  | `cogbox`                                            | OIDC audience identifier                                                                                                                                  |
 | `OIDC_MANAGEMENT_API_ENABLED`              | boolean | (empty)                                              | Enable OIDC management API                                                                                                                                |
 | `OIDC_MANAGEMENT_API_CLIENT_ID`            | string  | (empty)                                              | OIDC management API client ID                                                                                                                             |
 | `OIDC_MANAGEMENT_API_CLIENT_SECRET`        | string  | (empty)                                              | OIDC management API client secret                                                                                                                         |
 | `OIDC_MANAGEMENT_API_AUDIENCE`             | string  | (empty)                                              | OIDC management API audience                                                                                                                              |
-| `DEFAULT_SNAPSHOT`                         | string  | `daytonaio/sandbox:0.4.3`                            | Default sandbox snapshot image                                                                                                                            |
+| `DEFAULT_SNAPSHOT`                         | string  | `cognifyi/sandbox:0.4.3`                            | Default sandbox snapshot image                                                                                                                            |
 | `DASHBOARD_URL`                            | string  | `http://localhost:3000/dashboard`                    | Dashboard URL                                                                                                                                             |
 | `DASHBOARD_BASE_API_URL`                   | string  | `http://localhost:3000`                              | Dashboard base API URL                                                                                                                                    |
 | `POSTHOG_API_KEY`                          | string  | `phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv`    | PostHog API key for analytics                                                                                                                             |
@@ -366,23 +366,23 @@ Below is a full list of environment variables with their default values:
 | `TRANSIENT_REGISTRY_URL`                   | string  | `http://registry:6000`                               | Transient registry URL                                                                                                                                    |
 | `TRANSIENT_REGISTRY_ADMIN`                 | string  | `admin`                                              | Transient registry admin username                                                                                                                         |
 | `TRANSIENT_REGISTRY_PASSWORD`              | string  | `password`                                           | Transient registry admin password                                                                                                                         |
-| `TRANSIENT_REGISTRY_PROJECT_ID`            | string  | `daytona`                                            | Transient registry project ID                                                                                                                             |
+| `TRANSIENT_REGISTRY_PROJECT_ID`            | string  | `cogbox`                                            | Transient registry project ID                                                                                                                             |
 | `INTERNAL_REGISTRY_URL`                    | string  | `http://registry:6000`                               | Internal registry URL                                                                                                                                     |
 | `INTERNAL_REGISTRY_ADMIN`                  | string  | `admin`                                              | Internal registry admin username                                                                                                                          |
 | `INTERNAL_REGISTRY_PASSWORD`               | string  | `password`                                           | Internal registry admin password                                                                                                                          |
-| `INTERNAL_REGISTRY_PROJECT_ID`             | string  | `daytona`                                            | Internal registry project ID                                                                                                                              |
+| `INTERNAL_REGISTRY_PROJECT_ID`             | string  | `cogbox`                                            | Internal registry project ID                                                                                                                              |
 | `SMTP_HOST`                                | string  | `maildev`                                            | SMTP server hostname                                                                                                                                      |
 | `SMTP_PORT`                                | number  | `1025`                                               | SMTP server port                                                                                                                                          |
 | `SMTP_USER`                                | string  | (empty)                                              | SMTP username                                                                                                                                             |
 | `SMTP_PASSWORD`                            | string  | (empty)                                              | SMTP password                                                                                                                                             |
 | `SMTP_SECURE`                              | boolean | (empty)                                              | Enable SMTP secure connection                                                                                                                             |
-| `SMTP_EMAIL_FROM`                          | string  | `"Daytona Team <no-reply@daytona.io>"`               | SMTP sender email address                                                                                                                                 |
+| `SMTP_EMAIL_FROM`                          | string  | `"Cogbox Team <no-reply@pazity.com>"`               | SMTP sender email address                                                                                                                                 |
 | `S3_ENDPOINT`                              | string  | `http://minio:9000`                                  | S3-compatible storage endpoint                                                                                                                            |
 | `S3_STS_ENDPOINT`                          | string  | `http://minio:9000/minio/v1/assume-role`             | S3 STS endpoint                                                                                                                                           |
 | `S3_REGION`                                | string  | `us-east-1`                                          | S3 region                                                                                                                                                 |
 | `S3_ACCESS_KEY`                            | string  | `minioadmin`                                         | S3 access key                                                                                                                                             |
 | `S3_SECRET_KEY`                            | string  | `minioadmin`                                         | S3 secret key                                                                                                                                             |
-| `S3_DEFAULT_BUCKET`                        | string  | `daytona`                                            | S3 default bucket name                                                                                                                                    |
+| `S3_DEFAULT_BUCKET`                        | string  | `cogbox`                                            | S3 default bucket name                                                                                                                                    |
 | `S3_ACCOUNT_ID`                            | string  | `/`                                                  | S3 account ID                                                                                                                                             |
 | `S3_ROLE_NAME`                             | string  | `/`                                                  | S3 role name                                                                                                                                              |
 | `ENVIRONMENT`                              | string  | `dev`                                                | Application environment                                                                                                                                   |
@@ -467,8 +467,8 @@ Below is a full list of environment variables with their default values:
 
 | Variable                                | Type    | Default Value                     | Description                                           |
 | --------------------------------------- | ------- | --------------------------------- | ----------------------------------------------------- |
-| `DAYTONA_API_URL`                       | string  | `http://api:3000/api`             | Daytona API URL                                       |
-| `DAYTONA_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                       |
+| `COGBOX_API_URL`                       | string  | `http://api:3000/api`             | Cogbox API URL                                       |
+| `COGBOX_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                       |
 | `VERSION`                               | string  | `0.0.1`                           | Runner service version                                |
 | `OTEL_LOGGING_ENABLED`                  | boolean | `false`                           | Runner OpenTelemetry logging enabled                  |
 | `OTEL_TRACING_ENABLED`                  | boolean | `false`                           | Runner OpenTelemetry tracing enabled                  |
@@ -476,7 +476,7 @@ Below is a full list of environment variables with their default values:
 | `OTEL_EXPORTER_OTLP_HEADERS`            | string  | (empty)                           | Runner OpenTelemetry OTLP exporter headers            |
 | `ENVIRONMENT`                           | string  | `development`                     | Application environment                               |
 | `API_PORT`                              | number  | `3003`                            | Runner API service port                               |
-| `LOG_FILE_PATH`                         | string  | `/home/daytona/runner/runner.log` | Path to runner log file                               |
+| `LOG_FILE_PATH`                         | string  | `/home/cogbox/runner/runner.log` | Path to runner log file                               |
 | `RESOURCE_LIMITS_DISABLED`              | boolean | `true`                            | Disable resource limits for sandboxes                 |
 | `BUILD_TIMEOUT_MIN`                     | number  | `120`                             | Build timeout in minutes (minimum: 1)                 |
 | `BUILD_CPU_CORES`                       | number  | `4`                               | CPU cores allocated per build (minimum: 1)            |
@@ -485,7 +485,7 @@ Below is a full list of environment variables with their default values:
 | `AWS_REGION`                            | string  | `us-east-1`                       | AWS region                                            |
 | `AWS_ACCESS_KEY_ID`                     | string  | `minioadmin`                      | AWS access key ID                                     |
 | `AWS_SECRET_ACCESS_KEY`                 | string  | `minioadmin`                      | AWS secret access key                                 |
-| `AWS_DEFAULT_BUCKET`                    | string  | `daytona`                         | AWS default bucket name                               |
+| `AWS_DEFAULT_BUCKET`                    | string  | `cogbox`                         | AWS default bucket name                               |
 | `DAEMON_START_TIMEOUT_SEC`              | number  | `60`                              | Daemon start timeout in seconds                       |
 | `SANDBOX_START_TIMEOUT_SEC`             | number  | `30`                              | Sandbox start timeout in seconds                      |
 | `ANDROID_BOOT_TIMEOUT_SEC`              | number  | `300`                             | Android emulator boot timeout in seconds              |
@@ -510,7 +510,7 @@ Below is a full list of environment variables with their default values:
 
 | Variable           | Type   | Default Value                        | Description                |
 | ------------------ | ------ | ------------------------------------ | -------------------------- |
-| `API_URL`          | string | `http://api:3000/api`                | Daytona API URL            |
+| `API_URL`          | string | `http://api:3000/api`                | Cogbox API URL            |
 | `API_KEY`          | string | `ssh_secret_api_token`               | API authentication key     |
 | `SSH_PRIVATE_KEY`  | string | (Base64-encoded OpenSSH private key) | SSH private key for auth   |
 | `SSH_HOST_KEY`     | string | (Base64-encoded OpenSSH host key)    | SSH host key for server    |
@@ -520,16 +520,16 @@ Below is a full list of environment variables with their default values:
 
 | Variable                  | Type    | Default Value               | Description                     |
 | ------------------------- | ------- | --------------------------- | ------------------------------- |
-| `DAYTONA_API_URL`         | string  | `http://api:3000/api`       | Daytona API URL                 |
+| `COGBOX_API_URL`         | string  | `http://api:3000/api`       | Cogbox API URL                 |
 | `PROXY_PORT`              | number  | `4000`                      | Proxy service port              |
 | `PROXY_API_KEY`           | string  | `super_secret_key`          | Proxy API authentication key    |
 | `PROXY_PROTOCOL`          | string  | `http`                      | Proxy protocol (http or https)  |
 | `COOKIE_DOMAIN`           | string  | `$PROXY_DOMAIN`             | Cookie domain for proxy cookies |
-| `OIDC_CLIENT_ID`          | string  | `daytona`                   | OIDC client identifier          |
+| `OIDC_CLIENT_ID`          | string  | `cogbox`                   | OIDC client identifier          |
 | `OIDC_CLIENT_SECRET`      | string  | (empty)                     | OIDC client secret              |
 | `OIDC_DOMAIN`             | string  | `http://dex:5556/dex`       | OIDC domain                     |
 | `OIDC_PUBLIC_DOMAIN`      | string  | `http://localhost:5556/dex` | OIDC public domain              |
-| `OIDC_AUDIENCE`           | string  | `daytona`                   | OIDC audience identifier        |
+| `OIDC_AUDIENCE`           | string  | `cogbox`                   | OIDC audience identifier        |
 | `REDIS_HOST`              | string  | `redis`                     | Redis server hostname           |
 | `REDIS_PORT`              | number  | `6379`                      | Redis server port               |
 | `TOOLBOX_ONLY_MODE`       | boolean | `false`                     | Allow only toolbox requests     |
@@ -543,7 +543,7 @@ The default compose setup uses a local Dex OIDC provider for authentication. How
 ### Step 1: Create Your Auth0 Tenant
 
 Begin by navigating to https://auth0.com/signup and start the signup process. Choose your account type based on your use case - select `Company` for business applications or `Personal` for individual projects.\
-On the "Let's get setup" page, you'll need to enter your application name such as `My Daytona` and select `Single Page Application (SPA)` as the application type. For authentication methods, you can start with `Email and Password` since additional social providers like Google, GitHub, or Facebook can be added later. Once you've configured these settings, click `Create Application` in the bottom right corner.
+On the "Let's get setup" page, you'll need to enter your application name such as `My Cogbox` and select `Single Page Application (SPA)` as the application type. For authentication methods, you can start with `Email and Password` since additional social providers like Google, GitHub, or Facebook can be added later. Once you've configured these settings, click `Create Application` in the bottom right corner.
 
 ### Step 2: Configure Your Single Page Application
 
@@ -589,7 +589,7 @@ Click `Save` to apply these permission changes.
 
 ### Step 4: Set Up Custom API
 
-Your Daytona application will need a custom API to handle authentication and authorization. Navigate to `Applications` > `APIs` in the left sidebar and click `Create API`. Enter a descriptive name such as `My Daytona API` and provide an identifier like `my-daytona-api`. The identifier should be a unique string that will be used in your application configuration.\
+Your Cogbox application will need a custom API to handle authentication and authorization. Navigate to `Applications` > `APIs` in the left sidebar and click `Create API`. Enter a descriptive name such as `My Cogbox API` and provide an identifier like `my-cogbox-api`. The identifier should be a unique string that will be used in your application configuration.\
 After creating the API, go to the `Permissions` tab to define the scopes your application will use. Add each of the following permissions with their corresponding descriptions:
 
 | Permission                  | Description                              |
@@ -607,7 +607,7 @@ After creating the API, go to the `Permissions` tab to define the scopes your ap
 
 ### Step 5: Configure Environment Variables
 
-Once you've completed all the Auth0 setup steps, you'll need to configure environment variables in your Daytona deployment. These variables connect your application to the Auth0 services you've just configured.
+Once you've completed all the Auth0 setup steps, you'll need to configure environment variables in your Cogbox deployment. These variables connect your application to the Auth0 services you've just configured.
 
 #### Finding Your Configuration Values
 

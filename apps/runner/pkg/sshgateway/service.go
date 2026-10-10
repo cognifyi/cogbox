@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package sshgateway
@@ -308,7 +309,7 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	}
 
 	return &SandboxDetails{
-		User:     "daytona",
+		User:     "cogbox",
 		Hostname: containerIP,
 	}, nil
 }

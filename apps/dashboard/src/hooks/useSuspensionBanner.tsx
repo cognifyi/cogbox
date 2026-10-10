@@ -1,12 +1,13 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { useBanner } from '@/components/Banner'
 import { RoutePath } from '@/enums/RoutePath'
 import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
-import { Organization } from '@daytona/api-client'
+import { Organization } from '@cogbox/api-client'
 import { addHours, formatDistanceToNow } from 'date-fns'
 import { CreditCardIcon, MailIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'

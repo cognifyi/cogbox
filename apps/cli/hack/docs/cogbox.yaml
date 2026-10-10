@@ -1,0 +1,33 @@
+name: cogbox
+synopsis: Cogbox CLI
+description: Command line interface for Cogbox Sandboxes
+usage: cogbox [flags]
+options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+  - name: version
+    shorthand: v
+    default_value: 'false'
+    usage: Display the version of Cogbox
+see_also:
+  - cogbox archive - Archive a sandbox
+  - cogbox autocomplete - Adds a completion script for your shell environment
+  - cogbox create - Create a new sandbox
+  - cogbox delete - Delete a sandbox
+  - cogbox docs - Opens the Cogbox documentation in your default browser.
+  - cogbox exec - Execute a command in a sandbox
+  - cogbox info - Get sandbox info
+  - cogbox list - List sandboxes
+  - cogbox login - Log in to Cogbox
+  - cogbox logout - Logout from Cogbox
+  - cogbox mcp - Manage Cogbox MCP Server
+  - cogbox organization - Manage Cogbox organizations
+  - cogbox pause - Pause a sandbox
+  - cogbox preview-url - Get signed preview URL for a sandbox port
+  - cogbox snapshot - Manage Cogbox snapshots
+  - cogbox ssh - SSH into a sandbox
+  - cogbox start - Start a sandbox
+  - cogbox stop - Stop a sandbox
+  - cogbox version - Print the version number
+  - cogbox volume - Manage Cogbox volumes

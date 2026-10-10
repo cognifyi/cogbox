@@ -1,10 +1,10 @@
-import { Daytona, SandboxListSortDirection, SandboxListSortField, SandboxState } from '@daytona/sdk'
+import { Cogbox, SandboxListSortDirection, SandboxListSortField, SandboxState } from '@cogbox/sdk'
 
 async function main() {
-  const daytona = new Daytona()
+  const cogbox = new Cogbox()
 
   console.log('Creating sandbox')
-  const sandbox = await daytona.create()
+  const sandbox = await cogbox.create()
   console.log('Sandbox created')
 
   await sandbox.setLabels({
@@ -20,7 +20,7 @@ async function main() {
   console.log('Sandbox started')
 
   console.log('Getting existing sandbox')
-  const existingSandbox = await daytona.get(sandbox.id)
+  const existingSandbox = await cogbox.get(sandbox.id)
   console.log('Got existing sandbox')
 
   const response = await existingSandbox.process.executeCommand(
@@ -35,7 +35,7 @@ async function main() {
     console.log(response.result)
   }
 
-  for await (const sb of daytona.list({
+  for await (const sb of cogbox.list({
     limit: 10,
     labels: { env: 'dev' },
     states: [SandboxState.STARTED],

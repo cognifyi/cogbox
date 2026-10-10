@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CodeLanguage } from '@daytona/sdk'
+import { CodeLanguage } from '@cogbox/sdk'
 import { PythonSnippetGenerator } from './python'
 import { CodeSnippetGenerator } from './types'
 import { TypeScriptSnippetGenerator } from './typescript'

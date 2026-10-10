@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -74,7 +75,7 @@ func (s *Server) Start(ctx context.Context) error {
 		Handler: mux,
 	}
 
-	s.logger.Info("Daytona snapshot-manager started",
+	s.logger.Info("Cogbox snapshot-manager started",
 		slog.String("version", internal.Version),
 		slog.String("addr", s.config.HTTP.Addr),
 		slog.Any("storage", s.getStorageInfo()),
@@ -108,7 +109,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Shutdown gracefully shuts down the registry server
 func (s *Server) Shutdown(ctx context.Context) error {
-	s.logger.Info("Shutting down Daytona snapshot-manager...")
+	s.logger.Info("Shutting down Cogbox snapshot-manager...")
 	if s.server != nil {
 		return s.server.Shutdown(ctx)
 	}

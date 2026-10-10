@@ -1,0 +1,9 @@
+name: cogbox organization delete
+synopsis: Delete an organization
+usage: cogbox organization delete [ORGANIZATION] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox organization - Manage Cogbox organizations

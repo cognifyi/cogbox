@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common'
@@ -72,7 +73,7 @@ export class RegionService {
       const proxyApiKey = createRegionDto.proxyUrl ? generateApiKeyValue() : undefined
       const sshGatewayApiKey = createRegionDto.sshGatewayUrl ? generateApiKeyValue() : undefined
 
-      const snapshotManagerUsername = createRegionDto.snapshotManagerUrl ? 'daytona' : undefined
+      const snapshotManagerUsername = createRegionDto.snapshotManagerUrl ? 'cogbox' : undefined
       const snapshotManagerPassword = createRegionDto.snapshotManagerUrl ? generateRandomString(16) : undefined
 
       const region = new Region({
@@ -301,7 +302,7 @@ export class RegionService {
 
         // If the region did not have a snapshot manager, create new credentials
         if (!prevSnapshotManagerUrl) {
-          newUsername = 'daytona'
+          newUsername = 'cogbox'
           newPassword = generateRandomString(16)
         }
 
@@ -396,7 +397,7 @@ export class RegionService {
       throw new BadRequestException('Region does not have a snapshot manager URL configured')
     }
 
-    const newUsername = 'daytona'
+    const newUsername = 'cogbox'
     const newPassword = generateRandomString(16)
 
     await this.eventEmitter.emitAsync(

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -376,7 +377,7 @@ export class SnapshotService {
       if (!internalRegistry) {
         throw new Error('No internal registry found for snapshot')
       }
-      snapshot.ref = `${internalRegistry.url.replace(/^(https?:\/\/)/, '')}/${internalRegistry.project || 'daytona'}/${buildSnapshotRef}`
+      snapshot.ref = `${internalRegistry.url.replace(/^(https?:\/\/)/, '')}/${internalRegistry.project || 'cogbox'}/${buildSnapshotRef}`
 
       const exists = await this.readySnapshotRunnerExists(snapshot.ref, region.id)
 
@@ -1004,7 +1005,7 @@ export class SnapshotService {
     cutoff.setHours(cutoff.getHours() - retentionHours)
 
     const result = await this.snapshotRunnerRepository.delete({
-      snapshotRef: Like('daytona-%'),
+      snapshotRef: Like('cogbox-%'),
       state: SnapshotRunnerState.ERROR,
       updatedAt: LessThan(cutoff),
     })

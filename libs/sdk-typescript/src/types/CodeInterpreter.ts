@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,7 +8,7 @@
  * @module code-interpreter
  */
 
-import type { InterpreterContext } from '@daytona/toolbox-api-client'
+import type { InterpreterContext } from '@cogbox/toolbox-api-client'
 
 /**
  * Represents stdout or stderr output from code execution.

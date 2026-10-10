@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package controllers
@@ -153,7 +154,7 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 //
 //	@Tags			sandbox
 //	@Summary		Snapshot a running sandbox
-//	@Description	Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+//	@Description	Commit the sandbox container filesystem and push the image to the supplied registry under the canonical cogbox-{hash}:cogbox tag.
 //	@Produce		json
 //	@Param			sandboxId	path		string									true	"Sandbox ID"
 //	@Param			body		body		dto.CreateSnapshotFromSandboxRequestDTO	true	"Snapshot from sandbox"

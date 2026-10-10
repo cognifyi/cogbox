@@ -1,7 +1,8 @@
 # Copyright 2025 Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
-"""Benchmark veRL ReTool tool backends: Daytona, Docker, and SandboxFusion."""
+"""Benchmark veRL ReTool tool backends: Cogbox, Docker, and SandboxFusion."""
 
 from __future__ import annotations
 
@@ -111,8 +112,8 @@ def build_code_interpreter_schema():
     )
 
 
-def build_daytona_config(args: argparse.Namespace) -> dict[str, Any]:
-    """Build the Daytona tool config for the benchmark."""
+def build_cogbox_config(args: argparse.Namespace) -> dict[str, Any]:
+    """Build the Cogbox tool config for the benchmark."""
     config = {
         "type": "native",
         "rate_limit": args.rate_limit or max(args.concurrency),
@@ -122,15 +123,15 @@ def build_daytona_config(args: argparse.Namespace) -> dict[str, Any]:
         "delete_timeout": args.delete_timeout,
         "auto_stop_interval": args.auto_stop_interval,
         "auto_delete_interval": args.auto_delete_interval,
-        "name_prefix": "verl-daytona-bench",
+        "name_prefix": "verl-cogbox-bench",
         "language": "python",
     }
 
     for key, value in {
-        "snapshot": args.daytona_snapshot,
-        "api_url": args.daytona_api_url,
-        "target": args.daytona_target,
-        "organization_id": args.daytona_organization_id,
+        "snapshot": args.cogbox_snapshot,
+        "api_url": args.cogbox_api_url,
+        "target": args.cogbox_target,
+        "organization_id": args.cogbox_organization_id,
     }.items():
         if value is not None:
             config[key] = value
@@ -157,10 +158,10 @@ def build_sandboxfusion_config(args: argparse.Namespace) -> dict[str, Any]:
 
 def check_backend_prereqs(args: argparse.Namespace) -> None:
     """Fail fast when required backend configuration is missing."""
-    if args.backend == "daytona":
-        if not os.environ.get("DAYTONA_API_KEY") and not os.environ.get("DAYTONA_JWT_TOKEN"):
+    if args.backend == "cogbox":
+        if not os.environ.get("COGBOX_API_KEY") and not os.environ.get("COGBOX_JWT_TOKEN"):
             raise SystemExit(
-                "DAYTONA_API_KEY (or DAYTONA_JWT_TOKEN) is not set. Export it before running the Daytona benchmark."
+                "COGBOX_API_KEY (or COGBOX_JWT_TOKEN) is not set. Export it before running the Cogbox benchmark."
             )
     elif args.backend == "docker":
         import shutil
@@ -244,10 +245,10 @@ def make_tool(args: argparse.Namespace):
 
     # Import veRL modules only after the optional checkout path is on sys.path.
     try:
-        if args.backend == "daytona":
-            from recipe.retool.daytona_sandbox_tool import CustomDaytonaSandboxTool
+        if args.backend == "cogbox":
+            from recipe.retool.cogbox_sandbox_tool import CustomCogboxSandboxTool
 
-            return CustomDaytonaSandboxTool(build_daytona_config(args), schema)
+            return CustomCogboxSandboxTool(build_cogbox_config(args), schema)
 
         from recipe.retool.retool import CustomSandboxFusionTool
 
@@ -587,7 +588,7 @@ async def run_benchmarks(args: argparse.Namespace) -> tuple[list[dict[str, Any]]
 def parse_args() -> argparse.Namespace:
     """Parse the benchmark CLI arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--backend", choices=["daytona", "docker", "sandboxfusion"], default="daytona")
+    parser.add_argument("--backend", choices=["cogbox", "docker", "sandboxfusion"], default="cogbox")
     parser.add_argument("--verl-root", default=None, help="Path to a local veRL checkout if it is not installed.")
     parser.add_argument("--output-root", default="outputs")
     parser.add_argument(
@@ -608,10 +609,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--memory-limit-mb", type=int, default=1024)
     parser.add_argument("--sandbox-fusion-url", default=None)
-    parser.add_argument("--daytona-api-url", default=None)
-    parser.add_argument("--daytona-target", default=None)
-    parser.add_argument("--daytona-organization-id", default=None)
-    parser.add_argument("--daytona-snapshot", default=None)
+    parser.add_argument("--cogbox-api-url", default=None)
+    parser.add_argument("--cogbox-target", default=None)
+    parser.add_argument("--cogbox-organization-id", default=None)
+    parser.add_argument("--cogbox-snapshot", default=None)
     parser.add_argument("--docker-image", default="python:3.11-slim")
     parser.add_argument("--docker-memory", default="256m")
     return parser.parse_args()

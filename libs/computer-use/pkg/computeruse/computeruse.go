@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
@@ -68,7 +69,7 @@ func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 	if err != nil {
 		return new(computeruse.Empty), fmt.Errorf("failed to get home directory: %v", err)
 	}
-	c.configDir = filepath.Join(homeDir, ".daytona", "computeruse")
+	c.configDir = filepath.Join(homeDir, ".cogbox", "computeruse")
 	err = os.MkdirAll(c.configDir, 0755)
 	if err != nil {
 		return new(computeruse.Empty), fmt.Errorf("failed to create config directory: %v", err)
@@ -157,10 +158,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		display = ":0"
 	}
 
-	// Get user from environment, fallback to DAYTONA_SANDBOX_USER or default to "root" (just in case, but should not happen)
+	// Get user from environment, fallback to COGBOX_SANDBOX_USER or default to "root" (just in case, but should not happen)
 	user := os.Getenv("VNC_USER")
 	if user == "" {
-		user = os.Getenv("DAYTONA_SANDBOX_USER")
+		user = os.Getenv("COGBOX_SANDBOX_USER")
 		if user == "" {
 			user = "root"
 		}

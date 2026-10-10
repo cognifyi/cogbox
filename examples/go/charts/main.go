@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/options"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 )
@@ -51,14 +51,14 @@ plt.show()
 func main() {
 	ctx := context.Background()
 
-	client, err := daytona.NewClient()
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
 	pyVersion := "3.13"
 	sandbox, err := client.Create(ctx, types.ImageParams{
-		Image: daytona.DebianSlim(&pyVersion).PipInstall([]string{"matplotlib", "numpy"}),
+		Image: cogbox.DebianSlim(&pyVersion).PipInstall([]string{"matplotlib", "numpy"}),
 		SandboxBaseParams: types.SandboxBaseParams{
 			Language: types.CodeLanguagePython,
 		},

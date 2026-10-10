@@ -1,0 +1,9 @@
+name: cogbox logout
+synopsis: Logout from Cogbox
+usage: cogbox logout [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI

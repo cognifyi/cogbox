@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package main
@@ -21,9 +22,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:               "daytona",
-	Short:             "Daytona CLI",
-	Long:              "Command line interface for Daytona Sandboxes",
+	Use:               "cogbox",
+	Short:             "Cogbox CLI",
+	Long:              "Command line interface for Cogbox Sandboxes",
 	DisableAutoGenTag: true,
 	SilenceUsage:      true,
 	SilenceErrors:     true,
@@ -62,8 +63,8 @@ func init() {
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.PreviewUrlCmd))
 
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
-	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
-	rootCmd.Flags().BoolP("version", "v", false, "Display the version of Daytona")
+	rootCmd.PersistentFlags().BoolP("help", "", false, "help for cogbox")
+	rootCmd.Flags().BoolP("version", "v", false, "Display the version of Cogbox")
 
 	rootCmd.PreRun = func(command *cobra.Command, args []string) {
 		versionFlag, _ := command.Flags().GetBool("version")

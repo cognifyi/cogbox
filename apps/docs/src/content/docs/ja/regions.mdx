@@ -4,27 +4,27 @@ title: リージョンの選択
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona は現在、以下のリージョンで利用可能です。
+Cogbox は現在、以下のリージョンで利用可能です。
 
 - 米国（US）
 - 欧州（EU）
 
-Daytona の[設定](/docs/ja/configuration)手順でリージョンを選択できます。
+Cogbox の[設定](/docs/ja/configuration)手順でリージョンを選択できます。
 
 ```python
-from daytona import Daytona, DaytonaConfig
+from cogbox import Cogbox, CogboxConfig
 
-config = DaytonaConfig(
+config = CogboxConfig(
     target="us"
 )
 
-daytona = Daytona(config)
+cogbox = Cogbox(config)
 ```
 
 ```typescript
-import { Daytona } from '@daytona/sdk';
+import { Cogbox } from '@cogbox/sdk';
 
-const daytona: Daytona = new Daytona({
+const cogbox: Cogbox = new Cogbox({
     target: "eu"
 });
 ```

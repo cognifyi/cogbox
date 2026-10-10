@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -79,7 +80,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 		return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
-	// Android-device sandboxes do not run the daytona daemon. Readiness is signaled by
+	// Android-device sandboxes do not run the cogbox daemon. Readiness is signaled by
 	// the ADB port accepting TCP connections inside the container.
 	if isAndroidDeviceContainer(runningContainer) {
 		if err := d.waitForAdbRunning(ctx, containerIP); err != nil {
@@ -101,8 +102,8 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {
 		processesCtx := context.Background()
 		go func() {
-			if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
-				d.logger.ErrorContext(ctx, "Failed to start Daytona daemon", "error", err)
+			if err := d.startCogboxDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
+				d.logger.ErrorContext(ctx, "Failed to start Cogbox daemon", "error", err)
 			}
 		}()
 	}

@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -56,7 +57,7 @@ export function useSandboxInstanceQuery({
     queryKey: fileSystemQueryKeys.sandbox(sandboxId),
     queryFn: () => {
       if (!client) {
-        throw new Error('Unable to initialize Daytona client')
+        throw new Error('Unable to initialize Cogbox client')
       }
 
       return client.get(sandboxId)

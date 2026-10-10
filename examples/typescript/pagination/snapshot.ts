@@ -1,9 +1,9 @@
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 
 async function main() {
-  const daytona = new Daytona()
+  const cogbox = new Cogbox()
 
-  const result = await daytona.snapshot.list(2, 10)
+  const result = await cogbox.snapshot.list(2, 10)
   console.log(`Found ${result.total} snapshots`)
   result.items.forEach((snapshot) => console.log(`${snapshot.name} (${snapshot.imageName})`))
 }

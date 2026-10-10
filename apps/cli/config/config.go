@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package config
@@ -15,8 +16,8 @@ import (
 	"github.com/cognifyi/cogbox/cli/internal"
 )
 
-const DAYTONA_API_URL_ENV_VAR = "DAYTONA_API_URL"
-const DAYTONA_API_KEY_ENV_VAR = "DAYTONA_API_KEY"
+const COGBOX_API_URL_ENV_VAR = "COGBOX_API_URL"
+const COGBOX_API_KEY_ENV_VAR = "COGBOX_API_KEY"
 
 type Config struct {
 	ActiveProfileId string    `json:"activeProfile"`
@@ -76,11 +77,11 @@ func GetConfig() (*Config, error) {
 	return &c, nil
 }
 
-var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona login` to authenticate")
+var ErrNoProfilesFound = errors.New("no profiles found. Run `cogbox login` to authenticate")
 
 func (c *Config) GetActiveProfile() (Profile, error) {
-	apiUrl := os.Getenv(DAYTONA_API_URL_ENV_VAR)
-	apiKey := os.Getenv(DAYTONA_API_KEY_ENV_VAR)
+	apiUrl := os.Getenv(COGBOX_API_URL_ENV_VAR)
+	apiKey := os.Getenv(COGBOX_API_KEY_ENV_VAR)
 
 	if apiUrl != "" && apiKey != "" {
 		return Profile{
@@ -105,8 +106,8 @@ func (c *Config) GetActiveProfile() (Profile, error) {
 	return Profile{}, ErrNoActiveProfile
 }
 
-var ErrNoActiveProfile = errors.New("no active profile found. Run `daytona login` to authenticate")
-var ErrNoActiveOrganization = errors.New("no active organization found. Run `daytona organization use` to select an organization")
+var ErrNoActiveProfile = errors.New("no active profile found. Run `cogbox login` to authenticate")
+var ErrNoActiveOrganization = errors.New("no active organization found. Run `cogbox organization use` to select an organization")
 
 func (c *Config) Save() error {
 	configFilePath, err := getConfigPath()
@@ -183,9 +184,9 @@ func getConfigPath() (string, error) {
 }
 
 func GetConfigDir() (string, error) {
-	daytonaConfigDir := os.Getenv("DAYTONA_CONFIG_DIR")
-	if daytonaConfigDir != "" {
-		return daytonaConfigDir, nil
+	cogboxConfigDir := os.Getenv("COGBOX_CONFIG_DIR")
+	if cogboxConfigDir != "" {
+		return cogboxConfigDir, nil
 	}
 
 	userConfigDir, err := os.UserConfigDir()
@@ -193,7 +194,7 @@ func GetConfigDir() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona"), nil
+	return filepath.Join(userConfigDir, "cogbox"), nil
 }
 
 func DeleteConfigDir() error {
@@ -238,7 +239,7 @@ func IsApiKeyAuth() bool {
 }
 
 func GetAuth0Domain() string {
-	auth0Domain := os.Getenv("DAYTONA_AUTH0_DOMAIN")
+	auth0Domain := os.Getenv("COGBOX_AUTH0_DOMAIN")
 	if auth0Domain == "" {
 		auth0Domain = internal.Auth0Domain
 	}
@@ -247,7 +248,7 @@ func GetAuth0Domain() string {
 }
 
 func GetAuth0ClientId() string {
-	auth0ClientId := os.Getenv("DAYTONA_AUTH0_CLIENT_ID")
+	auth0ClientId := os.Getenv("COGBOX_AUTH0_CLIENT_ID")
 	if auth0ClientId == "" {
 		auth0ClientId = internal.Auth0ClientId
 	}
@@ -256,7 +257,7 @@ func GetAuth0ClientId() string {
 }
 
 func GetAuth0ClientSecret() string {
-	auth0ClientSecret := os.Getenv("DAYTONA_AUTH0_CLIENT_SECRET")
+	auth0ClientSecret := os.Getenv("COGBOX_AUTH0_CLIENT_SECRET")
 	if auth0ClientSecret == "" {
 		auth0ClientSecret = internal.Auth0ClientSecret
 	}
@@ -265,7 +266,7 @@ func GetAuth0ClientSecret() string {
 }
 
 func GetAuth0CallbackPort() string {
-	auth0CallbackPort := os.Getenv("DAYTONA_AUTH0_CALLBACK_PORT")
+	auth0CallbackPort := os.Getenv("COGBOX_AUTH0_CALLBACK_PORT")
 	if auth0CallbackPort == "" {
 		auth0CallbackPort = internal.Auth0CallbackPort
 	}
@@ -274,7 +275,7 @@ func GetAuth0CallbackPort() string {
 }
 
 func GetAuth0Audience() string {
-	auth0Audience := os.Getenv("DAYTONA_AUTH0_AUDIENCE")
+	auth0Audience := os.Getenv("COGBOX_AUTH0_AUDIENCE")
 	if auth0Audience == "" {
 		auth0Audience = internal.Auth0Audience
 	}
@@ -282,13 +283,13 @@ func GetAuth0Audience() string {
 	return auth0Audience
 }
 
-func GetDaytonaApiUrl() string {
-	daytonaApiUrl := os.Getenv("DAYTONA_API_URL")
-	if daytonaApiUrl == "" {
-		daytonaApiUrl = internal.DaytonaApiUrl
+func GetCogboxApiUrl() string {
+	cogboxApiUrl := os.Getenv("COGBOX_API_URL")
+	if cogboxApiUrl == "" {
+		cogboxApiUrl = internal.CogboxApiUrl
 	}
 
-	return daytonaApiUrl
+	return cogboxApiUrl
 }
 
 func GetToolboxProxyUrl(region string) (string, error) {

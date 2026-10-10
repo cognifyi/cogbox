@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { OrganizationUsage } from '@daytona/billing-api-client'
+import type { OrganizationUsage } from '@cogbox/billing-api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { useConfig } from '../useConfig'

@@ -1,11 +1,12 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { OrganizationWallet } from '@daytona/billing-api-client'
+import type { OrganizationWallet } from '@cogbox/billing-api-client'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationUserRoleEnum } from '@daytona/api-client'
+import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import { UseQueryOptions } from '@tanstack/react-query'
 import { useOrganizationInvoicesQuery } from './useOrganizationInvoicesQuery'
 import { useOrganizationTierQuery } from './useOrganizationTierQuery'

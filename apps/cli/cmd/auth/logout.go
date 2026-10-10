@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package auth
@@ -12,7 +13,7 @@ import (
 
 var LogoutCmd = &cobra.Command{
 	Use:     "logout",
-	Short:   "Logout from Daytona",
+	Short:   "Logout from Cogbox",
 	Args:    cobra.NoArgs,
 	GroupID: internal.USER_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {

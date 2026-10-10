@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -16,7 +17,7 @@ import {
 import { buttonVariants } from '@/components/ui/button'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { Sandbox } from '@daytona/api-client'
+import { Sandbox } from '@cogbox/api-client'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { SandboxState } from './sandboxes/SandboxState'

@@ -1,11 +1,11 @@
 ---
 title: Generate Verified Code With Google ADK Agent
-description: Build Google ADK agents that generate and test code using Daytona's isolated sandbox environment.
+description: Build Google ADK agents that generate and test code using Cogbox's isolated sandbox environment.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-This guide demonstrates how to use the `DaytonaPlugin` for Google ADK to build an agent that generates, tests, and verifies code in a secure sandbox environment. The plugin enables agents to execute Python, JavaScript, and TypeScript code, run shell commands, and manage files within isolated Daytona sandboxes.
+This guide demonstrates how to use the `DaytonaPlugin` for Google ADK to build an agent that generates, tests, and verifies code in a secure sandbox environment. The plugin enables agents to execute Python, JavaScript, and TypeScript code, run shell commands, and manage files within isolated Cogbox sandboxes.
 
 In this example, we build a code generator agent that takes a natural language description of a function, generates the implementation in TypeScript, creates test cases, executes them in the sandbox, and iterates until all tests pass before returning the verified code.
 
@@ -13,7 +13,7 @@ In this example, we build a code generator agent that takes a natural language d
 
 ### 1. Workflow Overview
 
-You describe the function you want in plain English, specifying the language (Python, JavaScript, or TypeScript). The agent generates the implementation, writes tests for it, and executes everything in a Daytona sandbox. If tests fail, the agent automatically fixes the code and re-runs until all tests pass. Only then does it return the verified, working code.
+You describe the function you want in plain English, specifying the language (Python, JavaScript, or TypeScript). The agent generates the implementation, writes tests for it, and executes everything in a Cogbox sandbox. If tests fail, the agent automatically fixes the code and re-runs until all tests pass. Only then does it return the verified, working code.
 
 The key benefit: you receive code that has already been tested and verified, not just generated.
 
@@ -21,11 +21,11 @@ The key benefit: you receive code that has already been tested and verified, not
 
 #### Clone the Repository
 
-Clone the Daytona repository and navigate to the example directory:
+Clone the Cogbox repository and navigate to the example directory:
 
 ```bash
 git clone https://github.com/cognifyi/cogbox
-cd daytona/guides/python/google-adk/code-generator-agent/gemini
+cd cogbox/guides/python/google-adk/code-generator-agent/gemini
 ```
 
 #### Install Dependencies
@@ -44,7 +44,7 @@ Install the required packages for this example:
 
     The packages include:
     - `google-adk`: Google's Agent Development Kit for building AI agents
-    - `daytona-adk`: Provides the `DaytonaPlugin` that enables secure code execution in Daytona sandboxes
+    - `daytona-adk`: Provides the `DaytonaPlugin` that enables secure code execution in Cogbox sandboxes
     - `python-dotenv`: Used for loading environment variables from `.env` file
   </TabItem>
 </Tabs>
@@ -53,13 +53,13 @@ Install the required packages for this example:
 
 Get your API keys and configure your environment:
 
-1. **Daytona API key:** Get it from [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
+1. **Cogbox API key:** Get it from [Cogbox Dashboard](https://cogbox.pazity.com/dashboard/keys)
 2. **Google API key:** Get it from [Google AI Studio](https://aistudio.google.com/apikey)
 
 Create a `.env` file in your project:
 
 ```bash
-DAYTONA_API_KEY=dtn_***
+COGBOX_API_KEY=dtn_***
 GOOGLE_API_KEY=***
 ```
 
@@ -77,7 +77,7 @@ Before diving into the implementation, let's understand the key components we'll
 There are two ways to run Google ADK agents: using the `App` class with `InMemoryRunner`, or using `InMemoryRunner` directly with just an agent. The `App` serves as a configuration container that bundles agents with plugins, while the `Runner` handles actual execution and lifecycle management. This guide uses the `App` approach for cleaner organization of agents and plugins.
 :::
 
-#### Daytona Plugin
+#### Cogbox Plugin
 
 The `DaytonaPlugin` provides tools that allow the agent to:
 - Execute code in Python, JavaScript, or TypeScript
@@ -195,7 +195,7 @@ The instruction is critical - it defines how the agent behaves. Our instruction 
   </TabItem>
 </Tabs>
 
-### 7. Configure the Daytona Plugin
+### 7. Configure the Cogbox Plugin
 
 Initialize the plugin that provides sandbox execution capabilities:
 
@@ -209,7 +209,7 @@ Initialize the plugin that provides sandbox execution capabilities:
 
     **Configuration options:**
     - `labels`: Custom metadata tags for the sandbox (useful for tracking/filtering)
-    - `api_key`: Daytona API key (defaults to `DAYTONA_API_KEY` env var)
+    - `api_key`: Cogbox API key (defaults to `COGBOX_API_KEY` env var)
     - `sandbox_name`: Custom name for the sandbox
     - `plugin_name`: Name displayed in logs when the plugin logs messages (defaults to `daytona_plugin`)
     - `env_vars`: Environment variables to set in the sandbox
@@ -220,7 +220,7 @@ Initialize the plugin that provides sandbox execution capabilities:
 
 ### 8. Create the Agent
 
-Create the agent with the Gemini model, our instruction, and the Daytona tools:
+Create the agent with the Gemini model, our instruction, and the Cogbox tools:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -237,7 +237,7 @@ Create the agent with the Gemini model, our instruction, and the Daytona tools:
     - `model`: The Gemini model to use for reasoning and code generation
     - `name`: Identifier for the agent
     - `instruction`: The behavioral guidelines we defined
-    - `tools`: List of tools from the Daytona plugin that the agent can use
+    - `tools`: List of tools from the Cogbox plugin that the agent can use
   </TabItem>
 </Tabs>
 
@@ -296,7 +296,7 @@ Here's what the debug output reveals about each step:
 **Step 1: Sandbox Creation**
 
 ```
-DEBUG:daytona_adk.plugin:Daytona sandbox created: e38f8574-48ac-48f1-a0ff-d922d02b0fcb
+DEBUG:daytona_adk.plugin:Cogbox sandbox created: e38f8574-48ac-48f1-a0ff-d922d02b0fcb
 INFO:google_adk.google.adk.plugins.plugin_manager:Plugin 'daytona_plugin' registered.
 ```
 
@@ -340,8 +340,8 @@ Once tests pass, the agent responds with only the working function. If you inclu
 **Step 7: Cleanup**
 
 ```
-INFO:daytona_adk.plugin:Deleting Daytona sandbox...
-INFO:daytona_adk.plugin:Daytona sandbox deleted.
+INFO:daytona_adk.plugin:Deleting Cogbox sandbox...
+INFO:daytona_adk.plugin:Cogbox sandbox deleted.
 INFO:google_adk.google.adk.runners:Runner closed.
 ```
 
@@ -546,7 +546,7 @@ Here is the complete, ready-to-run example with additional output formatting for
 **Key advantages of this approach:**
 
 - **Verified code:** Every response has been tested in a real execution environment
-- **Secure execution:** Code runs in isolated Daytona sandboxes, not on your machine
+- **Secure execution:** Code runs in isolated Cogbox sandboxes, not on your machine
 - **Multi-language support:** Generate and test Python, JavaScript, or TypeScript
 - **Automatic iteration:** Agent fixes issues until tests pass
 - **Flexible output:** Returns only the working function by default, or includes tests if explicitly requested in the prompt

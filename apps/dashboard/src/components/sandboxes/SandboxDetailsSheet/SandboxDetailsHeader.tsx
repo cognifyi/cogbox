@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { CopyButton } from '@/components/CopyButton'
-import type { SandboxListItem } from '@daytona/api-client'
+import type { SandboxListItem } from '@cogbox/api-client'
 import type React from 'react'
 import { InfoRow, InfoSection } from '../SandboxInfoPanel'
 import { SandboxState as SandboxStateComponent } from '../SandboxState'

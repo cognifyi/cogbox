@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -25,7 +26,7 @@ import { useUpdateRegionMutation } from '@/hooks/mutations/useUpdateRegionMutati
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken } from '@/lib/utils'
-import { CreateRegionResponse, Region, UpdateRegion } from '@daytona/api-client'
+import { CreateRegionResponse, Region, UpdateRegion } from '@cogbox/api-client'
 import { useForm } from '@tanstack/react-form'
 import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'

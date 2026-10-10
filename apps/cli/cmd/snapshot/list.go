@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package snapshot
@@ -22,7 +23,7 @@ var (
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List all snapshots",
-	Long:    "List all available Daytona snapshots",
+	Long:    "List all available Cogbox snapshots",
 	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

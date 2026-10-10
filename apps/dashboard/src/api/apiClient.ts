@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -9,8 +10,8 @@ import {
   Configuration as AnalyticsConfiguration,
   TelemetryApi as AnalyticsTelemetryApi,
   UsageApi as AnalyticsUsageApi,
-} from '@daytona/analytics-api-client'
-import { Configuration as BillingConfiguration } from '@daytona/billing-api-client'
+} from '@cogbox/analytics-api-client'
+import { Configuration as BillingConfiguration } from '@cogbox/billing-api-client'
 import {
   ApiKeysApi,
   AuditApi,
@@ -25,9 +26,9 @@ import {
   UsersApi,
   VolumesApi,
   WebhooksApi,
-} from '@daytona/api-client'
+} from '@cogbox/api-client'
 import axios, { AxiosError } from 'axios'
-import { DaytonaError } from './errors'
+import { CogboxError } from './errors'
 
 export class ApiClient {
   private config: Configuration
@@ -67,7 +68,7 @@ export class ApiClient {
           errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
         }
 
-        throw DaytonaError.fromString(String(errorMessage), { cause: error instanceof Error ? error : undefined })
+        throw CogboxError.fromString(String(errorMessage), { cause: error instanceof Error ? error : undefined })
       },
     )
 

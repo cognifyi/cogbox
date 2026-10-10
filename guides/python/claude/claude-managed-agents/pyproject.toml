@@ -1,11 +1,11 @@
 [project]
-name = "daytona-claude-managed-agents"
+name = "cogbox-claude-managed-agents"
 version = "0.1.0"
-description = "Reference implementation for running Claude Managed Agents on Daytona."
+description = "Reference implementation for running Claude Managed Agents on Cogbox."
 requires-python = ">=3.12"
 dependencies = [
     "anthropic>=0.103",
-    "daytona",
+    "cogbox",
     "python-dotenv",
 ]
 

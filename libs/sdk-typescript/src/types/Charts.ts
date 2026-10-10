@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Chart as GeneratedChart, ChartElement as GeneratedChartElement } from '@daytona/toolbox-api-client'
+import type { Chart as GeneratedChart, ChartElement as GeneratedChartElement } from '@cogbox/toolbox-api-client'
 
 export enum ChartType {
   LINE = 'line',

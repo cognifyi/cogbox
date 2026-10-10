@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Runner } from '@daytona/api-client'
+import { Runner } from '@cogbox/api-client'
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { useSelectedOrganization } from '../useSelectedOrganization'

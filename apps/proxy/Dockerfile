@@ -18,7 +18,7 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN apk add --no-cache git
 
-WORKDIR /daytona
+WORKDIR /cogbox
 
 # Yarn caching layer
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -55,10 +55,10 @@ RUN apk update && apk upgrade --no-cache openssl pcre2 \
 
 WORKDIR /usr/local/bin
 
-COPY --from=build /daytona/dist/apps/proxy daytona-proxy
+COPY --from=build /cogbox/dist/apps/proxy cogbox-proxy
 
-RUN chmod +x daytona-proxy
+RUN chmod +x cogbox-proxy
 
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:4000/health" ]
 
-ENTRYPOINT ["daytona-proxy"]
+ENTRYPOINT ["cogbox-proxy"]

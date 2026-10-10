@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copyright 2025 Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 
 
@@ -12,7 +13,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DIST_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 # Environment file precedence:
-# 1. DAYTONA_ENV_FILE environment variable if set
+# 1. COGBOX_ENV_FILE environment variable if set
 # 2. .env file in CLI directory
 # 3. .env file in project root
 # 4. Default values
@@ -38,9 +39,9 @@ done
 if [ "$SKIP_ENV_FILE" != "true" ]; then
     echo "Loading environment files"
     # Try loading environment files in order of precedence
-    if [ -n "$DAYTONA_ENV_FILE" ]; then
-        if ! load_env_file "$DAYTONA_ENV_FILE"; then
-            echo "Warning: Environment file specified by DAYTONA_ENV_FILE ($DAYTONA_ENV_FILE) not found"
+    if [ -n "$COGBOX_ENV_FILE" ]; then
+        if ! load_env_file "$COGBOX_ENV_FILE"; then
+            echo "Warning: Environment file specified by COGBOX_ENV_FILE ($COGBOX_ENV_FILE) not found"
         fi
     elif load_env_file "${SCRIPT_DIR}/../.env.local"; then
         : # Successfully loaded CLI .env
@@ -56,18 +57,18 @@ if [ "$SKIP_ENV_FILE" != "true" ]; then
 fi
 
 # Set default values
-DAYTONA_VERSION=${VERSION:-v0.0.0-dev}
+COGBOX_VERSION=${VERSION:-v0.0.0-dev}
 GOOS=${GOOS:-linux}
 GOARCH=${GOARCH:-amd64}
 CGO_ENABLED=${CGO_ENABLED:-0}
 
 # Validate required variables
 REQUIRED_VARS=(
-    "DAYTONA_API_URL"
-    "DAYTONA_AUTH0_DOMAIN"
-    "DAYTONA_AUTH0_CLIENT_ID"
-    "DAYTONA_AUTH0_CALLBACK_PORT"
-    "DAYTONA_AUTH0_AUDIENCE"
+    "COGBOX_API_URL"
+    "COGBOX_AUTH0_DOMAIN"
+    "COGBOX_AUTH0_CLIENT_ID"
+    "COGBOX_AUTH0_CALLBACK_PORT"
+    "COGBOX_AUTH0_AUDIENCE"
 )
 
 MISSING_VARS=()
@@ -87,21 +88,21 @@ fi
 mkdir -p "${DIST_DIR}/dist/apps/cli"
 
 # Set output filename with .exe extension for Windows
-OUTPUT_FILE="daytona-${GOOS}-${GOARCH}"
+OUTPUT_FILE="cogbox-${GOOS}-${GOARCH}"
 if [ "$GOOS" == "windows" ]; then
     OUTPUT_FILE="${OUTPUT_FILE}.exe"
 fi
 
 # Build the binary
-echo "Building Daytona CLI with version: $DAYTONA_VERSION"
+echo "Building Cogbox CLI with version: $COGBOX_VERSION"
 go build \
-    -ldflags "-X 'github.com/cognifyi/cogbox/cli/internal.Version=${DAYTONA_VERSION}' \
-    -X 'github.com/cognifyi/cogbox/cli/internal.DaytonaApiUrl=${DAYTONA_API_URL}' \
-    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0Domain=${DAYTONA_AUTH0_DOMAIN}' \
-    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0ClientId=${DAYTONA_AUTH0_CLIENT_ID}' \
-    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0ClientSecret=${DAYTONA_AUTH0_CLIENT_SECRET}' \
-    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0CallbackPort=${DAYTONA_AUTH0_CALLBACK_PORT}' \
-    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0Audience=${DAYTONA_AUTH0_AUDIENCE}'" \
+    -ldflags "-X 'github.com/cognifyi/cogbox/cli/internal.Version=${COGBOX_VERSION}' \
+    -X 'github.com/cognifyi/cogbox/cli/internal.CogboxApiUrl=${COGBOX_API_URL}' \
+    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0Domain=${COGBOX_AUTH0_DOMAIN}' \
+    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0ClientId=${COGBOX_AUTH0_CLIENT_ID}' \
+    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0ClientSecret=${COGBOX_AUTH0_CLIENT_SECRET}' \
+    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0CallbackPort=${COGBOX_AUTH0_CALLBACK_PORT}' \
+    -X 'github.com/cognifyi/cogbox/cli/internal.Auth0Audience=${COGBOX_AUTH0_AUDIENCE}'" \
     -o "${DIST_DIR}/dist/apps/cli/${OUTPUT_FILE}" main.go
 
 echo "Build complete: ${DIST_DIR}/dist/apps/cli/${OUTPUT_FILE}"

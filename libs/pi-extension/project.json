@@ -30,7 +30,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN"
+        "command": "VER=${NPM_PKG_VERSION#v}; PKGVERSION=$(npm view @cogbox/pi@$VER version 2>/dev/null); if [ -n \"$PKGVERSION\" ]; then echo \"@cogbox/pi@$VER already on npm, skipping publish\"; else npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN; fi"
       },
       "dependsOn": ["set-version"]
     }

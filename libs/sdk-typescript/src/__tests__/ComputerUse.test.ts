@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 import { createApiResponse } from './helpers'
@@ -6,7 +7,7 @@ import { ComputerUse } from '../ComputerUse'
 
 const mockDynamicImport = jest.fn()
 
-jest.mock('@daytona/toolbox-api-client', () => ({}), { virtual: true })
+jest.mock('@cogbox/toolbox-api-client', () => ({}), { virtual: true })
 jest.mock('../utils/Import', () => ({
   dynamicImport: (...args: unknown[]) => mockDynamicImport(...args),
 }))

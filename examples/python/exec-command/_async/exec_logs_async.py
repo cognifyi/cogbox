@@ -1,11 +1,11 @@
 import asyncio
 
-from daytona import AsyncDaytona, SessionExecuteRequest
+from cogbox import AsyncCogbox, SessionExecuteRequest
 
 
 async def main():
-    async with AsyncDaytona() as daytona:
-        sandbox = await daytona.create()
+    async with AsyncCogbox() as cogbox:
+        sandbox = await cogbox.create()
 
         try:
             session_id = "exec-session-1"
@@ -45,7 +45,7 @@ async def main():
             print(f"Error: {e}")
         finally:
             print("Cleaning up sandbox...")
-            await daytona.delete(sandbox)
+            await cogbox.delete(sandbox)
 
 
 if __name__ == "__main__":

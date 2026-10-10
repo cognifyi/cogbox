@@ -1,0 +1,12 @@
+name: cogbox login
+synopsis: Log in to Cogbox
+usage: cogbox login [flags]
+options:
+  - name: api-key
+    usage: API key to use for authentication
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI

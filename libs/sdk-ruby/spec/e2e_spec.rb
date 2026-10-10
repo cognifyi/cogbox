@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 # frozen_string_literal: true
@@ -8,18 +9,18 @@ require 'securerandom'
 require 'tmpdir'
 require 'spec_helper'
 
-RSpec.describe 'Daytona SDK E2E', :e2e do
+RSpec.describe 'Cogbox SDK E2E', :e2e do
   before(:each) do
     WebMock.allow_net_connect!
   end
 
   before(:all) do
     WebMock.allow_net_connect!
-    raise 'DAYTONA_API_KEY environment variable is required for E2E tests' unless ENV['DAYTONA_API_KEY']
+    raise 'COGBOX_API_KEY environment variable is required for E2E tests' unless ENV['COGBOX_API_KEY']
 
-    @daytona = Daytona::Daytona.new
-    params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)
-    @sandbox = @daytona.create(params)
+    @cogbox = Cogbox::Cogbox.new
+    params = Cogbox::CreateSandboxFromSnapshotParams.new(language: Cogbox::CodeLanguage::PYTHON)
+    @sandbox = @cogbox.create(params)
 
     @session_id = "e2e-sess-#{SecureRandom.hex(4)}"
     @volume_name = "e2e-vol-#{SecureRandom.hex(4)}"
@@ -39,9 +40,9 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       begin; @sandbox&.code_interpreter&.delete_context(@shared[:interpreter_context]); rescue StandardError; nil; end
     end
     begin; @shared[:lsp_server].stop; rescue StandardError; nil; end if @shared&.dig(:lsp_server)
-    begin; @daytona&.volume&.delete(@shared[:volume]); rescue StandardError; nil; end if @shared&.dig(:volume)
+    begin; @cogbox&.volume&.delete(@shared[:volume]); rescue StandardError; nil; end if @shared&.dig(:volume)
     begin
-      @daytona&.delete(@sandbox) if @sandbox
+      @cogbox&.delete(@sandbox) if @sandbox
     rescue StandardError => e
       puts "Cleanup error: #{e.message}"
     end
@@ -154,13 +155,13 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     it 'creates a sandbox from a declarative image with build logs', timeout: 360 do
       cache_key = "e2e-build-#{SecureRandom.uuid}"
       build_logs = []
-      image = Daytona::Image.debian_slim('3.12').pip_install('numpy').env({ 'CACHE_BUSTER' => cache_key })
-      params = Daytona::CreateSandboxFromImageParams.new(
+      image = Cogbox::Image.debian_slim('3.12').pip_install('numpy').env({ 'CACHE_BUSTER' => cache_key })
+      params = Cogbox::CreateSandboxFromImageParams.new(
         image: image,
-        language: Daytona::CodeLanguage::PYTHON
+        language: Cogbox::CodeLanguage::PYTHON
       )
 
-      image_sandbox = @daytona.send(
+      image_sandbox = @cogbox.send(
         :_create,
         params,
         timeout: 300,
@@ -177,7 +178,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
         expect(result.result.strip).to include('.')
       ensure
         begin
-          @daytona.delete(image_sandbox) if image_sandbox
+          @cogbox.delete(image_sandbox) if image_sandbox
         rescue StandardError
           nil
         end
@@ -208,8 +209,8 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
     it 'uploads multiple files via upload_files' do
       files = [
-        Daytona::FileUpload.new('content A', "#{@fs_dir}/multi_a.txt"),
-        Daytona::FileUpload.new('content B', "#{@fs_dir}/multi_b.txt")
+        Cogbox::FileUpload.new('content A', "#{@fs_dir}/multi_a.txt"),
+        Cogbox::FileUpload.new('content B', "#{@fs_dir}/multi_b.txt")
       ]
       @sandbox.fs.upload_files(files)
 
@@ -319,7 +320,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
             timeout: 180,
             cancel_event: cancel_event
           )
-        end.to raise_error(Daytona::Sdk::Error, /Failed to upload file: Upload cancelled/)
+        end.to raise_error(Cogbox::Sdk::Error, /Failed to upload file: Upload cancelled/)
 
         cancel_thread.join
       end
@@ -465,7 +466,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     it 'executes command in session' do
       response = @sandbox.process.execute_session_command(
         session_id: @session_id,
-        req: Daytona::SessionExecuteRequest.new(command: 'echo session_test')
+        req: Cogbox::SessionExecuteRequest.new(command: 'echo session_test')
       )
       expect(response.exit_code).to eq(0)
       expect(response.stdout).to include('session_test')
@@ -474,11 +475,11 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     it 'maintains state across session commands' do
       @sandbox.process.execute_session_command(
         session_id: @session_id,
-        req: Daytona::SessionExecuteRequest.new(command: 'export SESSION_VAR=persistent')
+        req: Cogbox::SessionExecuteRequest.new(command: 'export SESSION_VAR=persistent')
       )
       response = @sandbox.process.execute_session_command(
         session_id: @session_id,
-        req: Daytona::SessionExecuteRequest.new(command: 'echo $SESSION_VAR')
+        req: Cogbox::SessionExecuteRequest.new(command: 'echo $SESSION_VAR')
       )
       expect(response.exit_code).to eq(0)
       expect(response.stdout).to include('persistent')
@@ -493,7 +494,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     it 'gets session command logs' do
       cmd_response = @sandbox.process.execute_session_command(
         session_id: @session_id,
-        req: Daytona::SessionExecuteRequest.new(command: 'echo logs_test')
+        req: Cogbox::SessionExecuteRequest.new(command: 'echo logs_test')
       )
       logs = @sandbox.process.get_session_command_logs(
         session_id: @session_id,
@@ -573,7 +574,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
   context 'Code Interpreter', order: :defined, timeout: 120 do
     it 'runs simple Python code' do
       result = @sandbox.code_interpreter.run_code('print("interpreter hello")')
-      expect(result).to be_a(Daytona::ExecutionResult)
+      expect(result).to be_a(Cogbox::ExecutionResult)
       expect(result.stdout).to include('interpreter hello')
     end
 
@@ -629,7 +630,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       @sandbox.fs.upload_file(python_source, lsp_file_path)
 
       @shared[:lsp_server] = @sandbox.create_lsp_server(
-        language_id: Daytona::LspServer::Language::PYTHON,
+        language_id: Cogbox::LspServer::Language::PYTHON,
         path_to_project: lsp_project_dir
       )
       expect { @shared[:lsp_server].start }.not_to raise_error
@@ -667,7 +668,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       pty_session_id = "e2e-pty-#{SecureRandom.hex(4)}"
       handle = @sandbox.process.create_pty_session(
         id: pty_session_id,
-        pty_size: Daytona::PtySize.new(rows: 24, cols: 80)
+        pty_size: Cogbox::PtySize.new(rows: 24, cols: 80)
       )
       @shared[:pty_session_id] = pty_session_id
       sessions = @sandbox.process.list_pty_sessions
@@ -690,7 +691,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       pty_session_id = @shared[:pty_session_id]
       expect(pty_session_id).not_to be_nil
 
-      session = @sandbox.process.resize_pty_session(pty_session_id, Daytona::PtySize.new(rows: 30, cols: 100))
+      session = @sandbox.process.resize_pty_session(pty_session_id, Cogbox::PtySize.new(rows: 30, cols: 100))
       expect(session.cols).to eq(100)
       expect(session.rows).to eq(30)
     end
@@ -768,7 +769,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
   context 'Volume Management', order: :defined do
     it 'creates a volume' do
-      vol = @daytona.volume.create(@volume_name)
+      vol = @cogbox.volume.create(@volume_name)
       @shared[:volume] = vol
       expect(vol).not_to be_nil
       expect(vol.name).to eq(@volume_name)
@@ -776,59 +777,59 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     end
 
     it 'lists volumes including created one' do
-      volumes = @daytona.volume.list
+      volumes = @cogbox.volume.list
       expect(volumes).to be_a(Array)
       names = volumes.map(&:name)
       expect(names).to include(@volume_name)
     end
 
     it 'gets volume by name' do
-      vol = @daytona.volume.get(@volume_name)
+      vol = @cogbox.volume.get(@volume_name)
       expect(vol.name).to eq(@volume_name)
       expect(vol.id).to be_a(String)
     end
 
     it 'deletes a volume' do
-      vol = @daytona.volume.get(@volume_name)
+      vol = @cogbox.volume.get(@volume_name)
       attempts = 0
       while vol.state != 'ready' && attempts < 10
         sleep 1
-        vol = @daytona.volume.get(@volume_name)
+        vol = @cogbox.volume.get(@volume_name)
         attempts += 1
       end
-      expect { @daytona.volume.delete(vol) }.not_to raise_error
+      expect { @cogbox.volume.delete(vol) }.not_to raise_error
       @shared[:volume] = nil
     end
   end
 
   context 'Snapshot Operations', order: :defined do
     it 'lists snapshots' do
-      result = @daytona.snapshot.list
-      expect(result).to be_a(Daytona::PaginatedResource)
+      result = @cogbox.snapshot.list
+      expect(result).to be_a(Cogbox::PaginatedResource)
       expect(result.total).to be >= 0
       expect(result.items).to be_a(Array)
     end
 
     it 'lists with pagination' do
-      result = @daytona.snapshot.list(page: 1, limit: 2)
+      result = @cogbox.snapshot.list(page: 1, limit: 2)
       expect(result.page).to eq(1)
       expect(result.items.length).to be <= 2
     end
 
     it 'gets snapshot by name' do
-      list_result = @daytona.snapshot.list(page: 1, limit: 1)
+      list_result = @cogbox.snapshot.list(page: 1, limit: 1)
       expect(list_result.items).not_to be_empty
 
       snapshot_name = list_result.items.first.name
-      snapshot = @daytona.snapshot.get(snapshot_name)
-      expect(snapshot).to be_a(Daytona::Snapshot)
+      snapshot = @cogbox.snapshot.get(snapshot_name)
+      expect(snapshot).to be_a(Cogbox::Snapshot)
       expect(snapshot.name).to eq(snapshot_name)
     end
   end
 
   context 'Client Operations', order: :defined do
     it 'lists sandboxes' do
-      enumerator = @daytona.list
+      enumerator = @cogbox.list
       expect(enumerator).to be_a(Enumerator)
       sandboxes = enumerator.to_a
       expect(sandboxes.size).to be > 0
@@ -836,7 +837,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
     it 'lists with limit hint and supports early termination' do
       yielded = 0
-      @daytona.list(Daytona::ListSandboxesQuery.new(limit: 1)).each do
+      @cogbox.list(Cogbox::ListSandboxesQuery.new(limit: 1)).each do
         yielded += 1
         break if yielded >= 1
       end
@@ -844,14 +845,14 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     end
 
     it 'gets sandbox by id' do
-      fetched = @daytona.get(@sandbox.id)
+      fetched = @cogbox.get(@sandbox.id)
       expect(fetched.id).to eq(@sandbox.id)
       expect(fetched.state).to eq('started')
     end
 
     it 'lists sandboxes filtered by labels' do
       @sandbox.labels = { 'test' => 'e2e' } unless @sandbox.labels&.dig('test') == 'e2e'
-      ids = @daytona.list(Daytona::ListSandboxesQuery.new(labels: { 'test' => 'e2e' })).map(&:id)
+      ids = @cogbox.list(Cogbox::ListSandboxesQuery.new(labels: { 'test' => 'e2e' })).map(&:id)
       expect(ids).to include(@sandbox.id)
     end
   end

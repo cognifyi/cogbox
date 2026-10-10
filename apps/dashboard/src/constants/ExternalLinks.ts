@@ -1,10 +1,11 @@
 /**
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 /**
- * External URLs for Daytona resources
+ * External URLs for Cogbox resources
  */
-export const DAYTONA_DOCS_URL = 'https://www.daytona.io/docs'
-export const DAYTONA_SLACK_URL = 'https://go.daytona.io/slack'
+export const COGBOX_DOCS_URL = 'https://cogbox.pazity.com/docs'
+export const COGBOX_SLACK_URL = 'https://go.cogbox.pazity.com/slack'

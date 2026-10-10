@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -29,7 +30,7 @@ import { useRunnerWsSync } from '@/hooks/useRunnerWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { EMPTY_REGIONS, filterCustomRegions } from '@/lib/regions'
-import { OrganizationRolePermissionsEnum, Runner } from '@daytona/api-client'
+import { OrganizationRolePermissionsEnum, Runner } from '@cogbox/api-client'
 import { PlusIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'

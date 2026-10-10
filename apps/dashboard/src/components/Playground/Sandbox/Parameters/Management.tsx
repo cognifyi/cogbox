@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -9,8 +10,8 @@ import { SANDBOX_SNAPSHOT_DEFAULT_VALUE } from '@/constants/Playground'
 import { NumberParameterFormItem, ParameterFormItem } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
 import { getLanguageCodeToRun } from '@/lib/playground'
-import { SnapshotDto } from '@daytona/api-client'
-import { CodeLanguage } from '@daytona/sdk'
+import { SnapshotDto } from '@cogbox/api-client'
+import { CodeLanguage } from '@cogbox/sdk'
 import { HelpCircleIcon } from 'lucide-react'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'

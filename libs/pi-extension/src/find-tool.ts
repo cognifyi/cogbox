@@ -1,5 +1,6 @@
 /**
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,7 +8,7 @@
  * Remote find (by filename glob).
  *
  * Pi's built-in find tool runs `fd` on the LOCAL machine. Its FindOperations
- * could in principle delegate globbing, but Daytona's `fs.searchFiles` only
+ * could in principle delegate globbing, but Cogbox's `fs.searchFiles` only
  * does recursive basename matching (e.g. "star-dot-log", "marker.log") — it
  * does not understand path globs (recursive-dir patterns like the ones Pi
  * emits), which is exactly what Pi's find produces. So we run the search inside
@@ -18,7 +19,7 @@
  * A POSIX `find` basename fallback covers images without ripgrep.
  */
 
-import type { Sandbox } from '@daytona/sdk'
+import type { Sandbox } from '@cogbox/sdk'
 import { execCommand } from './sandbox.ts'
 import { joinPath, shellQuote } from './util.ts'
 

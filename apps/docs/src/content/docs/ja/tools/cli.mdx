@@ -1,43 +1,43 @@
 ---
 title: CLI
-description: Daytona（デイトナ）CLI で利用可能な操作のリファレンス。
+description: Cogbox（デイトナ）CLI で利用可能な操作のリファレンス。
 sidebar:
-  label: Daytona CLI リファレンス
+  label: Cogbox CLI リファレンス
 ---
 
 import Aside from '@components/Aside.astro'
 import Label from '@components/Label.astro'
 
-`daytona` コマンドラインツールは、Daytona（デイトナ）のコア機能へのアクセスを提供し、スナップショットの管理や Daytona サンドボックスのライフサイクル管理を行えます。インストール手順は[こちら](/docs/ja/getting-started#setting-up-the-daytona-cli)をご覧ください。
+`cogbox` コマンドラインツールは、Cogbox（デイトナ）のコア機能へのアクセスを提供し、スナップショットの管理や Cogbox サンドボックスのライフサイクル管理を行えます。インストール手順は[こちら](/docs/ja/getting-started#setting-up-the-cogbox-cli)をご覧ください。
 
-本リファレンスでは、`daytona` コマンドラインツールでサポートされているすべてのコマンドを、その動作の説明および対応フラグとともに一覧しています。`daytona` 実行時に `--help` または `-h` フラグを付けることで、各コマンドごとのドキュメントを参照できます。
+本リファレンスでは、`cogbox` コマンドラインツールでサポートされているすべてのコマンドを、その動作の説明および対応フラグとともに一覧しています。`cogbox` 実行時に `--help` または `-h` フラグを付けることで、各コマンドごとのドキュメントを参照できます。
 
-## daytona
+## cogbox
 
-Daytona CLI
+Cogbox CLI
 
 ```shell
-daytona [flags]
+cogbox [flags]
 ```
 
 **フラグ**
 | ロング | ショート | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示します |
-| `--version` | `-v` | Daytona のバージョンを表示します |
+| `--help` | | cogbox のヘルプを表示します |
+| `--version` | `-v` | Cogbox のバージョンを表示します |
 
-## daytona autocomplete
+## cogbox autocomplete
 
 シェル環境に補完スクリプトを追加します
 
 ```shell
-daytona autocomplete [bash|zsh|fish|powershell] [flags]
+cogbox autocomplete [bash|zsh|fish|powershell] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
 <Aside type="note">
   bash シェルを使用している場合、オートコンプリート機能をフルに利用するには bash-completion がインストールされていることを確認してください。Linux のインストール: `sudo
@@ -45,183 +45,183 @@ daytona autocomplete [bash|zsh|fish|powershell] [flags]
           bash-completion`
 </Aside>
 
-## daytona docs
+## cogbox docs
 
-既定のブラウザでDaytona（デイトナ）のドキュメントを開きます。
+既定のブラウザでCogbox（デイトナ）のドキュメントを開きます。
 
 ```shell
-daytona docs [flags]
+cogbox docs [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona login
+## cogbox login
 
-Daytona（デイトナ）にログイン
+Cogbox（デイトナ）にログイン
 
 ```shell
-daytona login [flags]
+cogbox login [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
 | `--api-key` | | 認証に使用するAPIキー |
-| `--help` | | daytonaのヘルプ |
+| `--help` | | cogboxのヘルプ |
 
-## daytona logout
+## cogbox logout
 
-Daytona（デイトナ）からログアウトします
+Cogbox（デイトナ）からログアウトします
 
 ```shell
-daytona logout [flags]
+cogbox logout [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona mcp
+## cogbox mcp
 
-Daytona MCPサーバー（Model Context Protocol）を管理する
+Cogbox MCPサーバー（Model Context Protocol）を管理する
 
 ```shell
-daytona mcp [flags]
+cogbox mcp [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona mcp config
+## cogbox mcp config
 
-Daytona MCPサーバー用のJSON設定を出力します
+Cogbox MCPサーバー用のJSON設定を出力します
 
 ```shell
-daytona mcp config [AGENT_NAME] [flags]
+cogbox mcp config [AGENT_NAME] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona mcp init
+## cogbox mcp init
 
-エージェントを指定して Daytona MCPサーバー を初期化します（現在サポート: claude、windsurf、cursor）
+エージェントを指定して Cogbox MCPサーバー を初期化します（現在サポート: claude、windsurf、cursor）
 
 ```shell
-daytona mcp init [AGENT_NAME] [flags]
+cogbox mcp init [AGENT_NAME] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona mcp start
+## cogbox mcp start
 
-Daytona MCPサーバーを起動します
+Cogbox MCPサーバーを起動します
 
 ```shell
-daytona mcp start [flags]
+cogbox mcp start [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona organization
+## cogbox organization
 
-Daytona（デイトナ）の組織を管理する
+Cogbox（デイトナ）の組織を管理する
 
 ```shell
-daytona organization [flags]
+cogbox organization [flags]
 ```
 
 **フラグ**
 | ロング | ショート | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona organization create
+## cogbox organization create
 
 新しい組織を作成し、アクティブとして設定します
 
 ```shell
-daytona organization create [ORGANIZATION_NAME] [flags]
+cogbox organization create [ORGANIZATION_NAME] [flags]
 ```
 
 **フラグ**
 | ロング | ショート | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona organization delete
+## cogbox organization delete
 
 組織を削除する
 
 ```shell
-daytona organization delete [ORGANIZATION] [flags]
+cogbox organization delete [ORGANIZATION] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona organization list
+## cogbox organization list
 
 すべての組織を一覧表示します
 
 ```shell
-daytona organization list [flags]
+cogbox organization list [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona organization use
+## cogbox organization use
 
 アクティブな組織を設定する
 
 ```shell
-daytona organization use [ORGANIZATION] [flags]
+cogbox organization use [ORGANIZATION] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona sandbox
+## cogbox sandbox
 
-Daytona（デイトナ）のサンドボックスを管理します
+Cogbox（デイトナ）のサンドボックスを管理します
 
 ```shell
-daytona sandbox [flags]
+cogbox sandbox [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona sandbox create
+## cogbox sandbox create
 
 新しいサンドボックスを作成
 
 ```shell
-daytona sandbox create [flags]
+cogbox sandbox create [flags]
 ```
 
 **フラグ**
@@ -244,14 +244,14 @@ daytona sandbox create [flags]
 | `--target` | | ターゲット（リージョン）（eu, us） |
 | `--user` | | サンドボックスに関連付けるユーザー |
 | `--volume` | `-v` | マウントするボリューム（形式: VOLUME\_NAME:MOUNT\_PATH） |
-| `--help` | | daytona のヘルプ |
+| `--help` | | cogbox のヘルプ |
 
-## daytona sandbox delete
+## cogbox sandbox delete
 
 サンドボックスを削除
 
 ```shell
-daytona sandbox delete [SANDBOX_ID] [flags]
+cogbox sandbox delete [SANDBOX_ID] [flags]
 ```
 
 **フラグ**
@@ -259,14 +259,14 @@ daytona sandbox delete [SANDBOX_ID] [flags]
 | :--- | :---- | :---------- |
 | `--all` | `-a` | すべてのサンドボックスを削除 |
 | `--force` | `-f` | 強制的に削除 |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona sandbox info
+## cogbox sandbox info
 
 サンドボックス情報を取得する
 
 ```shell
-daytona sandbox info [SANDBOX_ID] [flags]
+cogbox sandbox info [SANDBOX_ID] [flags]
 ```
 
 **フラグ**
@@ -274,14 +274,14 @@ daytona sandbox info [SANDBOX_ID] [flags]
 | :--- | :---- | :---------- |
 | `--format` | `-f` | 出力形式。yaml または json のいずれかを指定します |
 | `--verbose` | `-v` | 詳細な出力を含める |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona sandbox list
+## cogbox sandbox list
 
 サンドボックスを一覧表示します
 
 ```shell
-daytona sandbox list [flags]
+cogbox sandbox list [flags]
 ```
 
 **フラグ**
@@ -291,55 +291,55 @@ daytona sandbox list [flags]
 | `--limit` | `-l` | 1ページあたりの最大件数 |
 | `--page` | `-p` | ページ番号（1から開始） |
 | `--verbose` | `-v` | 冗長な出力を含める |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona sandbox start
+## cogbox sandbox start
 
 サンドボックスを起動する
 
 ```shell
-daytona sandbox start [SANDBOX_ID] [flags]
+cogbox sandbox start [SANDBOX_ID] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | すべてのサンドボックスを起動する |
-| `--help` | | daytona のヘルプ |
+| `--help` | | cogbox のヘルプ |
 
-## daytona sandbox stop
+## cogbox sandbox stop
 
 サンドボックスを停止する
 
 ```shell
-daytona sandbox stop [SANDBOX_ID] [flags]
+cogbox sandbox stop [SANDBOX_ID] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | すべてのサンドボックスを停止 |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona snapshot
+## cogbox snapshot
 
-Daytona（デイトナ）のスナップショットを管理する
+Cogbox（デイトナ）のスナップショットを管理する
 
 ```shell
-daytona snapshot [flags]
+cogbox snapshot [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona snapshot create
+## cogbox snapshot create
 
 スナップショットを作成
 
 ```shell
-daytona snapshot create [SNAPSHOT] [flags]
+cogbox snapshot create [SNAPSHOT] [flags]
 ```
 
 **フラグ**
@@ -352,28 +352,28 @@ daytona snapshot create [SNAPSHOT] [flags]
 | `--entrypoint` | `-e` | スナップショットのエントリーポイントコマンド |
 | `--image` | `-i` | スナップショットのイメージ名 |
 | `--memory` | | サンドボックスに割り当てるメモリ容量（GB）（既定: 1） |
-| `--help` | | daytona のヘルプ |
+| `--help` | | cogbox のヘルプ |
 
-## daytona snapshot delete
+## cogbox snapshot delete
 
 スナップショットを削除します
 
 ```shell
-daytona snapshot delete [SNAPSHOT_ID] [flags]
+cogbox snapshot delete [SNAPSHOT_ID] [flags]
 ```
 
 **フラグ**
 | ロング | ショート | 説明 |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | すべてのスナップショットを削除します |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona snapshot list
+## cogbox snapshot list
 
 すべてのスナップショットを一覧表示します
 
 ```shell
-daytona snapshot list [flags]
+cogbox snapshot list [flags]
 ```
 
 **フラグ**
@@ -382,14 +382,14 @@ daytona snapshot list [flags]
 | `--format` | `-f` | 出力形式。yaml または json のいずれか |
 | `--limit` | `-l` | 1ページあたりの最大件数 |
 | `--page` | `-p` | ページネーション用のページ番号（1から） |
-| `--help` | | daytona のヘルプ |
+| `--help` | | cogbox のヘルプ |
 
-## daytona snapshot push
+## cogbox snapshot push
 
 ローカルのスナップショットをプッシュします
 
 ```shell
-daytona snapshot push [SNAPSHOT] [flags]
+cogbox snapshot push [SNAPSHOT] [flags]
 ```
 
 **フラグ**
@@ -400,85 +400,85 @@ daytona snapshot push [SNAPSHOT] [flags]
 | `--entrypoint` | `-e` | イメージのエントリポイントコマンド |
 | `--memory` | | サンドボックスに割り当てるメモリ容量（GB、デフォルト: 1） |
 | `--name` | `-n` | スナップショット名を指定 |
-| `--help` | | daytonaのヘルプ |
+| `--help` | | cogboxのヘルプ |
 
-## daytona version
+## cogbox version
 
 バージョン番号を表示します
 
 ```shell
-daytona version [flags]
+cogbox version [flags]
 ```
 
 **フラグ**
 | ロング | ショート | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona volume
+## cogbox volume
 
-Daytona（デイトナ）のボリュームを管理します
+Cogbox（デイトナ）のボリュームを管理します
 
 ```shell
-daytona volume [flags]
+cogbox volume [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona volume create
+## cogbox volume create
 
 ボリュームを作成します
 
 ```shell
-daytona volume create [NAME] [flags]
+cogbox volume create [NAME] [flags]
 ```
 
 **フラグ**
 | ロング | ショート | 説明 |
 | :--- | :---- | :---------- |
 | `--size` | `-s` | ボリュームのサイズ（GB） |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona volume delete
+## cogbox volume delete
 
 ボリュームを削除します
 
 ```shell
-daytona volume delete [VOLUME_ID] [flags]
+cogbox volume delete [VOLUME_ID] [flags]
 ```
 
 **フラグ**
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona volume get
+## cogbox volume get
 
 ボリュームの詳細を取得する
 
 ```shell
-daytona volume get [VOLUME_ID] [flags]
+cogbox volume get [VOLUME_ID] [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |
 
-## daytona volume list
+## cogbox volume list
 
 すべてのボリュームを一覧表示します
 
 ```shell
-daytona volume list [flags]
+cogbox volume list [flags]
 ```
 
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--help` | | daytona のヘルプを表示 |
+| `--help` | | cogbox のヘルプを表示 |

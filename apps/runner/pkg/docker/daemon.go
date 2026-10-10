@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -23,12 +24,12 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string, workDir string) error {
+func (d *DockerClient) startCogboxDaemon(ctx context.Context, containerId string, workDir string) error {
 	defer timer.Timer()()
 
 	var envVars []string
 	if workDir == "" {
-		envVars = append(envVars, "DAYTONA_USER_HOME_AS_WORKDIR=true")
+		envVars = append(envVars, "COGBOX_USER_HOME_AS_WORKDIR=true")
 	}
 
 	execOptions := container.ExecOptions{
@@ -50,7 +51,7 @@ func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId strin
 	}
 
 	if result.ExitCode != 0 {
-		return fmt.Errorf("failed to start daytona daemon with exit code %d: %s", result.ExitCode, result.StdErr)
+		return fmt.Errorf("failed to start cogbox daemon with exit code %d: %s", result.ExitCode, result.StdErr)
 	}
 
 	return nil

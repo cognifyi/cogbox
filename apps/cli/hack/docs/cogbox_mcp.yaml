@@ -1,0 +1,12 @@
+name: cogbox mcp
+synopsis: Manage Cogbox MCP Server
+description: Commands for managing Cogbox MCP Server
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI
+  - cogbox mcp config - Outputs JSON configuration for Cogbox MCP Server
+  - 'cogbox mcp init - Initialize Cogbox MCP Server with an agent (currently supported: claude, windsurf, cursor)'
+  - cogbox mcp start - Start Cogbox MCP Server

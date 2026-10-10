@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { DEFAULT_SNAPSHOT_SORTING, SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
-import { GetAllSnapshotsOrderEnum, GetAllSnapshotsSortEnum } from '@daytona/api-client'
+import { GetAllSnapshotsOrderEnum, GetAllSnapshotsSortEnum } from '@cogbox/api-client'
 import { SortingState } from '@tanstack/react-table'
 
 export const convertApiSortingToTableSorting = (sorting: SnapshotSorting): SortingState => {

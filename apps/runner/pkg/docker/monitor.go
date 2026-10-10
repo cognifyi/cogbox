@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -174,10 +175,10 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 
 // reconcileNetworkRules is called when reconnection is established
 func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
-	// List all DOCKER-USER rules that jump to Daytona chains
-	rules, err := dm.netRulesManager.ListDaytonaRules(table, chain)
+	// List all DOCKER-USER rules that jump to Cogbox chains
+	rules, err := dm.netRulesManager.ListCogboxRules(table, chain)
 	if err != nil {
-		dm.log.Error("Error listing Daytona rules", "error", err)
+		dm.log.Error("Error listing Cogbox rules", "error", err)
 		return
 	}
 
@@ -205,8 +206,8 @@ func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
 			continue
 		}
 
-		// Extract container ID from chain name (remove DAYTONA-SB- prefix)
-		containerID := strings.TrimPrefix(chainName, "DAYTONA-SB-")
+		// Extract container ID from chain name (remove COGBOX-SB- prefix)
+		containerID := strings.TrimPrefix(chainName, "COGBOX-SB-")
 		if containerID == chainName {
 			dm.log.Warn("Invalid chain name format", "chainName", chainName)
 			continue
@@ -249,16 +250,16 @@ func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
 
 // reconcileChains removes orphaned chains for non-existent containers
 func (dm *DockerMonitor) reconcileChains(table string) {
-	// List all chains that start with DAYTONA-SB-
-	chains, err := dm.netRulesManager.ListDaytonaChains(table)
+	// List all chains that start with COGBOX-SB-
+	chains, err := dm.netRulesManager.ListCogboxChains(table)
 	if err != nil {
-		dm.log.Error("Error listing Daytona chains", "error", err)
+		dm.log.Error("Error listing Cogbox chains", "error", err)
 		return
 	}
 
 	for _, chain := range chains {
-		// Extract container ID from chain name (remove DAYTONA-SB- prefix)
-		containerID := strings.TrimPrefix(chain, "DAYTONA-SB-")
+		// Extract container ID from chain name (remove COGBOX-SB- prefix)
+		containerID := strings.TrimPrefix(chain, "COGBOX-SB-")
 		if containerID == chain {
 			dm.log.Warn("Invalid chain name format", "chain", chain)
 			continue

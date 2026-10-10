@@ -748,7 +748,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
-            '/docs/guides/reinforcement-learning/verl-retool-daytona',
+            '/docs/guides/reinforcement-learning/verl-retool-cogbox',
             locale
           ),
           label: t('sidebarconfig.verl'),
@@ -947,8 +947,8 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/typescript-sdk/daytona', locale),
-          label: t('sidebarconfig.daytona'),
+          href: localizePath('/docs/typescript-sdk/cogbox', locale),
+          label: t('sidebarconfig.cogbox'),
         },
         {
           type: 'link',
@@ -981,8 +981,8 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/python-sdk/sync/daytona', locale),
-          label: t('sidebarconfig.daytona'),
+          href: localizePath('/docs/python-sdk/sync/cogbox', locale),
+          label: t('sidebarconfig.cogbox'),
         },
         {
           type: 'link',
@@ -1000,8 +1000,8 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/python-sdk/async/async-daytona', locale),
-          label: t('sidebarconfig.asyncDaytona'),
+          href: localizePath('/docs/python-sdk/async/async-cogbox', locale),
+          label: t('sidebarconfig.asyncCogbox'),
         },
         {
           type: 'link',
@@ -1019,8 +1019,8 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/ruby-sdk/daytona', locale),
-          label: t('sidebarconfig.daytona'),
+          href: localizePath('/docs/ruby-sdk/cogbox', locale),
+          label: t('sidebarconfig.cogbox'),
         },
         {
           type: 'link',
@@ -1038,8 +1038,8 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/go-sdk/daytona', locale),
-          label: t('sidebarconfig.daytona'),
+          href: localizePath('/docs/go-sdk/cogbox', locale),
+          label: t('sidebarconfig.cogbox'),
         },
       ],
     },
@@ -1052,8 +1052,8 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/java-sdk/daytona', locale),
-          label: t('sidebarconfig.daytona'),
+          href: localizePath('/docs/java-sdk/cogbox', locale),
+          label: t('sidebarconfig.cogbox'),
         },
         {
           type: 'link',

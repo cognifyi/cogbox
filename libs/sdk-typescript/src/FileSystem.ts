@@ -1,15 +1,16 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import * as pathe from 'pathe'
 import axios from 'axios'
-import { Configuration, FileSystemApi } from '@daytona/toolbox-api-client'
-import type { FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse } from '@daytona/toolbox-api-client'
+import { Configuration, FileSystemApi } from '@cogbox/toolbox-api-client'
+import type { FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse } from '@cogbox/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
-import { createDaytonaError, DaytonaError } from './errors/DaytonaError'
+import { createCogboxError, CogboxError } from './errors/CogboxError'
 import type { Readable } from 'stream'
 import {
   coerceUploadSource,
@@ -32,7 +33,7 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @example
  * const permissions: FilePermissionsParams = {
  *   mode: '644',
- *   owner: 'daytona',
+ *   owner: 'cogbox',
  *   group: 'users'
  * };
  */
@@ -173,12 +174,12 @@ export type UploadStreamOptions = {
   timeout?: number
 }
 
-function createFileDownloadError(error: string, errorDetails?: FileDownloadErrorDetails): DaytonaError {
+function createFileDownloadError(error: string, errorDetails?: FileDownloadErrorDetails): CogboxError {
   if (!errorDetails) {
-    return new DaytonaError(error)
+    return new CogboxError(error)
   }
 
-  return createDaytonaError(errorDetails.message, errorDetails.statusCode, undefined, errorDetails.errorCode)
+  return createCogboxError(errorDetails.message, errorDetails.statusCode, undefined, errorDetails.errorCode)
 }
 
 /**
@@ -322,19 +323,19 @@ export class FileSystem {
     const timeout = options.timeout ?? 30 * 60
     const isNonStreamingRuntime = RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS
     if (isNonStreamingRuntime) {
-      throw new DaytonaError(
+      throw new CogboxError(
         'downloadFileStream is not supported in browser or serverless environments. Use downloadFile instead.',
       )
     }
 
     if (options.signal?.aborted) {
-      throw new DaytonaError('Download cancelled')
+      throw new CogboxError('Download cancelled')
     }
 
     // Pre-resolve `stream` so the sync `onFileStream` callback below is await-free.
     const { Transform } = await dynamicImport('stream', 'downloadFileStream progress tracking is not supported: ')
 
-    const toDownloadCancelledError = () => new DaytonaError('Download cancelled')
+    const toDownloadCancelledError = () => new CogboxError('Download cancelled')
     const isCanceledError = (err: unknown) => {
       const error = err as { code?: string; name?: string }
       return Boolean(axios.isCancel?.(err) || error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED')
@@ -428,7 +429,7 @@ export class FileSystem {
             if (metadata?.error) {
               reject(createFileDownloadError(metadata.error, metadata.errorDetails))
             } else {
-              reject(new DaytonaError(`No file data received for: ${remotePath}`))
+              reject(new CogboxError(`No file data received for: ${remotePath}`))
             }
           }
         })
@@ -456,7 +457,7 @@ export class FileSystem {
    * Default is 30 minutes.
    * @returns {Promise<FileDownloadResponse[]>} Array of download results.
    *
-   * @throws {DaytonaError} If the request itself fails (network issues, invalid request/response, etc.). Individual
+   * @throws {CogboxError} If the request itself fails (network issues, invalid request/response, etc.). Individual
    * file download errors are returned in `FileDownloadResponse.error`. When the daemon provides structured
    * per-file metadata, it is also available in `FileDownloadResponse.errorDetails`.
    *
@@ -653,7 +654,7 @@ export class FileSystem {
    * @example
    * // Set file permissions and ownership
    * await fs.setFilePermissions('app/script.sh', {
-   *   owner: 'daytona',
+   *   owner: 'cogbox',
    *   group: 'users',
    *   mode: '755'  // Execute permission for shell script
    * });
@@ -740,7 +741,7 @@ export class FileSystem {
     const isNonStreamingRuntime =
       RUNTIME === Runtime.DENO || RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS
     if (isNonStreamingRuntime) {
-      throw new DaytonaError(
+      throw new CogboxError(
         'uploadFileStream is not supported in browser, Deno, or serverless runtimes. Use uploadFile instead.',
       )
     }

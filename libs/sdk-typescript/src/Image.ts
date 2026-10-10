@@ -1,11 +1,12 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import * as pathe from 'pathe'
 import { quote, parse as parseShellQuote } from 'shell-quote'
-import { DaytonaNotFoundError, DaytonaValidationError } from './errors/DaytonaError'
+import { CogboxNotFoundError, CogboxValidationError } from './errors/CogboxError'
 import { dynamicRequire } from './utils/Import'
 
 const SUPPORTED_PYTHON_SERIES = ['3.9', '3.10', '3.11', '3.12', '3.13'] as const
@@ -55,7 +56,7 @@ export interface PyprojectOptions extends PipInstallOptions {
 }
 
 /**
- * Represents an image definition for a Daytona sandbox.
+ * Represents an image definition for a Cogbox sandbox.
  * Do not construct this class directly. Instead use one of its static factory methods,
  * such as `Image.base()`, `Image.debianSlim()` or `Image.fromDockerfile()`.
  *
@@ -117,10 +118,10 @@ export class Image {
 
     const expandedPath = expandTilde(requirementsTxt)
     if (!fs.existsSync(expandedPath)) {
-      throw new DaytonaNotFoundError(`Requirements file ${requirementsTxt} does not exist`)
+      throw new CogboxNotFoundError(`Requirements file ${requirementsTxt} does not exist`)
     }
     if (!fs.statSync(expandedPath).isFile()) {
-      throw new DaytonaValidationError(`Requirements path ${requirementsTxt} exists but is not a file`)
+      throw new CogboxValidationError(`Requirements path ${requirementsTxt} exists but is not a file`)
     }
 
     const extraArgs = this.formatPipInstallArgs(options)
@@ -151,10 +152,10 @@ export class Image {
     const expandedPath = expandTilde(pyprojectToml)
 
     if (!fs.existsSync(expandedPath)) {
-      throw new DaytonaNotFoundError(`pyproject.toml file ${pyprojectToml} does not exist`)
+      throw new CogboxNotFoundError(`pyproject.toml file ${pyprojectToml} does not exist`)
     }
     if (!fs.statSync(expandedPath).isFile()) {
-      throw new DaytonaValidationError(`pyproject.toml path ${pyprojectToml} exists but is not a file`)
+      throw new CogboxValidationError(`pyproject.toml path ${pyprojectToml} exists but is not a file`)
     }
 
     let tomlData: any
@@ -163,7 +164,7 @@ export class Image {
       tomlData = toml.parse(fs.readFileSync(expandedPath, 'utf-8')) as any
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      throw new DaytonaValidationError(`Invalid pyproject.toml file ${pyprojectToml}: ${errorMessage}`)
+      throw new CogboxValidationError(`Invalid pyproject.toml file ${pyprojectToml}: ${errorMessage}`)
     }
 
     const dependencies: string[] = []
@@ -173,7 +174,7 @@ export class Image {
         'No [project.dependencies] section in pyproject.toml file. ' +
         'See https://packaging.python.org/en/latest/guides/writing-pyproject-toml ' +
         'for further file format guidelines.'
-      throw new DaytonaValidationError(msg)
+      throw new CogboxValidationError(msg)
     }
 
     dependencies.push(...tomlData.project.dependencies)
@@ -181,7 +182,7 @@ export class Image {
     if (options?.optionalDependencies && tomlData.project['optional-dependencies']) {
       const optionalGroups = tomlData.project['optional-dependencies']
       if (typeof optionalGroups !== 'object' || Array.isArray(optionalGroups)) {
-        throw new DaytonaValidationError('optional-dependencies must be a mapping in pyproject.toml')
+        throw new CogboxValidationError('optional-dependencies must be a mapping in pyproject.toml')
       }
 
       for (const group of options.optionalDependencies) {
@@ -205,7 +206,7 @@ export class Image {
    * @example
    * const image = Image
    *  .debianSlim('3.12')
-   *  .addLocalFile('requirements.txt', '/home/daytona/requirements.txt')
+   *  .addLocalFile('requirements.txt', '/home/cogbox/requirements.txt')
    */
   addLocalFile(localPath: string, remotePath: string): Image {
     const importErrorPrefix = '"addLocalFile" is not supported: '
@@ -218,10 +219,10 @@ export class Image {
 
     const expandedPath = expandTilde(localPath)
     if (!fs.existsSync(expandedPath)) {
-      throw new DaytonaNotFoundError(`Local file ${localPath} does not exist`)
+      throw new CogboxNotFoundError(`Local file ${localPath} does not exist`)
     }
     if (!fs.statSync(expandedPath).isFile()) {
-      throw new DaytonaValidationError(`Local path ${localPath} exists but is not a file`)
+      throw new CogboxValidationError(`Local path ${localPath} exists but is not a file`)
     }
 
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
@@ -240,7 +241,7 @@ export class Image {
    * @example
    * const image = Image
    *  .debianSlim('3.12')
-   *  .addLocalDir('src', '/home/daytona/src')
+   *  .addLocalDir('src', '/home/cogbox/src')
    */
   addLocalDir(localPath: string, remotePath: string): Image {
     const importErrorPrefix = '"addLocalDir" is not supported: '
@@ -249,10 +250,10 @@ export class Image {
 
     const expandedPath = expandTilde(localPath)
     if (!fs.existsSync(expandedPath)) {
-      throw new DaytonaNotFoundError(`Local directory ${localPath} does not exist`)
+      throw new CogboxNotFoundError(`Local directory ${localPath} does not exist`)
     }
     if (!fs.statSync(expandedPath).isDirectory()) {
-      throw new DaytonaValidationError(`Local path ${localPath} exists but is not a directory`)
+      throw new CogboxValidationError(`Local path ${localPath} exists but is not a directory`)
     }
 
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
@@ -304,7 +305,7 @@ export class Image {
       .map(([key]) => key)
 
     if (nonStringKeys.length) {
-      throw new DaytonaValidationError(`Image ENV variables must be strings. Invalid keys: ${nonStringKeys}`)
+      throw new CogboxValidationError(`Image ENV variables must be strings. Invalid keys: ${nonStringKeys}`)
     }
 
     for (const [key, val] of Object.entries(envVars)) {
@@ -323,7 +324,7 @@ export class Image {
    * @example
    * const image = Image
    *  .debianSlim('3.12')
-   *  .workdir('/home/daytona')
+   *  .workdir('/home/cogbox')
    */
   workdir(dirPath: string): Image {
     this._dockerfile += `WORKDIR ${quote([dirPath])}\n`
@@ -343,7 +344,7 @@ export class Image {
    */
   entrypoint(entrypointCommands: string[]): Image {
     if (!Array.isArray(entrypointCommands) || !entrypointCommands.every((x) => typeof x === 'string')) {
-      throw new DaytonaValidationError('entrypoint_commands must be a list of strings')
+      throw new CogboxValidationError('entrypoint_commands must be a list of strings')
     }
 
     const argsStr = entrypointCommands.map((arg) => `"${arg}"`).join(', ')
@@ -365,7 +366,7 @@ export class Image {
    */
   cmd(cmd: string[]): Image {
     if (!Array.isArray(cmd) || !cmd.every((x) => typeof x === 'string')) {
-      throw new DaytonaValidationError('Image CMD must be a list of strings')
+      throw new CogboxValidationError('Image CMD must be a list of strings')
     }
 
     const cmdStr = cmd.map((arg) => `"${arg}"`).join(', ')
@@ -394,10 +395,10 @@ export class Image {
 
       const expandedPath = expandTilde(contextDir)
       if (!fs.existsSync(expandedPath)) {
-        throw new DaytonaNotFoundError(`Context directory ${contextDir} does not exist`)
+        throw new CogboxNotFoundError(`Context directory ${contextDir} does not exist`)
       }
       if (!fs.statSync(expandedPath).isDirectory()) {
-        throw new DaytonaValidationError(`Context path ${contextDir} exists but is not a directory`)
+        throw new CogboxValidationError(`Context path ${contextDir} exists but is not a directory`)
       }
     }
 
@@ -435,10 +436,10 @@ export class Image {
 
     const expandedPath = pathe.resolve(expandTilde(path))
     if (!fs.existsSync(expandedPath)) {
-      throw new DaytonaNotFoundError(`Dockerfile ${path} does not exist`)
+      throw new CogboxNotFoundError(`Dockerfile ${path} does not exist`)
     }
     if (!fs.statSync(expandedPath).isFile()) {
-      throw new DaytonaValidationError(`Dockerfile path ${path} exists but is not a file`)
+      throw new CogboxValidationError(`Dockerfile path ${path} exists but is not a file`)
     }
 
     const dockerfileContent = fs.readFileSync(expandedPath, 'utf-8')
@@ -562,7 +563,7 @@ export class Image {
           flatten(item)
         }
       } else {
-        throw new DaytonaValidationError(`${functionName}: ${argName} must only contain strings`)
+        throw new CogboxValidationError(`${functionName}: ${argName} must only contain strings`)
       }
     }
 
@@ -583,9 +584,9 @@ export class Image {
     }
 
     if (!SUPPORTED_PYTHON_SERIES.includes(pythonVersion)) {
-      throw new DaytonaValidationError(
+      throw new CogboxValidationError(
         `Unsupported Python version: ${pythonVersion}. ` +
-          `Daytona supports the following series: ${SUPPORTED_PYTHON_SERIES.join(', ')}`,
+          `Cogbox supports the following series: ${SUPPORTED_PYTHON_SERIES.join(', ')}`,
       )
     }
 

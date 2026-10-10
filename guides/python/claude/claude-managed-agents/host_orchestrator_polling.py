@@ -1,7 +1,9 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 """Long-polling entrypoint for the shared host orchestrator."""
+
 from __future__ import annotations
 
 import os

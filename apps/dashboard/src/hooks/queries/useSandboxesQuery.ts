@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -14,7 +15,7 @@ import {
   SandboxListSortField,
   SandboxState,
   ListSandboxesResponse,
-} from '@daytona/api-client'
+} from '@cogbox/api-client'
 import { queryKeys } from './queryKeys'
 
 type ListSandboxesQueryResponse = ListSandboxesResponse | SandboxListItem[]

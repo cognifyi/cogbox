@@ -1,7 +1,8 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Configuration } from '@daytona/toolbox-api-client'
+import type { Configuration } from '@cogbox/toolbox-api-client'
 import { createApiResponse } from './helpers'
 
 const mockCreateSandboxWebSocket = jest.fn()
@@ -9,7 +10,7 @@ const mockStdDemuxStream = jest.fn()
 const mockParseChart = jest.fn((chart: { title?: string }) => ({ ...chart, parsed: true }))
 const mockPtyHandleCtor = jest.fn()
 
-jest.mock('@daytona/toolbox-api-client', () => ({}), { virtual: true })
+jest.mock('@cogbox/toolbox-api-client', () => ({}), { virtual: true })
 jest.mock('../utils/WebSocket', () => ({
   createSandboxWebSocket: (...args: unknown[]) => mockCreateSandboxWebSocket(...args),
 }))

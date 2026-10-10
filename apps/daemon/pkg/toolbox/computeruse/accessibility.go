@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 // Daemon-side HTTP handlers for the AT-SPI accessibility API. The plugin's

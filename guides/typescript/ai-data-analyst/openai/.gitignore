@@ -13,8 +13,8 @@ yarn-error.log*
 # VS Code
 .vscode/
 
-# Daytona SDK and sandbox artifacts
-.daytona/
+# Cogbox SDK and sandbox artifacts
+.cogbox/
 sandbox/
 
 # Build output

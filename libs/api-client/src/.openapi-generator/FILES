@@ -31,6 +31,7 @@ models/api-key-list.ts
 models/api-key-response.ts
 models/audit-log.ts
 models/build-info.ts
+models/cogbox-configuration.ts
 models/command.ts
 models/completion-context.ts
 models/completion-item.ts
@@ -58,7 +59,6 @@ models/create-session-request.ts
 models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
-models/daytona-configuration.ts
 models/display-info-response.ts
 models/docker-registry.ts
 models/download-files.ts

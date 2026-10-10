@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { isIPv4 } from 'net'
@@ -45,7 +46,7 @@ export function validateNetworkAllowList(networkAllowList: string): void {
 export function validateDomainAllowList(domainAllowList: string): void {
   const domains = domainAllowList.split(',').map((domain: string) => domain.trim())
 
-  // Hostname label format, optionally prefixed with a single `*.` wildcard (e.g. "*.daytona.io")
+  // Hostname label format, optionally prefixed with a single `*.` wildcard (e.g. "*.cogbox.pazity.com")
   const domainRegex = /^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
 
   for (const domain of domains) {

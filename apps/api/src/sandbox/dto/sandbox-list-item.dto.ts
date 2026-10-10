@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -110,13 +111,13 @@ export class SandboxListItemDto {
 
   @ApiPropertyOptional({
     description: 'The snapshot used for the sandbox',
-    example: 'daytonaio/sandbox:latest',
+    example: 'cognifyi/sandbox:latest',
   })
   snapshot?: string
 
   @ApiProperty({
     description: 'The user associated with the project',
-    example: 'daytona',
+    example: 'cogbox',
   })
   user: string
 
@@ -180,7 +181,7 @@ export class SandboxListItemDto {
     description: 'Labels for the sandbox',
     type: 'object',
     additionalProperties: { type: 'string' },
-    example: { 'daytona.io/public': 'true' },
+    example: { 'cogbox.pazity.com/public': 'true' },
   })
   labels: { [key: string]: string }
 
@@ -253,7 +254,7 @@ export class SandboxListItemDto {
 
   @ApiProperty({
     description: 'The toolbox proxy URL for the sandbox',
-    example: 'https://proxy.app.daytona.io/toolbox',
+    example: 'https://proxy.cogbox.pazity.com/toolbox',
   })
   toolboxProxyUrl: string
 

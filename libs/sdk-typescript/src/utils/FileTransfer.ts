@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import type { Readable } from 'stream'
-import { DaytonaError } from '../errors/DaytonaError'
+import { CogboxError } from '../errors/CogboxError'
 import { dynamicImport, dynamicRequire } from './Import'
 import { collectStreamBytes, toBuffer, toUint8Array } from './Binary'
 import { extractBoundary, getHeader, parseMultipartWithFormData } from './Multipart'
@@ -250,14 +251,14 @@ export async function processDownloadFilesResponseWithBusboy(
       const source = fileInfo?.filename
       if (!source) {
         abortStream(stream)
-        reject(new DaytonaError(`Received unexpected file "${fileInfo?.filename}".`))
+        reject(new CogboxError(`Received unexpected file "${fileInfo?.filename}".`))
         return
       }
 
       const metadata = metadataMap.get(source)
       if (!metadata) {
         abortStream(stream)
-        reject(new DaytonaError(`Target metadata missing for valid source: ${source}`))
+        reject(new CogboxError(`Target metadata missing for valid source: ${source}`))
         return
       }
 
@@ -353,9 +354,9 @@ async function feedStreamToBusboy(stream: any, bb: any, observer: MultipartHeade
   // busboy and cause the outer Promise to reject correctly.
   //
   // Errors are normalized at the forwarding site so that axios "CanceledError"
-  // is already wrapped as DaytonaError by the time busboy's internal cleanup
+  // is already wrapped as CogboxError by the time busboy's internal cleanup
   // destroys the file stream — ensuring the stream returned to the caller
-  // always emits DaytonaError, not a raw library error.
+  // always emits CogboxError, not a raw library error.
   if (typeof stream?.pipe === 'function') {
     if (observer) {
       const { Transform } = await dynamicImport('stream', '"downloadFiles" is not supported: ')
@@ -414,7 +415,7 @@ async function feedStreamToBusboy(stream: any, bb: any, observer: MultipartHeade
   }
 
   // Unsupported stream type
-  throw new DaytonaError(`Unsupported stream type: ${stream?.constructor?.name || typeof stream}`)
+  throw new CogboxError(`Unsupported stream type: ${stream?.constructor?.name || typeof stream}`)
 }
 
 export async function processDownloadFilesResponseWithBuffered(
@@ -452,7 +453,7 @@ export async function processDownloadFilesResponseWithBuffered(
   // Manual multipart parsing (handles multipart/mixed, etc.)
   const boundary = extractBoundary(contentType)
   if (!boundary) {
-    throw new DaytonaError(`Missing multipart boundary in Content-Type: "${contentType}"`)
+    throw new CogboxError(`Missing multipart boundary in Content-Type: "${contentType}"`)
   }
 
   const parts = parseMultipart(bodyBytes, boundary)
@@ -475,20 +476,20 @@ export async function processDownloadFilesResponseWithBuffered(
  * Normalizes errors that arrive from the HTTP transport layer to ensure
  * callers always see a consistent error type. Axios emits "CanceledError"
  * when an AbortSignal fires; we normalize it here (at the source stream's
- * error boundary) so that DaytonaError propagates through all downstream
+ * error boundary) so that CogboxError propagates through all downstream
  * pipe stages rather than the raw library error.
  */
 function normalizeDownloadStreamError(err: Error): Error {
   const e = err as { code?: string; name?: string }
   if (e.code === 'ERR_CANCELED' || e.name === 'CanceledError' || e.name === 'AbortError') {
-    return new DaytonaError('Download cancelled')
+    return new CogboxError('Download cancelled')
   }
   return err
 }
 
 /** Construct the cancellation error thrown when an upload is aborted. */
-export function createAbortError(remotePath: string): DaytonaError {
-  return new DaytonaError(`Upload cancelled: ${remotePath}`)
+export function createAbortError(remotePath: string): CogboxError {
+  return new CogboxError(`Upload cancelled: ${remotePath}`)
 }
 
 /**
@@ -512,7 +513,7 @@ export async function coerceUploadSource(source: UploadSource): Promise<Readable
   if (typeof (source as ReadableStream).getReader === 'function') {
     return stream.Readable.fromWeb(source as any)
   }
-  throw new DaytonaError(
+  throw new CogboxError(
     `Unsupported upload source: ${(source as { constructor?: { name?: string } }).constructor?.name ?? typeof source}`,
   )
 }

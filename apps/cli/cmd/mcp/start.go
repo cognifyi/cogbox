@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package mcp
@@ -13,10 +14,10 @@ import (
 
 var StartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start Daytona MCP Server",
+	Short: "Start Cogbox MCP Server",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		server := mcp.NewDaytonaMCPServer()
+		server := mcp.NewCogboxMCPServer()
 
 		interruptChan := make(chan os.Signal, 1)
 		signal.Notify(interruptChan, os.Interrupt)

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -15,7 +16,7 @@ import {
 } from '@/contexts/PlaygroundContext'
 import { KeyboardActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { ComputerUse } from '@daytona/sdk'
+import { ComputerUse } from '@cogbox/sdk'
 import PlaygroundActionForm from '../../ActionForm'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
@@ -46,7 +47,7 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
   ]
 
   const typeParamsFormData: ParameterFormData<KeyboardType> = [
-    { label: 'Text', key: 'text', placeholder: 'Daytona', required: true },
+    { label: 'Text', key: 'text', placeholder: 'Cogbox', required: true },
     { label: 'Delay(ms)', key: 'delay', placeholder: '50ms', min: 0, max: Infinity, step: 10 },
   ]
 

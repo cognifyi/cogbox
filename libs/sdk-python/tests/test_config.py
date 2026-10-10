@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -7,47 +8,47 @@ from unittest.mock import patch
 
 import pytest
 
-from daytona._utils.env import DaytonaEnvReader
+from cogbox._utils.env import CogboxEnvReader
 
 
-class TestDaytonaEnvReader:
-    def test_get_rejects_non_daytona_variable_names(self):
-        reader = DaytonaEnvReader()
+class TestCogboxEnvReader:
+    def test_get_rejects_non_cogbox_variable_names(self):
+        reader = CogboxEnvReader()
 
-        with pytest.raises(ValueError, match="must start with 'DAYTONA_'"):
+        with pytest.raises(ValueError, match="must start with 'COGBOX_'"):
             reader.get("OTHER_VAR")
 
     def test_runtime_env_takes_precedence(self, monkeypatch):
-        monkeypatch.setenv("DAYTONA_API_KEY", "runtime")
+        monkeypatch.setenv("COGBOX_API_KEY", "runtime")
 
         with patch.object(
-            DaytonaEnvReader, "_load", side_effect=[{"DAYTONA_API_KEY": "local"}, {"DAYTONA_API_KEY": "env"}]
+            CogboxEnvReader, "_load", side_effect=[{"COGBOX_API_KEY": "local"}, {"COGBOX_API_KEY": "env"}]
         ):
-            reader = DaytonaEnvReader()
+            reader = CogboxEnvReader()
 
-        assert reader.get("DAYTONA_API_KEY") == "runtime"
+        assert reader.get("COGBOX_API_KEY") == "runtime"
 
     def test_env_local_takes_precedence_over_env_file(self, monkeypatch):
-        monkeypatch.delenv("DAYTONA_API_KEY", raising=False)
+        monkeypatch.delenv("COGBOX_API_KEY", raising=False)
 
         with patch.object(
-            DaytonaEnvReader, "_load", side_effect=[{"DAYTONA_API_KEY": "local"}, {"DAYTONA_API_KEY": "env"}]
+            CogboxEnvReader, "_load", side_effect=[{"COGBOX_API_KEY": "local"}, {"COGBOX_API_KEY": "env"}]
         ):
-            reader = DaytonaEnvReader()
+            reader = CogboxEnvReader()
 
-        assert reader.get("DAYTONA_API_KEY") == "local"
+        assert reader.get("COGBOX_API_KEY") == "local"
 
     def test_get_returns_none_for_missing_variable(self, monkeypatch):
-        monkeypatch.delenv("DAYTONA_API_KEY", raising=False)
+        monkeypatch.delenv("COGBOX_API_KEY", raising=False)
 
-        with patch.object(DaytonaEnvReader, "_load", side_effect=[{}, {}]):
-            reader = DaytonaEnvReader()
+        with patch.object(CogboxEnvReader, "_load", side_effect=[{}, {}]):
+            reader = CogboxEnvReader()
 
-        assert reader.get("DAYTONA_API_KEY") is None
+        assert reader.get("COGBOX_API_KEY") is None
 
-    def test_load_filters_non_daytona_and_none_values(self):
+    def test_load_filters_non_cogbox_and_none_values(self):
         with patch(
-            "daytona._utils.env.dotenv_values",
-            return_value={"DAYTONA_API_KEY": "key", "OTHER": "nope", "DAYTONA_TARGET": None},
+            "cogbox._utils.env.dotenv_values",
+            return_value={"COGBOX_API_KEY": "key", "OTHER": "nope", "COGBOX_TARGET": None},
         ):
-            assert DaytonaEnvReader._load(".env") == {"DAYTONA_API_KEY": "key"}
+            assert CogboxEnvReader._load(".env") == {"COGBOX_API_KEY": "key"}

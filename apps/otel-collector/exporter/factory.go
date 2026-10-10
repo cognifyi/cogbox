@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package exporter
@@ -20,7 +21,7 @@ import (
 )
 
 const (
-	typeStr   = "daytona_exporter"
+	typeStr   = "cogbox_exporter"
 	stability = component.StabilityLevelBeta
 )
 

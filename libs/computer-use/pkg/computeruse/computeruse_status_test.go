@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
@@ -114,7 +115,7 @@ func TestAtspiStatusRechecksAfterTTL(t *testing.T) {
 
 func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
 	addAtspiLauncherToPath(t)
-	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/daytona-test-bus")
+	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/cogbox-test-bus")
 
 	c := &ComputerUse{
 		processes: make(map[string]*Process),
