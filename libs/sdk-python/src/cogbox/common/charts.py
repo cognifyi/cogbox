@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Union
 
 from pydantic import Field
 from typing_extensions import TypeAlias, override
@@ -14,7 +13,7 @@ from cogbox_toolbox_api_client import Chart as GeneratedChart
 from cogbox_toolbox_api_client import ChartElement as GeneratedChartElement
 from cogbox_toolbox_api_client_async import Chart as AsyncGeneratedChart
 
-GeneratedChartLike: TypeAlias = Union[GeneratedChart, AsyncGeneratedChart]
+GeneratedChartLike: TypeAlias = GeneratedChart | AsyncGeneratedChart
 ChartElement: TypeAlias = GeneratedChartElement
 ChartElementLike: TypeAlias = GeneratedChartElement
 
