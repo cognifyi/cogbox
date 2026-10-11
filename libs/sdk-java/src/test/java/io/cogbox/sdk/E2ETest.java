@@ -239,8 +239,7 @@ class E2ETest {
                 .isEqualTo("replaced bar baz");
 
         sandbox.getFs().uploadFile("script".getBytes(StandardCharsets.UTF_8), fsDir + "/perm-test.txt");
-        // TODO(rename): use cogbox/cogbox once sandbox images ship the cogbox user (images predate the rename)
-        assertThatCode(() -> toolboxFileSystemApi.setFilePermissions(fsDir + "/perm-test.txt", "daytona", "daytona", "644"))
+        assertThatCode(() -> toolboxFileSystemApi.setFilePermissions(fsDir + "/perm-test.txt", "cogbox", "cogbox", "644"))
                 .doesNotThrowAnyException();
 
         sandbox.getFs().uploadFile("moveme".getBytes(StandardCharsets.UTF_8), fsDir + "/to-move.txt");
