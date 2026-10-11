@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Sandbox, PtyHandle } from '@daytona/sdk'
+import { Sandbox, PtyHandle } from '@cogbox/sdk'
 import {
   GeminiStreamEvent,
   InitEvent,
@@ -14,7 +15,7 @@ import {
   ResultEvent,
 } from './types.js'
 
-const WORK_DIR = '/home/daytona'
+const WORK_DIR = '/home/cogbox'
 
 const DEBUG = false
 function debug(...args: unknown[]) {

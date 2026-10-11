@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -10,7 +11,7 @@ import {
   ForkSandboxPayloadSchema,
   PauseSandboxPayloadSchema,
   RegistrySchema,
-} from '@daytona/runner-proto'
+} from '@cogbox/runner-proto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, IsNull, Not } from 'typeorm'
 import {
@@ -41,7 +42,7 @@ import {
   UpdateNetworkSettingsDTO,
   InspectSnapshotInRegistryRequest,
   RecoverSandboxDTO,
-} from '@daytona/runner-api-client'
+} from '@cogbox/runner-api-client'
 import { SnapshotStateError } from '../errors/snapshot-state-error'
 
 /**

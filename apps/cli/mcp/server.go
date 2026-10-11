@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package mcp
@@ -9,15 +10,15 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-type DaytonaMCPServer struct {
+type CogboxMCPServer struct {
 	server.MCPServer
 }
 
-func NewDaytonaMCPServer() *DaytonaMCPServer {
-	s := &DaytonaMCPServer{}
+func NewCogboxMCPServer() *CogboxMCPServer {
+	s := &CogboxMCPServer{}
 
 	s.MCPServer = *server.NewMCPServer(
-		"Daytona MCP Server",
+		"Cogbox MCP Server",
 		"0.0.0-dev",
 		server.WithRecovery(),
 		server.WithPromptCapabilities(false),
@@ -31,11 +32,11 @@ func NewDaytonaMCPServer() *DaytonaMCPServer {
 	return s
 }
 
-func (s *DaytonaMCPServer) Start() error {
+func (s *CogboxMCPServer) Start() error {
 	return server.ServeStdio(&s.MCPServer)
 }
 
-func (s *DaytonaMCPServer) addTools() {
+func (s *CogboxMCPServer) addTools() {
 	s.AddTool(tools.GetCreateSandboxTool(), mcp.NewTypedToolHandler(tools.CreateSandbox))
 	s.AddTool(tools.GetDestroySandboxTool(), mcp.NewTypedToolHandler(tools.DestroySandbox))
 

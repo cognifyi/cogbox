@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package tools
@@ -21,14 +22,14 @@ type ListFilesArgs struct {
 
 func GetListFilesTool() mcp.Tool {
 	return mcp.NewTool("list_files",
-		mcp.WithDescription("List files in a directory in the Daytona sandbox."),
+		mcp.WithDescription("List files in a directory in the Cogbox sandbox."),
 		mcp.WithString("path", mcp.Description("Path to the directory to list files from (defaults to current directory).")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to list the files from.")),
 	)
 }
 
 func ListFiles(ctx context.Context, request mcp.CallToolRequest, args ListFilesArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient.GetApiClient(nil, cogboxMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}

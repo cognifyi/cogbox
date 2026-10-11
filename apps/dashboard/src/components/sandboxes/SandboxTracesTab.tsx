@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -10,11 +11,11 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { COGBOX_DOCS_URL } from '@/constants/ExternalLinks'
 import { TracesQueryParams, useSandboxTraces } from '@/hooks/useSandboxTraces'
 import { useSandboxTraceSpans } from '@/hooks/useSandboxTraceSpans'
 import { cn } from '@/lib/utils'
-import { TraceSpan, TraceSummary } from '@daytona/api-client'
+import { TraceSpan, TraceSummary } from '@cogbox/api-client'
 import { format, subHours } from 'date-fns'
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import { useQueryStates } from 'nuqs'
@@ -164,7 +165,7 @@ function TracesEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean;
         ) : (
           <EmptyDescription>
             Traces will appear here when the sandbox emits telemetry.{' '}
-            <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
+            <a href={`${COGBOX_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
               Learn more about observability
             </a>
             .

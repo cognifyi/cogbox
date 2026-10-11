@@ -1,10 +1,11 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 import os
 
 from autogen import ConversableAgent, LLMConfig  # pylint: disable=import-error
-from autogen.coding import DaytonaCodeExecutor  # pylint: disable=import-error
+from autogen.coding import CogboxCodeExecutor  # pylint: disable=import-error
 from dotenv import load_dotenv  # pylint: disable=import-error
 
 load_dotenv()
@@ -27,10 +28,10 @@ Never include TERMINATE in a message that contains a code block.
 
 def fix_bug(broken_code: str, error_description: str = "") -> None:
     """
-    Fix broken code using AG2 agents with Daytona sandbox execution.
+    Fix broken code using AG2 agents with Cogbox sandbox execution.
 
     The bug_fixer agent analyzes the code and proposes fixes, while the
-    code_executor agent runs each attempt in an isolated Daytona sandbox.
+    code_executor agent runs each attempt in an isolated Cogbox sandbox.
     The loop continues until the code runs successfully or max attempts are reached.
 
     Args:
@@ -44,7 +45,7 @@ def fix_bug(broken_code: str, error_description: str = "") -> None:
         }
     )
 
-    with DaytonaCodeExecutor(timeout=60) as executor:
+    with CogboxCodeExecutor(timeout=60) as executor:
         bug_fixer = ConversableAgent(
             name="bug_fixer",
             system_message=BUG_FIXER_SYSTEM_MESSAGE,

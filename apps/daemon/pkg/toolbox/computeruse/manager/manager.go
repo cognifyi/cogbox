@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package manager
@@ -27,8 +28,8 @@ type pluginRef struct {
 
 var ComputerUseHandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "DAYTONA_COMPUTER_USE_PLUGIN",
-	MagicCookieValue: "daytona_computer_use",
+	MagicCookieKey:   "COGBOX_COMPUTER_USE_PLUGIN",
+	MagicCookieValue: "cogbox_computer_use",
 }
 
 var computerUse = &pluginRef{}

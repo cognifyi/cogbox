@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -39,7 +40,7 @@ func (d *DockerClient) UpdateNetworkSettings(ctx context.Context, containerId st
 	case hasAllowList:
 		err = d.netRulesManager.SetNetworkRules(containerShortId, ipAddress, allowListTrimmed)
 	case updateNetworkSettingsDto.NetworkBlockAll != nil && !*updateNetworkSettingsDto.NetworkBlockAll && !hasAllowList:
-		// Restore general outbound access (clear Daytona filter rules for this sandbox)
+		// Restore general outbound access (clear Cogbox filter rules for this sandbox)
 		err = d.netRulesManager.DeleteNetworkRules(containerShortId)
 	case updateNetworkSettingsDto.NetworkAllowList != nil && !hasAllowList:
 		// Explicit empty allow list: treat as open network

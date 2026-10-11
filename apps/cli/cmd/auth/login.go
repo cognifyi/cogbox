@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package auth
@@ -20,7 +21,7 @@ import (
 
 var LoginCmd = &cobra.Command{
 	Use:     "login",
-	Short:   "Log in to Daytona",
+	Short:   "Log in to Cogbox",
 	Args:    cobra.NoArgs,
 	GroupID: internal.USER_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -32,7 +33,7 @@ var LoginCmd = &cobra.Command{
 
 		items := []view_common.SelectItem{
 			{Title: "Login with Browser", Desc: "Authenticate using OAuth in your browser"},
-			{Title: "Set Daytona API Key", Desc: "Authenticate using Daytona API key"},
+			{Title: "Set Cogbox API Key", Desc: "Authenticate using Cogbox API key"},
 		}
 
 		choice, err := view_common.Select("Select Authentication Method", items)
@@ -45,11 +46,11 @@ var LoginCmd = &cobra.Command{
 		}
 
 		var tokenConfig *config.Token
-		setApiKey := choice == "Set Daytona API Key"
+		setApiKey := choice == "Set Cogbox API Key"
 
 		if setApiKey {
 			// Prompt for API key
-			apiKey, err := view_common.PromptForInput("", "Enter your Daytona API key", "You can find it in the Daytona dashboard - https://app.daytona.io/dashboard")
+			apiKey, err := view_common.PromptForInput("", "Enter your Cogbox API key", "You can find it in the Cogbox dashboard - https://cogbox.pazity.com/dashboard")
 			if err != nil {
 				return err
 			}
@@ -101,7 +102,7 @@ func updateProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {
 		activeProfile.Api.Token = nil
 		activeProfile.Api.Key = apiKey
 
-		view_common.RenderInfoMessageBold("Successfully set Daytona API key!")
+		view_common.RenderInfoMessageBold("Successfully set Cogbox API key!")
 	}
 
 	if tokenConfig != nil {
@@ -131,7 +132,7 @@ func createInitialProfile(c *config.Config) (config.Profile, error) {
 		Id:   "initial",
 		Name: "initial",
 		Api: config.ServerApi{
-			Url: config.GetDaytonaApiUrl(),
+			Url: config.GetCogboxApiUrl(),
 		},
 	}
 

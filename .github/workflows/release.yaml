@@ -26,7 +26,7 @@ env:
 
 jobs:
   publish:
-    if: github.repository == 'daytonaio/daytona' || github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -59,8 +59,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "Daytona Release Bot"
-          git config --global user.email "daytona-release@users.noreply.github.com"
+          git config --global user.name "Cogbox Release Bot"
+          git config --global user.email "cogbox-release@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 
       - name: Tag Go modules
@@ -105,9 +105,9 @@ jobs:
             "version": "0.0.0"
           }' > apps/runner/package.json
           echo '{
-            "name": "daytona-e2e",
+            "name": "cogbox-e2e",
             "version": "0.0.0"
-          }' > apps/daytona-e2e/package.json
+          }' > apps/cogbox-e2e/package.json
           for dir in apps/*/ libs/*/; do
             if [ ! -f "${dir}package.json" ]; then
               name=$(basename "$dir")
@@ -129,8 +129,8 @@ jobs:
       - name: Cleanup credentials
         if: always()
         run: |
-          git config --global --fixed-value --unset-all user.name "Daytona Release Bot" 2>/dev/null || true
-          git config --global --fixed-value --unset-all user.email "daytona-release@users.noreply.github.com" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.name "Cogbox Release Bot" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.email "cogbox-release@users.noreply.github.com" 2>/dev/null || true
           git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
@@ -141,12 +141,12 @@ jobs:
       contents: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
-      DAYTONA_AUTH0_DOMAIN: ${{ secrets.DAYTONA_AUTH0_DOMAIN }}
-      DAYTONA_AUTH0_CLIENT_ID: ${{ secrets.DAYTONA_AUTH0_CLIENT_ID }}
-      DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
-      DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
-      DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
+      COGBOX_API_URL: ${{ secrets.COGBOX_API_URL }}
+      COGBOX_AUTH0_DOMAIN: ${{ secrets.COGBOX_AUTH0_DOMAIN }}
+      COGBOX_AUTH0_CLIENT_ID: ${{ secrets.COGBOX_AUTH0_CLIENT_ID }}
+      COGBOX_AUTH0_CALLBACK_PORT: ${{ secrets.COGBOX_AUTH0_CALLBACK_PORT }}
+      COGBOX_AUTH0_CLIENT_SECRET: ${{ secrets.COGBOX_AUTH0_CLIENT_SECRET }}
+      COGBOX_AUTH0_AUDIENCE: ${{ secrets.COGBOX_AUTH0_AUDIENCE }}
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
@@ -166,8 +166,8 @@ jobs:
       - name: Configure git
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "Daytona Release Bot"
-          git config --global user.email "daytona-release@users.noreply.github.com"
+          git config --global user.name "Cogbox Release Bot"
+          git config --global user.email "cogbox-release@users.noreply.github.com"
 
       - name: Build projects
         run: |
@@ -183,13 +183,13 @@ jobs:
           # Placeholder defaults until real Auth0/API infra is ready (repo secrets).
           # Real secrets, when set, take precedence via ${VAR:-default}.
           # NOTE: binaries built with placeholders have non-functional default
-          # `daytona login`; override at runtime via DAYTONA_API_URL /
-          # DAYTONA_AUTH0_* env vars or profiles.
-          export DAYTONA_API_URL="${DAYTONA_API_URL:-https://api.cogbox.example}"
-          export DAYTONA_AUTH0_DOMAIN="${DAYTONA_AUTH0_DOMAIN:-https://cogbox-placeholder.auth0.com}"
-          export DAYTONA_AUTH0_CLIENT_ID="${DAYTONA_AUTH0_CLIENT_ID:-cogbox-placeholder-client-id}"
-          export DAYTONA_AUTH0_CALLBACK_PORT="${DAYTONA_AUTH0_CALLBACK_PORT:-8080}"
-          export DAYTONA_AUTH0_AUDIENCE="${DAYTONA_AUTH0_AUDIENCE:-https://api.cogbox.example}"
+          # `cogbox login`; override at runtime via COGBOX_API_URL /
+          # COGBOX_AUTH0_* env vars or profiles.
+          export COGBOX_API_URL="${COGBOX_API_URL:-https://api.cogbox.example}"
+          export COGBOX_AUTH0_DOMAIN="${COGBOX_AUTH0_DOMAIN:-https://cogbox-placeholder.auth0.com}"
+          export COGBOX_AUTH0_CLIENT_ID="${COGBOX_AUTH0_CLIENT_ID:-cogbox-placeholder-client-id}"
+          export COGBOX_AUTH0_CALLBACK_PORT="${COGBOX_AUTH0_CALLBACK_PORT:-8080}"
+          export COGBOX_AUTH0_AUDIENCE="${COGBOX_AUTH0_AUDIENCE:-https://api.cogbox.example}"
           cd ./apps/cli
           GOOS=linux GOARCH=amd64 ./hack/build.sh --skip-env-file
           GOOS=linux GOARCH=arm64 ./hack/build.sh --skip-env-file
@@ -201,32 +201,32 @@ jobs:
 
       - name: Upload runner to release assets
         run: |
-          gh release upload "$VERSION" "dist/apps/runner-amd64#daytona-runner-${VERSION}-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/runner-amd64#cogbox-runner-${VERSION}-amd64" --clobber
 
       - name: Upload runner .deb to release assets
         run: |
           DEB_VERSION="${VERSION#v}"
-          gh release upload "$VERSION" "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
+          gh release upload "$VERSION" "dist/apps/runner-deb/cogbox-runner_${DEB_VERSION}_amd64.deb#cogbox-runner-${DEB_VERSION}-amd64.deb" --clobber
 
       - name: Upload daemon to release assets
         run: |
-          gh release upload "$VERSION" "dist/apps/daemon-amd64#daytona-daemon-${VERSION}-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/daemon-amd64#cogbox-daemon-${VERSION}-amd64" --clobber
 
       - name: Upload CLI to release assets
         run: |
-          gh release upload "$VERSION" "dist/apps/cli/daytona-linux-amd64#daytona-cli-${VERSION}-linux-amd64" --clobber
-          gh release upload "$VERSION" "dist/apps/cli/daytona-linux-arm64#daytona-cli-${VERSION}-linux-arm64" --clobber
-          gh release upload "$VERSION" "dist/apps/cli/daytona-darwin-amd64#daytona-cli-${VERSION}-darwin-amd64" --clobber
-          gh release upload "$VERSION" "dist/apps/cli/daytona-darwin-arm64#daytona-cli-${VERSION}-darwin-arm64" --clobber
-          gh release upload "$VERSION" "dist/apps/cli/daytona-windows-amd64.exe#daytona-cli-${VERSION}-windows-amd64.exe" --clobber
-          gh release upload "$VERSION" "dist/apps/cli/daytona-windows-arm64.exe#daytona-cli-${VERSION}-windows-arm64.exe" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/cogbox-linux-amd64#cogbox-cli-${VERSION}-linux-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/cogbox-linux-arm64#cogbox-cli-${VERSION}-linux-arm64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/cogbox-darwin-amd64#cogbox-cli-${VERSION}-darwin-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/cogbox-darwin-arm64#cogbox-cli-${VERSION}-darwin-arm64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/cogbox-windows-amd64.exe#cogbox-cli-${VERSION}-windows-amd64.exe" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/cogbox-windows-arm64.exe#cogbox-cli-${VERSION}-windows-arm64.exe" --clobber
 
       - name: Append placeholder notice to release notes
         # Only when built with placeholder Auth0/API defaults (no real secrets yet).
-        if: env.DAYTONA_API_URL == ''
+        if: env.COGBOX_API_URL == ''
         run: |
           NOTE='> [!WARNING]
-          > Placeholder build: default `daytona login` is not configured (no Auth0 tenant yet). Override at runtime via `DAYTONA_API_URL` / `DAYTONA_AUTH0_*` env vars or profiles.'
+          > Placeholder build: default `cogbox login` is not configured (no Auth0 tenant yet). Override at runtime via `COGBOX_API_URL` / `COGBOX_AUTH0_*` env vars or profiles.'
           BODY=$(gh release view "$VERSION" --json body --jq .body) || { echo "::warning::could not read release notes, skipping notice"; exit 0; }
           printf '%s\n\n%s\n' "$BODY" "$NOTE" > /tmp/placeholder-note.md
           gh release edit "$VERSION" --notes-file /tmp/placeholder-note.md || echo "::warning::could not update release notes"
@@ -250,8 +250,8 @@ jobs:
       - name: Cleanup credentials
         if: always()
         run: |
-          git config --global --fixed-value --unset-all user.name "Daytona Release Bot" 2>/dev/null || true
-          git config --global --fixed-value --unset-all user.email "daytona-release@users.noreply.github.com" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.name "Cogbox Release Bot" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.email "cogbox-release@users.noreply.github.com" 2>/dev/null || true
           git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
@@ -425,8 +425,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "Daytona Release Bot"
-          git config --global user.email "daytona-release@users.noreply.github.com"
+          git config --global user.name "Cogbox Release Bot"
+          git config --global user.email "cogbox-release@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 
       - name: Project dependencies
@@ -463,7 +463,7 @@ jobs:
       - name: Cleanup credentials
         if: always()
         run: |
-          git config --global --fixed-value --unset-all user.name "Daytona Release Bot" 2>/dev/null || true
-          git config --global --fixed-value --unset-all user.email "daytona-release@users.noreply.github.com" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.name "Cogbox Release Bot" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.email "cogbox-release@users.noreply.github.com" 2>/dev/null || true
           git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true

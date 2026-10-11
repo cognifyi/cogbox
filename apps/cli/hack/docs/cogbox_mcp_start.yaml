@@ -1,0 +1,9 @@
+name: cogbox mcp start
+synopsis: Start Cogbox MCP Server
+usage: cogbox mcp start [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox mcp - Manage Cogbox MCP Server

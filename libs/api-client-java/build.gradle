@@ -3,7 +3,7 @@ apply plugin: 'eclipse'
 apply plugin: 'java'
 apply plugin: 'com.diffplug.spotless'
 
-group = 'io.daytona'
+group = 'io.cogbox'
 version = '0.0.0-dev'
 
 buildscript {
@@ -98,8 +98,8 @@ if(hasProperty('target') && target == 'android') {
                 artifactId = 'api-client'
                 from components.java
                 pom {
-                    name = 'Daytona API Client'
-                    description = 'Auto-generated Java client for the Daytona REST API'
+                    name = 'Cogbox API Client'
+                    description = 'Auto-generated Java client for the Cogbox REST API'
                     url = 'https://github.com/cognifyi/cogbox'
                     licenses {
                         license {
@@ -109,14 +109,14 @@ if(hasProperty('target') && target == 'android') {
                     }
                     developers {
                         developer {
-                            id = 'daytonaio'
-                            name = 'Daytona Platforms Inc.'
-                            email = 'support@daytona.io'
+                            id = 'cognifyi'
+                            name = 'Cogbox Platforms Inc.'
+                            email = 'support@pazity.com'
                         }
                     }
                     scm {
                         connection = 'scm:git:git://github.com/cognifyi/cogbox.git'
-                        developerConnection = 'scm:git:ssh://github.com:daytonaio/daytona.git'
+                        developerConnection = 'scm:git:ssh://github.com:cognifyi/cogbox.git'
                         url = 'https://github.com/cognifyi/cogbox'
                     }
                 }

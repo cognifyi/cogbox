@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -33,8 +34,8 @@ import { GPU_TYPE_LABELS } from '@/lib/gpu-types'
 import { EMPTY_REGIONS } from '@/lib/regions'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
-import { GpuType, OrganizationUserRoleEnum, RegionType, type Region, type SnapshotDto } from '@daytona/api-client'
-import { Sandbox } from '@daytona/sdk'
+import { GpuType, OrganizationUserRoleEnum, RegionType, type Region, type SnapshotDto } from '@cogbox/api-client'
+import { Sandbox } from '@cogbox/sdk'
 import { useForm, useStore } from '@tanstack/react-form'
 import { isAxiosError } from 'axios'
 import { Info, Minus, Plus, Upload } from 'lucide-react'

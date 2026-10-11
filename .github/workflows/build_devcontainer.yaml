@@ -8,7 +8,7 @@ permissions: {}
 
 jobs:
   build:
-    if: github.repository == 'daytonaio/daytona' || github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,8 +34,8 @@ jobs:
           # see: https://github.com/devcontainers/ci/issues/191#issuecomment-1603857155
           BUILDX_NO_DEFAULT_ATTESTATIONS: true
         with:
-          imageName: ghcr.io/${{ github.repository_owner }}/daytona-devcontainer
-          cacheFrom: ghcr.io/${{ github.repository_owner }}/daytona-devcontainer
+          imageName: ghcr.io/${{ github.repository_owner }}/cogbox-devcontainer
+          cacheFrom: ghcr.io/${{ github.repository_owner }}/cogbox-devcontainer
           platform: linux/amd64,linux/arm64
           imageTag: main,latest
           configFile: .devcontainer/devcontainer.build.json

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,7 +8,7 @@ import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import * as crypto from 'crypto'
 import * as pathe from 'pathe'
-import { DaytonaNotFoundError } from './errors/DaytonaError'
+import { CogboxNotFoundError } from './errors/CogboxError'
 import { dynamicImport } from './utils/Import'
 import { WithInstrumentation } from './utils/otel.decorator'
 
@@ -40,7 +41,7 @@ export class ObjectStorage {
   private s3Client: S3Client
 
   constructor(config: ObjectStorageConfig) {
-    this.bucketName = config.bucketName || 'daytona-volume-builds'
+    this.bucketName = config.bucketName || 'cogbox-volume-builds'
     this.s3Client = new S3Client({
       region: this.extractAwsRegion(config.endpointUrl) || 'us-east-1',
       endpoint: config.endpointUrl,
@@ -67,7 +68,7 @@ export class ObjectStorage {
 
     if (!fs.existsSync(path)) {
       const errMsg = `Path does not exist: ${path}`
-      throw new DaytonaNotFoundError(errMsg)
+      throw new CogboxNotFoundError(errMsg)
     }
 
     // Compute hash for the path

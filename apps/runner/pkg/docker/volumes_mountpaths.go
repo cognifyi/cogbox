@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -20,7 +21,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const volumeMountPrefix = "daytona-volume-"
+const volumeMountPrefix = "cogbox-volume-"
 
 // volumeId becomes part of the host mount path and the S3 bucket name, so require
 // the canonical lowercase UUID form (rejects braced/URN/dashless/uppercase variants,

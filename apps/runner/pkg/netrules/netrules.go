@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package netrules
@@ -72,8 +73,8 @@ func (manager *NetRulesManager) saveIptablesRules() error {
 	return nil
 }
 
-// ListDaytonaRules returns all DOCKER-USER rules that jump to Daytona chains
-func (manager *NetRulesManager) ListDaytonaRules(table string, chain string) ([]string, error) {
+// ListCogboxRules returns all DOCKER-USER rules that jump to Cogbox chains
+func (manager *NetRulesManager) ListCogboxRules(table string, chain string) ([]string, error) {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
@@ -82,14 +83,14 @@ func (manager *NetRulesManager) ListDaytonaRules(table string, chain string) ([]
 		return nil, err
 	}
 
-	var daytonaRules []string
+	var cogboxRules []string
 	for _, rule := range rules {
 		if strings.Contains(rule, ChainPrefix) {
-			daytonaRules = append(daytonaRules, rule)
+			cogboxRules = append(cogboxRules, rule)
 		}
 	}
 
-	return daytonaRules, nil
+	return cogboxRules, nil
 }
 
 // DeleteChainRule deletes a specific rule from a specific chain
@@ -105,8 +106,8 @@ func (manager *NetRulesManager) DeleteChainRule(table string, chain string, rule
 	return manager.ipt.Delete(table, chain, args...)
 }
 
-// ListDaytonaChains returns all chains that start with DAYTONA-SB-
-func (manager *NetRulesManager) ListDaytonaChains(table string) ([]string, error) {
+// ListCogboxChains returns all chains that start with COGBOX-SB-
+func (manager *NetRulesManager) ListCogboxChains(table string) ([]string, error) {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
@@ -115,14 +116,14 @@ func (manager *NetRulesManager) ListDaytonaChains(table string) ([]string, error
 		return nil, err
 	}
 
-	var daytonaChains []string
+	var cogboxChains []string
 	for _, chain := range chains {
 		if strings.HasPrefix(chain, ChainPrefix) {
-			daytonaChains = append(daytonaChains, chain)
+			cogboxChains = append(cogboxChains, chain)
 		}
 	}
 
-	return daytonaChains, nil
+	return cogboxChains, nil
 }
 
 // ClearAndDeleteChain deletes a specific table chain

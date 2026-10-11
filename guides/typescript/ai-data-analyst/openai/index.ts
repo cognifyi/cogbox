@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, CodeLanguage, Sandbox } from '@daytona/sdk'
+import { Cogbox, CodeLanguage, Sandbox } from '@cogbox/sdk'
 import OpenAI from 'openai'
 import * as fs from 'fs'
 
@@ -16,8 +17,8 @@ function extractPython(text: string): string {
   return m ? m[1].trim() : ''
 }
 
-// Make sure you have the DAYTONA_API_KEY and OPENAI_API_KEY environment variables set
-const dt = new Daytona()
+// Make sure you have the COGBOX_API_KEY and OPENAI_API_KEY environment variables set
+const dt = new Cogbox()
 const openai = new OpenAI()
 
 async function run() {

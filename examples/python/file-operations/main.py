@@ -3,17 +3,17 @@ import json
 import os
 from datetime import datetime
 
-from daytona import CreateSandboxFromSnapshotParams, Daytona, FileDownloadRequest, FileUpload
+from cogbox import Cogbox, CreateSandboxFromSnapshotParams, FileDownloadRequest, FileUpload
 
 
 def main():
-    daytona = Daytona()
+    cogbox = Cogbox()
     params = CreateSandboxFromSnapshotParams(
         language="python",
     )
 
     # First, create a sandbox
-    sandbox = daytona.create(params)
+    sandbox = cogbox.create(params)
     print(f"Created sandbox with ID: {sandbox.id}")
 
     # List files in the sandbox
@@ -132,7 +132,7 @@ def main():
         os.remove("local-script.sh")
 
     # Delete the sandbox
-    daytona.delete(sandbox)
+    cogbox.delete(sandbox)
 
 
 if __name__ == "__main__":

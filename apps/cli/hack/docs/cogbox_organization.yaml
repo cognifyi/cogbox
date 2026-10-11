@@ -1,0 +1,13 @@
+name: cogbox organization
+synopsis: Manage Cogbox organizations
+description: Commands for managing Cogbox organizations
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI
+  - cogbox organization create - Create a new organization and set it as active
+  - cogbox organization delete - Delete an organization
+  - cogbox organization list - List all organizations
+  - cogbox organization use - Set active organization

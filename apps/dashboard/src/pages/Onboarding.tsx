@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -9,14 +10,14 @@ import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { COGBOX_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { cn, getMaskedToken } from '@/lib/utils'
-import { ApiKeyResponse, CreateApiKeyPermissionsEnum, OrganizationRolePermissionsEnum } from '@daytona/api-client'
+import { ApiKeyResponse, CreateApiKeyPermissionsEnum, OrganizationRolePermissionsEnum } from '@cogbox/api-client'
 import { Check, ClipboardIcon, Eye, EyeOff, Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -155,7 +156,7 @@ const Onboarding: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Install the SDK</h2>
-                  <p className="mb-4">Run the following command in your terminal to install the Daytona SDK:</p>
+                  <p className="mb-4">Run the following command in your terminal to install the Cogbox SDK:</p>
                   <div className="transition-all duration-500">
                     <CodeBlock code={codeExamples[language].install} language="bash" showCopy />
                   </div>
@@ -317,7 +318,7 @@ const Onboarding: React.FC = () => {
                   <h2 className="text-xl font-semibold mb-4">That's It</h2>
                   <p className="text-muted-foreground">
                     It's as easy as that. For more examples check out the{' '}
-                    <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
+                    <a href={COGBOX_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
                       Docs
                     </a>
                     .
@@ -334,15 +335,15 @@ const Onboarding: React.FC = () => {
 
 const codeExamples = {
   typescript: {
-    install: `npm install @daytona/sdk`,
+    install: `npm install @cogbox/sdk`,
     run: `npx tsx index.mts`,
-    example: `import { Daytona } from '@daytona/sdk'
+    example: `import { Cogbox } from '@cogbox/sdk'
 
-// Initialize the Daytona client
-const daytona = new Daytona({ apiKey: 'your-api-key' });
+// Initialize the Cogbox client
+const cogbox = new Cogbox({ apiKey: 'your-api-key' });
 
 // Create the Sandbox instance
-const sandbox = await daytona.create({
+const sandbox = await cogbox.create({
   language: 'typescript',
 });
 
@@ -352,18 +353,18 @@ console.log(response.result);
   `,
   },
   python: {
-    install: `pip install daytona`,
+    install: `pip install cogbox`,
     run: `python main.py`,
-    example: `from daytona import Daytona, DaytonaConfig
+    example: `from cogbox import Cogbox, CogboxConfig
 
 # Define the configuration
-config = DaytonaConfig(api_key="your-api-key")
+config = CogboxConfig(api_key="your-api-key")
 
-# Initialize the Daytona client
-daytona = Daytona(config)
+# Initialize the Cogbox client
+cogbox = Cogbox(config)
 
 # Create the Sandbox instance
-sandbox = daytona.create()
+sandbox = cogbox.create()
 
 # Run the code securely inside the Sandbox
 response = sandbox.process.code_run('print("Hello World from code!")')

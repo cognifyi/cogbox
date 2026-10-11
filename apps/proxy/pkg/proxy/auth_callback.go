@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package proxy
@@ -214,7 +215,7 @@ func (p *Proxy) getUserApiClient(ctx context.Context, authToken string) *apiclie
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
-			URL: p.config.DaytonaApiUrl,
+			URL: p.config.CogboxApiUrl,
 		},
 	}
 	clientConfig.HTTPClient = p.userAPIHTTPClient

@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package toolbox
@@ -49,7 +50,7 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 
 	extraLabels := make(map[string]string)
 
-	if envLabels := os.Getenv("DAYTONA_SANDBOX_OTEL_EXTRA_LABELS"); envLabels != "" {
+	if envLabels := os.Getenv("COGBOX_SANDBOX_OTEL_EXTRA_LABELS"); envLabels != "" {
 		for pair := range strings.SplitSeq(envLabels, ",") {
 			parts := strings.SplitN(pair, "=", 2)
 			if len(parts) != 2 {
@@ -65,15 +66,15 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 	}
 
 	if organizationId != nil && *organizationId != "" {
-		extraLabels["daytona_organization_id"] = *organizationId
+		extraLabels["cogbox_organization_id"] = *organizationId
 	}
 
 	if regionId != nil && *regionId != "" {
-		extraLabels["daytona_region_id"] = *regionId
+		extraLabels["cogbox_region_id"] = *regionId
 	}
 
 	if snapshot != nil && *snapshot != "" {
-		extraLabels["daytona_snapshot"] = *snapshot
+		extraLabels["cogbox_snapshot"] = *snapshot
 	}
 
 	if len(extraLabels) > 0 {
@@ -104,7 +105,7 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 
 		entrypointLogFile, err := os.Open(entrypointLogFilePath)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "Failed to open entrypoint log file", "error", err, "daytona-entrypoint", true)
+			s.logger.ErrorContext(ctx, "Failed to open entrypoint log file", "error", err, "cogbox-entrypoint", true)
 			return
 		}
 		defer entrypointLogFile.Close()
@@ -118,12 +119,12 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 			case <-entrypointCtx.Done():
 				return
 			case line := <-stdoutChan:
-				s.logger.InfoContext(telemetryContext, string(line), "daytona-entrypoint", true)
+				s.logger.InfoContext(telemetryContext, string(line), "cogbox-entrypoint", true)
 			case line := <-stderrChan:
-				s.logger.ErrorContext(telemetryContext, string(line), "daytona-entrypoint", true)
+				s.logger.ErrorContext(telemetryContext, string(line), "cogbox-entrypoint", true)
 			case err := <-errChan:
 				if err != nil {
-					s.logger.ErrorContext(telemetryContext, "Error reading entrypoint log file", "error", err, "daytona-entrypoint", true)
+					s.logger.ErrorContext(telemetryContext, "Error reading entrypoint log file", "error", err, "cogbox-entrypoint", true)
 				}
 				return
 			}
@@ -131,7 +132,7 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 	}()
 
 	// Initialize OpenTelemetry metrics
-	mp, err := telemetry.InitMetrics(ctx, config, "daytona.sandbox")
+	mp, err := telemetry.InitMetrics(ctx, config, "cogbox.sandbox")
 	if err != nil {
 		if shutDownErr := lp.Shutdown(telemetryContext); shutDownErr != nil {
 			s.logger.ErrorContext(ctx, "Failed to shutdown logger after metrics initialization failure", "shutdownErr", shutDownErr)

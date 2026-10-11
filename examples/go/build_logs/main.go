@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -9,16 +10,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/options"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 	"github.com/google/uuid"
 )
 
 func main() {
-	// Create a new Daytona client using environment variables
-	// Set DAYTONA_API_KEY before running
-	client, err := daytona.NewClient()
+	// Create a new Cogbox client using environment variables
+	// Set COGBOX_API_KEY before running
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -33,10 +34,10 @@ func main() {
 }
 
 // Example 1: Simple log streaming with direct output
-func simpleLogStreaming(ctx context.Context, client *daytona.Client) {
+func simpleLogStreaming(ctx context.Context, client *cogbox.Client) {
 	log.Println("Creating sandbox with simple log streaming...")
 
-	image := daytona.Base("python:3.12-slim").
+	image := cogbox.Base("python:3.12-slim").
 		PipInstall([]string{"requests"}, options.WithFindLinks("https://pypi.org/simple")).
 		Workdir("/app")
 

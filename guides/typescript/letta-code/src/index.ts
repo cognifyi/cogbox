@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytona/sdk'
+import { Cogbox, Sandbox } from '@cogbox/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 import { LettaSession } from './letta-session'
@@ -12,12 +13,12 @@ import { LettaSession } from './letta-session'
 dotenv.config()
 
 async function main() {
-  // Get the Daytona API key from environment variables
-  const apiKey = process.env.DAYTONA_API_KEY
+  // Get the Cogbox API key from environment variables
+  const apiKey = process.env.COGBOX_API_KEY
 
   if (!apiKey) {
-    console.error('Error: DAYTONA_API_KEY environment variable is not set')
-    console.error('Please create a .env file with your Daytona API key')
+    console.error('Error: COGBOX_API_KEY environment variable is not set')
+    console.error('Please create a .env file with your Cogbox API key')
     process.exit(1)
   }
 
@@ -28,8 +29,8 @@ async function main() {
     process.exit(1)
   }
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey })
+  // Initialize the Cogbox client
+  const cogbox = new Cogbox({ apiKey })
 
   let sandbox: Sandbox | undefined
 
@@ -46,9 +47,9 @@ async function main() {
   }
 
   try {
-    // Create a new Daytona sandbox
+    // Create a new Cogbox sandbox
     console.log('Creating sandbox...')
-    sandbox = await daytona.create({
+    sandbox = await cogbox.create({
       envVars: { LETTA_API_KEY: process.env.SANDBOX_LETTA_API_KEY },
     })
 
@@ -61,7 +62,7 @@ async function main() {
       if (r.exitCode) throw new Error('Error installing Letta Code: ' + r.result)
     })
 
-    // Create the URL pattern for Daytona preview links
+    // Create the URL pattern for Cogbox preview links
     // This is a URL where {PORT} is a placeholder for the port number
     // We first generate a preview link with the dummy port 1234, then replace it with {PORT}
     const previewLink = await sandbox.getPreviewLink(1234)
@@ -69,7 +70,7 @@ async function main() {
 
     // Configure the system prompt
     const systemPrompt = [
-      'You are running in a Daytona sandbox.',
+      'You are running in a Cogbox sandbox.',
       `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
       'When starting a server, always give the user the preview URL to access it.',
     ].join(' ')

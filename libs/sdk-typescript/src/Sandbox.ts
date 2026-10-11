@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@daytona/api-client'
+import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@cogbox/api-client'
 import type {
   Sandbox as SandboxDto,
   SandboxListItem as SandboxListItemDto,
@@ -18,9 +19,9 @@ import type {
   UpdateSandboxNetworkSettings,
   SandboxListSortField,
   SandboxListSortDirection,
-} from '@daytona/api-client'
-import { Daytona } from './Daytona'
-import type { Resources } from './Daytona'
+} from '@cogbox/api-client'
+import { Cogbox } from './Cogbox'
+import type { Resources } from './Cogbox'
 import {
   FileSystemApi,
   GitApi,
@@ -29,20 +30,20 @@ import {
   InfoApi,
   ComputerUseApi,
   InterpreterApi,
-} from '@daytona/toolbox-api-client'
+} from '@cogbox/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
-import { DaytonaError, DaytonaNotFoundError, DaytonaTimeoutError, DaytonaValidationError } from './errors/DaytonaError'
-import { CODE_TOOLBOX_LANGUAGE_LABEL } from './Daytona'
+import { CogboxError, CogboxNotFoundError, CogboxTimeoutError, CogboxValidationError } from './errors/CogboxError'
+import { CODE_TOOLBOX_LANGUAGE_LABEL } from './Cogbox'
 import { ComputerUse } from './ComputerUse'
 import type { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
- * Represents a Daytona Sandbox.
+ * Represents a Cogbox Sandbox.
  *
  * @property {FileSystem} fs - File system operations interface
  * @property {Git} git - Git operations interface
@@ -52,7 +53,7 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @property {ComputerUse} computerUse - Computer use operations interface for desktop automation
  * @property {string} id - Unique identifier for the Sandbox
  * @property {string} organizationId - Organization ID of the Sandbox
- * @property {string} [snapshot] - Daytona snapshot used to create the Sandbox
+ * @property {string} [snapshot] - Cogbox snapshot used to create the Sandbox
  * @property {string} user - OS user running in the Sandbox
  * @property {Record<string, string>} [env] - Environment variables set in the Sandbox
  * (not returned by list results; call `refreshData()` on each item to populate)
@@ -264,17 +265,17 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If Sandbox fails to start or times out
+   * @throws {CogboxError} - `CogboxError` - If Sandbox fails to start or times out
    *
    * @example
-   * const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+   * const sandbox = await cogbox.getCurrentSandbox('my-sandbox');
    * await sandbox.start(40);  // Wait up to 40 seconds
    * console.log('Sandbox started successfully');
    */
   @WithInstrumentation()
   public async start(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -290,16 +291,16 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If Sandbox fails to recover or times out
+   * @throws {CogboxError} - `CogboxError` - If Sandbox fails to recover or times out
    *
    * @example
-   * const sandbox = await daytona.get('my-sandbox-id');
+   * const sandbox = await cogbox.get('my-sandbox-id');
    * await sandbox.recover();
    * console.log('Sandbox recovered successfully');
    */
   public async recover(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -320,14 +321,14 @@ export class Sandbox {
    * @returns {Promise<void>}
    *
    * @example
-   * const sandbox = await daytona.get('my-sandbox-id');
+   * const sandbox = await cogbox.get('my-sandbox-id');
    * await sandbox.stop();
    * console.log('Sandbox stopped successfully');
    */
   @WithInstrumentation()
   public async stop(timeout = 60, force = false): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
     await this.sandboxApi.stopSandbox(this.id, undefined, force, { timeout: timeout * 1000 })
@@ -347,18 +348,18 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<Sandbox>} The forked Sandbox.
-   * @throws {DaytonaValidationError} - If timeout is a negative number
-   * @throws {DaytonaError} - If the fork operation fails or times out
+   * @throws {CogboxValidationError} - If timeout is a negative number
+   * @throws {CogboxError} - If the fork operation fails or times out
    *
    * @example
-   * const sandbox = await daytona.get('my-sandbox');
+   * const sandbox = await cogbox.get('my-sandbox');
    * const forked = await sandbox._experimental_fork({ name: 'my-fork' });
    * console.log(`Forked sandbox: ${forked.id}`);
    */
   @WithInstrumentation()
   public async _experimental_fork(params?: { name?: string }, timeout = 60): Promise<Sandbox> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -370,7 +371,7 @@ export class Sandbox {
     const forkedSandbox = new Sandbox(
       sandboxDto,
       structuredClone(this.clientConfig),
-      Daytona.createAxiosInstance(),
+      Cogbox.createAxiosInstance(),
       this.sandboxApi,
     )
 
@@ -391,18 +392,18 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<void>}
-   * @throws {DaytonaValidationError} - If timeout is a negative number
-   * @throws {DaytonaError} - If the snapshot operation fails or times out
+   * @throws {CogboxValidationError} - If timeout is a negative number
+   * @throws {CogboxError} - If the snapshot operation fails or times out
    *
    * @example
-   * const sandbox = await daytona.get('my-sandbox');
+   * const sandbox = await cogbox.get('my-sandbox');
    * await sandbox._experimental_createSnapshot('my-snapshot');
    * console.log('Snapshot created successfully');
    */
   @WithInstrumentation()
   public async _experimental_createSnapshot(name: string, timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -427,7 +428,7 @@ export class Sandbox {
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
       if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
-        throw new DaytonaError(
+        throw new CogboxError(
           `Sandbox ${this.id} snapshot failed with state: ${this.state}, error reason: ${this.errorReason}`,
         )
       }
@@ -437,7 +438,7 @@ export class Sandbox {
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaTimeoutError('Sandbox snapshot did not complete within the timeout period')
+        throw new CogboxTimeoutError('Sandbox snapshot did not complete within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
@@ -457,18 +458,18 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<void>}
-   * @throws {DaytonaValidationError} - If timeout is a negative number
-   * @throws {DaytonaError} - If the pause operation fails or times out
+   * @throws {CogboxValidationError} - If timeout is a negative number
+   * @throws {CogboxError} - If the pause operation fails or times out
    *
    * @example
-   * const sandbox = await daytona.get('my-sandbox');
+   * const sandbox = await cogbox.get('my-sandbox');
    * await sandbox.pause();
    * console.log('Sandbox paused successfully');
    */
   @WithInstrumentation()
   public async pause(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -492,13 +493,13 @@ export class Sandbox {
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
       if (this.state === SandboxState.ERROR) {
-        throw new DaytonaError(
+        throw new CogboxError(
           `Sandbox ${this.id} pause failed with state: ${this.state}, error reason: ${this.errorReason}`,
         )
       }
 
       if (timeout > 0 && (Date.now() - startTime) / 1000 >= timeout) {
-        throw new DaytonaError(`Sandbox ${this.id} failed to pause within ${timeout} seconds`)
+        throw new CogboxError(`Sandbox ${this.id} failed to pause within ${timeout} seconds`)
       }
 
       await new Promise((resolve) => globalThis.setTimeout(resolve, checkInterval))
@@ -525,12 +526,12 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                               Defaults to 60 seconds.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If the sandbox ends up in an error state or fails to start within the timeout period.
+   * @throws {CogboxError} - `CogboxError` - If the sandbox ends up in an error state or fails to start within the timeout period.
    */
   @WithInstrumentation()
   public async waitUntilStarted(timeout = 60) {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     let checkInterval = 100
@@ -546,11 +547,11 @@ export class Sandbox {
 
       if (this.state === 'error') {
         const errMsg = `Sandbox ${this.id} failed to start with status: ${this.state}, error reason: ${this.errorReason}`
-        throw new DaytonaError(errMsg)
+        throw new CogboxError(errMsg)
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaTimeoutError('Sandbox failed to become ready within the timeout period')
+        throw new CogboxTimeoutError('Sandbox failed to become ready within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
@@ -569,12 +570,12 @@ export class Sandbox {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                               Defaults to 60 seconds.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If the sandbox fails to stop within the timeout period.
+   * @throws {CogboxError} - `CogboxError` - If the sandbox fails to stop within the timeout period.
    */
   @WithInstrumentation()
   public async waitUntilStopped(timeout = 60) {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     let checkInterval = 100
@@ -591,11 +592,11 @@ export class Sandbox {
 
       if (this.state === 'error') {
         const errMsg = `Sandbox failed to stop with status: ${this.state}, error reason: ${this.errorReason}`
-        throw new DaytonaError(errMsg)
+        throw new CogboxError(errMsg)
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaTimeoutError('Sandbox failed to become stopped within the timeout period')
+        throw new CogboxTimeoutError('Sandbox failed to become stopped within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
@@ -648,7 +649,7 @@ export class Sandbox {
    * @param {number} interval - Number of minutes of inactivity before auto-stopping.
    *                           Set to 0 to disable auto-stop. Default is 15 minutes.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If interval is not a non-negative integer
+   * @throws {CogboxError} - `CogboxError` - If interval is not a non-negative integer
    *
    * @example
    * // Auto-stop after 1 hour
@@ -659,7 +660,7 @@ export class Sandbox {
   @WithInstrumentation()
   public async setAutostopInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
-      throw new DaytonaValidationError('autoStopInterval must be a non-negative integer')
+      throw new CogboxValidationError('autoStopInterval must be a non-negative integer')
     }
 
     await this.sandboxApi.setAutostopInterval(this.id, interval)
@@ -674,7 +675,7 @@ export class Sandbox {
    * @param {number} interval - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
    *                           Set to 0 for the maximum interval. Default is 7 days.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If interval is not a non-negative integer
+   * @throws {CogboxError} - `CogboxError` - If interval is not a non-negative integer
    *
    * @example
    * // Auto-archive after 1 hour
@@ -685,7 +686,7 @@ export class Sandbox {
   @WithInstrumentation()
   public async setAutoArchiveInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
-      throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
+      throw new CogboxValidationError('autoArchiveInterval must be a non-negative integer')
     }
     await this.sandboxApi.setAutoArchiveInterval(this.id, interval)
     this.autoArchiveInterval = interval
@@ -732,7 +733,7 @@ export class Sandbox {
    * // Resume internet
    * await sandbox.updateNetworkSettings({ networkBlockAll: false });
    * // Allow only specific domains
-   * await sandbox.updateNetworkSettings({ domainAllowList: 'example.com,*.daytona.io' });
+   * await sandbox.updateNetworkSettings({ domainAllowList: 'example.com,*.cogbox.pazity.com' });
    */
   @WithInstrumentation()
   public async updateNetworkSettings(settings: UpdateSandboxNetworkSettings): Promise<void> {
@@ -741,7 +742,7 @@ export class Sandbox {
       settings.networkAllowList === undefined &&
       settings.domainAllowList === undefined
     ) {
-      throw new DaytonaValidationError(
+      throw new CogboxValidationError(
         'At least one of networkBlockAll, networkAllowList or domainAllowList must be set',
       )
     }
@@ -811,7 +812,7 @@ export class Sandbox {
    *
    * @param resources - New resource configuration (cpu, memory, disk only). Only specified fields are updated.
    * @param [timeout=60] - Timeout in seconds for the resize operation. 0 means no timeout.
-   * @throws {DaytonaError} If hot-resize constraints are violated, disk resize is attempted on
+   * @throws {CogboxError} If hot-resize constraints are violated, disk resize is attempted on
    *   a running Sandbox, disk decrease is attempted, no fields are provided, or the operation times out.
    *
    * @example
@@ -824,10 +825,10 @@ export class Sandbox {
   @WithInstrumentation()
   public async resize(resources: Pick<Resources, 'cpu' | 'memory' | 'disk'>, timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
     if ('gpu' in resources || 'gpuType' in resources) {
-      throw new DaytonaValidationError(
+      throw new CogboxValidationError(
         'Resize does not support changes to gpu or gpuType — to change GPU, create a new Sandbox',
       )
     }
@@ -853,12 +854,12 @@ export class Sandbox {
    *
    * @param {number} [timeout=60] - Maximum time to wait in seconds. 0 means no timeout.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - If the sandbox ends up in an error state or resize times out.
+   * @throws {CogboxError} - If the sandbox ends up in an error state or resize times out.
    */
   @WithInstrumentation()
   public async waitForResizeComplete(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
+      throw new CogboxValidationError('Timeout must be a non-negative number')
     }
 
     let checkInterval = 100
@@ -869,7 +870,7 @@ export class Sandbox {
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
       if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
-        throw new DaytonaError(
+        throw new CogboxError(
           `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`,
         )
       }
@@ -879,7 +880,7 @@ export class Sandbox {
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaTimeoutError('Sandbox resize did not complete within the timeout period')
+        throw new CogboxTimeoutError('Sandbox resize did not complete within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
@@ -976,7 +977,7 @@ export class Sandbox {
     try {
       await this.refreshData()
     } catch (error) {
-      if (error instanceof DaytonaNotFoundError) {
+      if (error instanceof CogboxNotFoundError) {
         this.state = SandboxState.DESTROYED
       }
     }

@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package errors
@@ -12,154 +13,154 @@ import (
 	"github.com/cognifyi/cogbox/libs/toolbox-api-client-go"
 )
 
-// DaytonaError is the base error type for all Daytona SDK errors
-type DaytonaError struct {
+// CogboxError is the base error type for all Cogbox SDK errors
+type CogboxError struct {
 	Message    string
 	StatusCode int
 	Headers    http.Header
 }
 
-func (e *DaytonaError) Error() string {
+func (e *CogboxError) Error() string {
 	if e.StatusCode != 0 {
-		return fmt.Sprintf("Daytona error (status %d): %s", e.StatusCode, e.Message)
+		return fmt.Sprintf("Cogbox error (status %d): %s", e.StatusCode, e.Message)
 	}
-	return fmt.Sprintf("Daytona error: %s", e.Message)
+	return fmt.Sprintf("Cogbox error: %s", e.Message)
 }
 
-// NewDaytonaError creates a new DaytonaError
-func NewDaytonaError(message string, statusCode int, headers http.Header) *DaytonaError {
-	return &DaytonaError{
+// NewCogboxError creates a new CogboxError
+func NewCogboxError(message string, statusCode int, headers http.Header) *CogboxError {
+	return &CogboxError{
 		Message:    message,
 		StatusCode: statusCode,
 		Headers:    headers,
 	}
 }
 
-// DaytonaNotFoundError represents a resource not found error (404)
-type DaytonaNotFoundError struct {
-	*DaytonaError
+// CogboxNotFoundError represents a resource not found error (404)
+type CogboxNotFoundError struct {
+	*CogboxError
 }
 
-func (e *DaytonaNotFoundError) Error() string {
+func (e *CogboxNotFoundError) Error() string {
 	return fmt.Sprintf("Resource not found: %s", e.Message)
 }
 
-// NewDaytonaNotFoundError creates a new DaytonaNotFoundError
-func NewDaytonaNotFoundError(message string, headers http.Header) *DaytonaNotFoundError {
-	return &DaytonaNotFoundError{
-		DaytonaError: NewDaytonaError(message, http.StatusNotFound, headers),
+// NewCogboxNotFoundError creates a new CogboxNotFoundError
+func NewCogboxNotFoundError(message string, headers http.Header) *CogboxNotFoundError {
+	return &CogboxNotFoundError{
+		CogboxError: NewCogboxError(message, http.StatusNotFound, headers),
 	}
 }
 
-// DaytonaRateLimitError represents a rate limit error (429)
-type DaytonaRateLimitError struct {
-	*DaytonaError
+// CogboxRateLimitError represents a rate limit error (429)
+type CogboxRateLimitError struct {
+	*CogboxError
 }
 
-func (e *DaytonaRateLimitError) Error() string {
+func (e *CogboxRateLimitError) Error() string {
 	return fmt.Sprintf("Rate limit exceeded: %s", e.Message)
 }
 
-// NewDaytonaRateLimitError creates a new DaytonaRateLimitError
-func NewDaytonaRateLimitError(message string, headers http.Header) *DaytonaRateLimitError {
-	return &DaytonaRateLimitError{
-		DaytonaError: NewDaytonaError(message, http.StatusTooManyRequests, headers),
+// NewCogboxRateLimitError creates a new CogboxRateLimitError
+func NewCogboxRateLimitError(message string, headers http.Header) *CogboxRateLimitError {
+	return &CogboxRateLimitError{
+		CogboxError: NewCogboxError(message, http.StatusTooManyRequests, headers),
 	}
 }
 
-// DaytonaAuthenticationError represents an authentication error (401)
-type DaytonaAuthenticationError struct {
-	*DaytonaError
+// CogboxAuthenticationError represents an authentication error (401)
+type CogboxAuthenticationError struct {
+	*CogboxError
 }
 
-func (e *DaytonaAuthenticationError) Error() string {
+func (e *CogboxAuthenticationError) Error() string {
 	return fmt.Sprintf("Authentication failed: %s", e.Message)
 }
 
-func NewDaytonaAuthenticationError(message string, headers http.Header) *DaytonaAuthenticationError {
-	return &DaytonaAuthenticationError{
-		DaytonaError: NewDaytonaError(message, http.StatusUnauthorized, headers),
+func NewCogboxAuthenticationError(message string, headers http.Header) *CogboxAuthenticationError {
+	return &CogboxAuthenticationError{
+		CogboxError: NewCogboxError(message, http.StatusUnauthorized, headers),
 	}
 }
 
-// DaytonaForbiddenError represents a forbidden/authorization error (403)
-type DaytonaForbiddenError struct {
-	*DaytonaError
+// CogboxForbiddenError represents a forbidden/authorization error (403)
+type CogboxForbiddenError struct {
+	*CogboxError
 }
 
-func (e *DaytonaForbiddenError) Error() string {
+func (e *CogboxForbiddenError) Error() string {
 	return fmt.Sprintf("Forbidden: %s", e.Message)
 }
 
-func NewDaytonaForbiddenError(message string, headers http.Header) *DaytonaForbiddenError {
-	return &DaytonaForbiddenError{
-		DaytonaError: NewDaytonaError(message, http.StatusForbidden, headers),
+func NewCogboxForbiddenError(message string, headers http.Header) *CogboxForbiddenError {
+	return &CogboxForbiddenError{
+		CogboxError: NewCogboxError(message, http.StatusForbidden, headers),
 	}
 }
 
-// DaytonaConflictError represents a conflict error (409)
-type DaytonaConflictError struct {
-	*DaytonaError
+// CogboxConflictError represents a conflict error (409)
+type CogboxConflictError struct {
+	*CogboxError
 }
 
-func (e *DaytonaConflictError) Error() string {
+func (e *CogboxConflictError) Error() string {
 	return fmt.Sprintf("Conflict: %s", e.Message)
 }
 
-func NewDaytonaConflictError(message string, headers http.Header) *DaytonaConflictError {
-	return &DaytonaConflictError{
-		DaytonaError: NewDaytonaError(message, http.StatusConflict, headers),
+func NewCogboxConflictError(message string, headers http.Header) *CogboxConflictError {
+	return &CogboxConflictError{
+		CogboxError: NewCogboxError(message, http.StatusConflict, headers),
 	}
 }
 
-// DaytonaValidationError represents a validation/bad request error (400)
-type DaytonaValidationError struct {
-	*DaytonaError
+// CogboxValidationError represents a validation/bad request error (400)
+type CogboxValidationError struct {
+	*CogboxError
 }
 
-func (e *DaytonaValidationError) Error() string {
+func (e *CogboxValidationError) Error() string {
 	return fmt.Sprintf("Validation error: %s", e.Message)
 }
 
-func NewDaytonaValidationError(message string, headers http.Header) *DaytonaValidationError {
-	return &DaytonaValidationError{
-		DaytonaError: NewDaytonaError(message, http.StatusBadRequest, headers),
+func NewCogboxValidationError(message string, headers http.Header) *CogboxValidationError {
+	return &CogboxValidationError{
+		CogboxError: NewCogboxError(message, http.StatusBadRequest, headers),
 	}
 }
 
-// DaytonaServerError represents a server error (5xx)
-type DaytonaServerError struct {
-	*DaytonaError
+// CogboxServerError represents a server error (5xx)
+type CogboxServerError struct {
+	*CogboxError
 }
 
-func (e *DaytonaServerError) Error() string {
+func (e *CogboxServerError) Error() string {
 	return fmt.Sprintf("Server error: %s", e.Message)
 }
 
-func NewDaytonaServerError(message string, statusCode int, headers http.Header) *DaytonaServerError {
-	return &DaytonaServerError{
-		DaytonaError: NewDaytonaError(message, statusCode, headers),
+func NewCogboxServerError(message string, statusCode int, headers http.Header) *CogboxServerError {
+	return &CogboxServerError{
+		CogboxError: NewCogboxError(message, statusCode, headers),
 	}
 }
 
-// DaytonaTimeoutError represents a timeout error
-type DaytonaTimeoutError struct {
-	*DaytonaError
+// CogboxTimeoutError represents a timeout error
+type CogboxTimeoutError struct {
+	*CogboxError
 }
 
-func (e *DaytonaTimeoutError) Error() string {
+func (e *CogboxTimeoutError) Error() string {
 	return fmt.Sprintf("Operation timed out: %s", e.Message)
 }
 
-func NewDaytonaTimeoutError(message string) *DaytonaTimeoutError {
-	return &DaytonaTimeoutError{
-		DaytonaError: NewDaytonaError(message, 0, nil),
+func NewCogboxTimeoutError(message string) *CogboxTimeoutError {
+	return &CogboxTimeoutError{
+		CogboxError: NewCogboxError(message, 0, nil),
 	}
 }
 
-// NewDaytonaErrorFromBody parses a JSON response body and maps the status code
+// NewCogboxErrorFromBody parses a JSON response body and maps the status code
 // to the appropriate SDK error type. Falls back to the raw body as the message.
-func NewDaytonaErrorFromBody(body []byte, statusCode int, headers http.Header) error {
+func NewCogboxErrorFromBody(body []byte, statusCode int, headers http.Header) error {
 	var message string
 
 	if len(body) > 0 {
@@ -189,11 +190,11 @@ func NewDaytonaErrorFromBody(body []byte, statusCode int, headers http.Header) e
 
 	switch statusCode {
 	case http.StatusNotFound:
-		return NewDaytonaNotFoundError(message, headers)
+		return NewCogboxNotFoundError(message, headers)
 	case http.StatusTooManyRequests:
-		return NewDaytonaRateLimitError(message, headers)
+		return NewCogboxRateLimitError(message, headers)
 	default:
-		return NewDaytonaError(message, statusCode, headers)
+		return NewCogboxError(message, statusCode, headers)
 	}
 }
 
@@ -298,22 +299,22 @@ func ConvertToolboxError(err error, httpResp *http.Response) error {
 func mapStatusCodeToError(statusCode int, message string, headers http.Header) error {
 	switch {
 	case statusCode == http.StatusBadRequest:
-		return NewDaytonaValidationError(message, headers)
+		return NewCogboxValidationError(message, headers)
 	case statusCode == http.StatusUnauthorized:
-		return NewDaytonaAuthenticationError(message, headers)
+		return NewCogboxAuthenticationError(message, headers)
 	case statusCode == http.StatusForbidden:
-		return NewDaytonaForbiddenError(message, headers)
+		return NewCogboxForbiddenError(message, headers)
 	case statusCode == http.StatusNotFound:
-		return NewDaytonaNotFoundError(message, headers)
+		return NewCogboxNotFoundError(message, headers)
 	case statusCode == http.StatusConflict:
-		return NewDaytonaConflictError(message, headers)
+		return NewCogboxConflictError(message, headers)
 	case statusCode == http.StatusTooManyRequests:
-		return NewDaytonaRateLimitError(message, headers)
+		return NewCogboxRateLimitError(message, headers)
 	case statusCode >= 500 && statusCode <= 599:
-		return NewDaytonaServerError(message, statusCode, headers)
+		return NewCogboxServerError(message, statusCode, headers)
 	case statusCode == 0:
-		return NewDaytonaError(message, 0, nil)
+		return NewCogboxError(message, 0, nil)
 	default:
-		return NewDaytonaError(message, statusCode, headers)
+		return NewCogboxError(message, statusCode, headers)
 	}
 }

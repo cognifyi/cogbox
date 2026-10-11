@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { DEFAULT_TABLE_COLUMN } from '@/lib/utils/table'
-import { Charge } from '@daytona/billing-api-client'
+import { Charge } from '@cogbox/billing-api-client'
 import {
   ColumnFiltersState,
   getCoreRowModel,

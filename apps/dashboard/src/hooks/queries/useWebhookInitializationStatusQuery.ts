@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { WebhookInitializationStatus } from '@daytona/api-client'
+import { WebhookInitializationStatus } from '@cogbox/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useApi } from '../useApi'

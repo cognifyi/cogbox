@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -11,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
-import { Organization, Region } from '@daytona/api-client'
+import { Organization, Region } from '@cogbox/api-client'
 import { useForm } from '@tanstack/react-form'
 import { TriangleAlertIcon } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'

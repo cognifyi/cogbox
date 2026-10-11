@@ -1,10 +1,10 @@
-Package: daytona-runner
+Package: cogbox-runner
 Version: ${VERSION}
 Section: utils
 Priority: optional
 Architecture: amd64
-Maintainer: Daytona <support@daytona.io>
-Description: Daytona Runner
- The Daytona Runner manages execution of jobs and sandboxes
- for the Daytona development environment platform.
+Maintainer: Cogbox <support@pazity.com>
+Description: Cogbox Runner
+ The Cogbox Runner manages execution of jobs and sandboxes
+ for the Cogbox development environment platform.
 Homepage: https://github.com/cognifyi/cogbox

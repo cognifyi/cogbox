@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxListItem, SandboxState } from '@daytona/api-client'
+import { SandboxListItem, SandboxState } from '@cogbox/api-client'
 
 export function isStartable(sandbox: SandboxListItem): boolean {
   return (

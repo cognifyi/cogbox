@@ -1,7 +1,7 @@
 {
-  "name": "@daytona/analytics-api-client",
+  "name": "@cogbox/analytics-api-client",
   "version": "0.0.0-dev",
-  "description": "OpenAPI client for @daytona/analytics-api-client",
+  "description": "OpenAPI client for @cogbox/analytics-api-client",
   "author": "OpenAPI-Generator Contributors",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "typescript",
     "openapi-client",
     "openapi-generator",
-    "@daytona/analytics-api-client"
+    "@cogbox/analytics-api-client"
   ],
   "license": "Apache-2.0",
   "main": "./src/index.js",

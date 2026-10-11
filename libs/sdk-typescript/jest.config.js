@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 /** @type {import('jest').Config} */
@@ -17,9 +18,9 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
-    '^@daytona/api-client$': '<rootDir>/../api-client/src/index.ts',
-    '^@daytona/toolbox-api-client$': '<rootDir>/../toolbox-api-client/src/index.ts',
-    '^@daytona/sdk$': '<rootDir>/src/index.ts',
+    '^@cogbox/api-client$': '<rootDir>/../api-client/src/index.ts',
+    '^@cogbox/toolbox-api-client$': '<rootDir>/../toolbox-api-client/src/index.ts',
+    '^@cogbox/sdk$': '<rootDir>/src/index.ts',
   },
   coverageDirectory: '../../coverage/libs/sdk-typescript',
 }

@@ -1,5 +1,6 @@
 /**
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,21 +9,21 @@
 import type { ExtensionContext } from '@earendil-works/pi-coding-agent'
 
 /**
- * Resolve the Daytona API key.
+ * Resolve the Cogbox API key.
  *
  * Order:
- *   1. `DAYTONA_API_KEY` environment variable (the documented SDK convention).
+ *   1. `COGBOX_API_KEY` environment variable (the documented SDK convention).
  *   2. A one-time interactive prompt for this session (when a UI is available).
  *
  * There is no extension-writable secrets vault, so a prompted key is held only
  * in memory for the session and never persisted.
  */
 export async function resolveApiKey(ctx: ExtensionContext): Promise<string | undefined> {
-  const fromEnv = process.env.DAYTONA_API_KEY?.trim()
+  const fromEnv = process.env.COGBOX_API_KEY?.trim()
   if (fromEnv) return fromEnv
 
   if (!ctx.hasUI) return undefined
 
-  const entered = await ctx.ui.input('Daytona API key', 'DAYTONA_API_KEY — create one at https://app.daytona.io')
+  const entered = await ctx.ui.input('Cogbox API key', 'COGBOX_API_KEY — create one at https://cogbox.pazity.com')
   return entered?.trim() || undefined
 }

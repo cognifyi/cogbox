@@ -1,7 +1,8 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,8 +20,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    const daytona = new Daytona()
-    const sandbox = await daytona.get(sandboxId)
+    const cogbox = new Cogbox()
+    const sandbox = await cogbox.get(sandboxId)
     const buf = await sandbox.fs.downloadFile('test.txt')
     return Response.json({
       downloadOk: buf.toString('utf-8') === expectedContent,

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -11,7 +12,7 @@ import {
 } from '@/hooks/queries/useOrganizationMembersQuery'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { Organization, OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
+import { Organization, OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@cogbox/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { usePostHog } from 'posthog-js/react'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'

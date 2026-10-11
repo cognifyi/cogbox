@@ -1,9 +1,9 @@
-from daytona import Daytona, SessionExecuteRequest
+from cogbox import Cogbox, SessionExecuteRequest
 
 
 def main():
-    daytona = Daytona()
-    sandbox = daytona.create()
+    cogbox = Cogbox()
+    sandbox = cogbox.create()
 
     exec_session_id = "exec-session-1"
     sandbox.process.create_session(exec_session_id)
@@ -46,7 +46,7 @@ def main():
     # And of course you can delete the session at any time
     sandbox.process.delete_session(exec_session_id)
 
-    daytona.delete(sandbox)
+    cogbox.delete(sandbox)
 
 
 if __name__ == "__main__":

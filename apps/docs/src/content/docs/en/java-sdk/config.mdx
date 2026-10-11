@@ -1,11 +1,11 @@
 ---
-title: "DaytonaConfig"
+title: "CogboxConfig"
 hideTitleOnPage: true
 ---
 
-## DaytonaConfig
+## CogboxConfig
 
-Configuration used to initialize a `Daytona` client.
+Configuration used to initialize a `Cogbox` client.
 
 Contains API authentication settings, API endpoint URL, and the default target region used
 when creating new Sandboxes.
@@ -28,7 +28,7 @@ Returns the API key used to authenticate SDK requests.
 public String getApiUrl()
 ```
 
-Returns the Daytona API base URL.
+Returns the Cogbox API base URL.
 
 **Returns**:
 
@@ -60,9 +60,9 @@ of instrumentation landing in a future release.
 
 - `boolean` - `true` if OpenTelemetry tracing is enabled
 
-## DaytonaConfig.Builder
+## CogboxConfig.Builder
 
-Builder for creating immutable `DaytonaConfig` instances.
+Builder for creating immutable `CogboxConfig` instances.
 
 ### Methods
 
@@ -75,7 +75,7 @@ Sets the API key used for authenticating SDK requests.
 
 **Parameters**:
 
-- `apiKey` _String_ - Daytona API key
+- `apiKey` _String_ - Cogbox API key
 
 **Returns**:
 
@@ -86,11 +86,11 @@ Sets the API key used for authenticating SDK requests.
 public Builder apiUrl(String apiUrl)
 ```
 
-Sets the Daytona API base URL.
+Sets the Cogbox API base URL.
 
 **Parameters**:
 
-- `apiUrl` _String_ - API URL to use; defaults to `https://app.daytona.io/api` when omitted
+- `apiUrl` _String_ - API URL to use; defaults to `https://cogbox.pazity.com/api` when omitted
 
 **Returns**:
 
@@ -132,11 +132,11 @@ of instrumentation landing in a future release.
 
 #### build()
 ```java
-public DaytonaConfig build()
+public CogboxConfig build()
 ```
 
-Builds a new immutable `DaytonaConfig`.
+Builds a new immutable `CogboxConfig`.
 
 **Returns**:
 
-- `DaytonaConfig` - configured `DaytonaConfig` instance
+- `CogboxConfig` - configured `CogboxConfig` instance

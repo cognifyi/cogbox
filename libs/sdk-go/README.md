@@ -1,6 +1,6 @@
-# Daytona Go SDK
+# Cogbox Go SDK
 
-The official Go SDK for Daytona, enabling programmatic interaction with Daytona Sandboxes
+The official Go SDK for Cogbox, enabling programmatic interaction with Cogbox Sandboxes
 
 ## Quick Start
 
@@ -12,13 +12,13 @@ import (
     "log"
     "time"
 
-    "github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+    "github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
     "github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 )
 
 func main() {
-    // Create a new Daytona client (uses DAYTONA_API_KEY from environment)
-    client, err := daytona.NewClient()
+    // Create a new Cogbox client (uses COGBOX_API_KEY from environment)
+    client, err := cogbox.NewClient()
     if err != nil {
         log.Fatal(err)
     }
@@ -44,7 +44,7 @@ func main() {
   
     // Default WaitForStart is true, but can be overriden for more async behavior
     sandbox, buildLogs, err := client.Create(ctx, params,
-  daytona.WithTimeout(90*time.Second),
+  cogbox.WithTimeout(90*time.Second),
  )
  if err != nil {
   log.Fatal(err)
@@ -76,23 +76,23 @@ The SDK can be configured using environment variables or a configuration object.
 Set the following environment variables:
 
 ```bash
-export DAYTONA_API_KEY=your-api-key
+export COGBOX_API_KEY=your-api-key
 ```
 
 Then create the client:
 
 ```go
-client, err := daytona.NewClient()
+client, err := cogbox.NewClient()
 ```
 
 ### Configuration Object
 
 ```go
-config := &types.DaytonaConfig{
+config := &types.CogboxConfig{
     APIKey: "your-api-key",
 }
 
-client, err := daytona.NewClientWithConfig(config)
+client, err := cogbox.NewClientWithConfig(config)
 ```
 
 ## Usage Examples
@@ -117,7 +117,7 @@ The `examples/` directory contains comprehensive examples demonstrating various 
 To run an example:
 
 ```bash
-export DAYTONA_API_KEY=your-api-key
+export COGBOX_API_KEY=your-api-key
 go run examples/sandbox/main.go
 go run examples/code_interpreter/main.go
 go run examples/fromimage/main.go
@@ -192,8 +192,8 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "long-running-command")
 
 **Methods:**
 
-- `NewClient() (*Client, error)` - Create a new Daytona client with default configuration
-- `NewClientWithConfig(config *types.DaytonaConfig) (*Client, error)` - Create a new Daytona client with custom configuration
+- `NewClient() (*Client, error)` - Create a new Cogbox client with default configuration
+- `NewClientWithConfig(config *types.CogboxConfig) (*Client, error)` - Create a new Cogbox client with custom configuration
 - `Create(ctx, params, options...) (*Sandbox, <-chan string, error)` - Create a sandbox and returns a channel for streaming build logs
   - Options: `WithTimeout(time.Duration)`
 - `Get(ctx, sandboxIDOrName) (*Sandbox, error)` - Get a sandbox by ID or name
@@ -253,4 +253,4 @@ Apache-2.0
 For issues and questions:
 
 - **GitHub Issues**: https://github.com/cognifyi/cogbox/issues
-- **Documentation**: https://www.daytona.io/docs
+- **Documentation**: https://cogbox.pazity.com/docs

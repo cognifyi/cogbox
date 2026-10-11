@@ -1,14 +1,15 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
-import { Daytona, Image } from '@daytona/sdk'
+import { Cogbox, Image } from '@cogbox/sdk'
 
 const image = Image.base('alpine').env({ FOO: 'bar' })
 if (!image.dockerfile.includes('FROM alpine')) throw new Error('Image.base failed')
 if (!image.dockerfile.includes('ENV FOO')) throw new Error('Image.env failed')
 
-const daytona = new Daytona()
-const iter = daytona.list()
+const cogbox = new Cogbox()
+const iter = cogbox.list()
 if (typeof (iter as any)[Symbol.asyncIterator] !== 'function') {
   throw new Error('list() did not return an async iterator')
 }

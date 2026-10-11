@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package apiclient
@@ -13,7 +14,7 @@ import (
 
 var apiClient *apiclient.APIClient
 
-const DaytonaSourceHeader = "X-Daytona-Source"
+const CogboxSourceHeader = "X-Cogbox-Source"
 
 func GetApiClient() (*apiclient.APIClient, error) {
 	c, err := config.GetConfig()
@@ -23,7 +24,7 @@ func GetApiClient() (*apiclient.APIClient, error) {
 
 	var newApiClient *apiclient.APIClient
 
-	serverUrl := c.DaytonaApiUrl
+	serverUrl := c.CogboxApiUrl
 
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
@@ -34,7 +35,7 @@ func GetApiClient() (*apiclient.APIClient, error) {
 
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+c.ApiToken)
 
-	clientConfig.AddDefaultHeader(DaytonaSourceHeader, "runner")
+	clientConfig.AddDefaultHeader(CogboxSourceHeader, "runner")
 
 	newApiClient = apiclient.NewAPIClient(clientConfig)
 

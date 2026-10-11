@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -17,8 +18,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatMoney } from '@/lib/utils'
-import { ModelsUsageChartPoint } from '@daytona/analytics-api-client'
-import type { RegionUsageOverview } from '@daytona/api-client'
+import { ModelsUsageChartPoint } from '@cogbox/analytics-api-client'
+import type { RegionUsageOverview } from '@cogbox/api-client'
 import { differenceInCalendarDays } from 'date-fns'
 import { useMemo, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -31,7 +32,7 @@ import {
   type Organization,
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
-} from '@daytona/api-client'
+} from '@cogbox/api-client'
 import { AlertCircle, Building2, PlusIcon, RefreshCw } from 'lucide-react'
 import React, { useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'

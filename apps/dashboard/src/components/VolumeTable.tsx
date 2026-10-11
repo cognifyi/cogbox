@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -37,7 +38,7 @@ import {
   getTableColumnMaxResizeSize,
   getTableSizeStyles,
 } from '@/lib/utils/table'
-import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
+import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@cogbox/api-client'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -231,7 +232,7 @@ export function VolumeTable({
                     <p>
                       Create one via the SDK or CLI.{' '}
                       <a
-                        href="https://www.daytona.io/docs/volumes"
+                        href="https://cogbox.pazity.com/docs/volumes"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-foreground hover:underline"

@@ -1,7 +1,8 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
-"""Plan-and-execute LangGraph agent that ETLs GitHub data into a Daytona-sandboxed SQLite."""
+"""Plan-and-execute LangGraph agent that ETLs GitHub data into a Cogbox-sandboxed SQLite."""
 
 import re
 from typing import TypedDict
@@ -12,7 +13,7 @@ from langchain_core.messages import HumanMessage, SystemMessage  # pylint: disab
 from langgraph.graph import END, START, StateGraph  # pylint: disable=import-error
 from pydantic import BaseModel, Field  # pylint: disable=import-error
 
-from daytona import Daytona, Sandbox
+from cogbox import Cogbox, Sandbox
 
 load_dotenv()
 
@@ -34,7 +35,7 @@ Then answer these three questions, printing the SQL query before each result:
 PLAN_SYSTEM_PROMPT = """You are the planner stage of a plan-and-execute data agent.
 
 Produce an ordered list of 4-8 atomic plan steps. Each step is one natural-language sentence describing
-a single chunk of Python code that the executor stage will then write and run in a persistent Daytona sandbox.
+a single chunk of Python code that the executor stage will then write and run in a persistent Cogbox sandbox.
 
 Rules:
 - Sandbox state PERSISTS across steps. Imports, variables, and files from step N are visible in step N+1.
@@ -50,7 +51,7 @@ Rules:
 EXECUTE_SYSTEM_PROMPT = """You are the executor stage of a plan-and-execute data agent.
 
 You receive the user's original request, the full plan, and the index of the current step. You must output
-ONLY Python code that accomplishes the current step. The code runs in a persistent Daytona sandbox; prior
+ONLY Python code that accomplishes the current step. The code runs in a persistent Cogbox sandbox; prior
 steps' variables, imports, and files are still in scope. Always `print()` the relevant output so later
 stages can see the results.
 
@@ -113,8 +114,8 @@ def build_graph(model: ChatAnthropic):
     plan_llm = model.with_structured_output(Plan)
 
     def provision(state: AgentState) -> dict:
-        print("\n[provision] creating Daytona sandbox...")
-        sandbox = Daytona().create()
+        print("\n[provision] creating Cogbox sandbox...")
+        sandbox = Cogbox().create()
         print(f"[provision] sandbox ready (id={sandbox.id})")
         return {"sandbox": sandbox}
 

@@ -1,12 +1,13 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Configuration, Sandbox as SandboxDto } from '@daytona/api-client'
+import type { Configuration, Sandbox as SandboxDto } from '@cogbox/api-client'
 import { createApiResponse } from './helpers'
-import { DaytonaNotFoundError } from '../errors/DaytonaError'
+import { CogboxNotFoundError } from '../errors/CogboxError'
 
 jest.mock(
-  '@daytona/api-client',
+  '@cogbox/api-client',
   () => ({
     SandboxState: {
       RESIZING: 'resizing',
@@ -19,7 +20,7 @@ jest.mock(
 )
 
 jest.mock(
-  '@daytona/toolbox-api-client',
+  '@cogbox/toolbox-api-client',
   () => ({
     FileSystemApi: jest.fn(() => ({})),
     GitApi: jest.fn(() => ({})),
@@ -36,7 +37,7 @@ const baseDto: SandboxDto = {
   id: 'sb-1',
   name: 'sandbox-one',
   organizationId: 'org-1',
-  user: 'daytona',
+  user: 'cogbox',
   env: {},
   labels: {},
   public: false,
@@ -235,9 +236,9 @@ describe('Sandbox', () => {
     const { sandbox } = makeSandbox()
     const infoApi = (sandbox as unknown as { infoApi: { getUserHomeDir: jest.Mock } }).infoApi
     const runtime = sandbox as unknown as { getUserRootDir: () => Promise<string | undefined> }
-    infoApi.getUserHomeDir.mockResolvedValue(createApiResponse({ dir: '/home/daytona' }))
+    infoApi.getUserHomeDir.mockResolvedValue(createApiResponse({ dir: '/home/cogbox' }))
 
-    await expect(runtime.getUserRootDir()).resolves.toBe('/home/daytona')
+    await expect(runtime.getUserRootDir()).resolves.toBe('/home/cogbox')
     expect(infoApi.getUserHomeDir).toHaveBeenCalledTimes(1)
   })
 
@@ -268,7 +269,7 @@ describe('Sandbox', () => {
   it('waitUntilStopped treats deleted sandboxes as destroyed', async () => {
     const { sandbox } = makeSandbox({ state: 'stopping' })
 
-    jest.spyOn(sandbox, 'refreshData').mockRejectedValue(new DaytonaNotFoundError('missing'))
+    jest.spyOn(sandbox, 'refreshData').mockRejectedValue(new CogboxNotFoundError('missing'))
 
     await expect(sandbox.waitUntilStopped(1)).resolves.toBeUndefined()
     expect(sandbox.state).toBe('destroyed')
@@ -320,10 +321,10 @@ describe('Sandbox', () => {
   it('exposes user/work directories and creates LSP server', async () => {
     const { sandbox } = makeSandbox()
     const infoApi = (sandbox as unknown as { infoApi: { getUserHomeDir: jest.Mock; getWorkDir: jest.Mock } }).infoApi
-    infoApi.getUserHomeDir.mockResolvedValue(createApiResponse({ dir: '/home/daytona' }))
+    infoApi.getUserHomeDir.mockResolvedValue(createApiResponse({ dir: '/home/cogbox' }))
     infoApi.getWorkDir.mockResolvedValue(createApiResponse({ dir: '/workspace' }))
 
-    await expect(sandbox.getUserHomeDir()).resolves.toBe('/home/daytona')
+    await expect(sandbox.getUserHomeDir()).resolves.toBe('/home/cogbox')
     await expect(sandbox.getWorkDir()).resolves.toBe('/workspace')
 
     const lsp = await sandbox.createLspServer('typescript', '/workspace/project')

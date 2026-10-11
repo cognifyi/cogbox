@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GitApi } from '@daytona/toolbox-api-client'
-import type { ListBranchResponse, GitStatus } from '@daytona/toolbox-api-client'
+import { GitApi } from '@cogbox/toolbox-api-client'
+import type { ListBranchResponse, GitStatus } from '@cogbox/toolbox-api-client'
 import { WithInstrumentation } from './utils/otel.decorator'
 
 /**

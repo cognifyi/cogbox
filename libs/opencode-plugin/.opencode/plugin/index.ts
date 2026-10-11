@@ -1,11 +1,12 @@
 /**
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
- * Main entry point for the OpenCode Daytona plugin.
- * Re-exports the default plugin from daytona.
+ * Main entry point for the OpenCode Cogbox plugin.
+ * Re-exports the default plugin from cogbox.
  */
 
-export { default } from './daytona/index.js'
+export { default } from './cogbox/index.js'

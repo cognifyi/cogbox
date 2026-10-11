@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SshAccessDto } from '@daytona/api-client'
+import { SshAccessDto } from '@cogbox/api-client'
 import { useForm } from '@tanstack/react-form'
 import { CheckIcon, CopyIcon, InfoIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'

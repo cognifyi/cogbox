@@ -37,7 +37,7 @@ permissions: {}
 
 jobs:
   publish:
-    if: github.repository == 'daytonaio/daytona' || github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -97,8 +97,8 @@ jobs:
       - name: Configure git
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "Daytona Release Bot"
-          git config --global user.email "daytona-release@users.noreply.github.com"
+          git config --global user.name "Cogbox Release Bot"
+          git config --global user.email "cogbox-release@users.noreply.github.com"
 
       - name: Configure RubyGems credentials
         if: matrix.projects == 'sdk-ruby'
@@ -109,13 +109,17 @@ jobs:
           chmod 0600 ~/.gem/credentials
 
       - name: Publish projects
+        # NOTE: --skip-nx-cache is deliberate. Publish flows do
+        # `rm -rf dist` + rebuild, and a stale remote-cache entry
+        # restored over fresh outputs leaves dist/ empty ("No files
+        # to publish"). Publish runs rarely; correctness beats speed.
         run: |
           source "$(poetry env info --path)/bin/activate"
           if [ "${{ matrix.exclude-task-deps }}" = "true" ]; then
-            yarn nx run-many --target=build --projects=${{ matrix.projects }}
-            yarn nx run-many --target=publish --projects=${{ matrix.projects }} --excludeTaskDependencies
+            yarn nx run-many --target=build --projects=${{ matrix.projects }} --skip-nx-cache
+            yarn nx run-many --target=publish --projects=${{ matrix.projects }} --excludeTaskDependencies --skip-nx-cache
           else
-            yarn nx run-many --target=publish --projects=${{ matrix.projects }}
+            yarn nx run-many --target=publish --projects=${{ matrix.projects }} --skip-nx-cache
           fi
 
       - name: Cleanup credentials
@@ -124,13 +128,14 @@ jobs:
           rm -f ~/.gem/credentials 2>/dev/null || true
           docker logout docker.io 2>/dev/null || true
           docker logout ghcr.io 2>/dev/null || true
-          git config --global --fixed-value --unset-all user.name "Daytona Release Bot" 2>/dev/null || true
-          git config --global --fixed-value --unset-all user.email "daytona-release@users.noreply.github.com" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.name "Cogbox Release Bot" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.email "cogbox-release@users.noreply.github.com" 2>/dev/null || true
           git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
   update-homebrew-tap:
-    if: ${{ (github.repository == 'daytonaio/daytona' || github.repository == 'cognifyi/cogbox') && inputs.npm_tag == 'latest' }}
+    # No Homebrew tap exists for the fork; only upstream maintains one.
+    if: ${{ github.repository == 'daytonaio/daytona' && inputs.npm_tag == 'latest' }}
     runs-on: ubuntu-latest
     permissions: {}
     name: Update Homebrew CLI tap

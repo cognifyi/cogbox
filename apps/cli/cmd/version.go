@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package cmd
@@ -14,7 +15,7 @@ var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Daytona CLI version", internal.Version)
+		fmt.Println("Cogbox CLI version", internal.Version)
 		return nil
 	},
 }

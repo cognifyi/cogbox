@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -147,7 +148,7 @@ export class ObjectStorageService {
 
       const command = new AssumeRoleCommand({
         RoleArn: `arn:aws:iam::${config.accountId}:role/${config.roleName}`,
-        RoleSessionName: `daytona-${config.organizationId}-${Date.now()}`,
+        RoleSessionName: `cogbox-${config.organizationId}-${Date.now()}`,
         DurationSeconds: 3600, // One hour
         Policy: JSON.stringify(config.policy),
       })

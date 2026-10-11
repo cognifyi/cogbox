@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package tools
@@ -21,7 +22,7 @@ type MoveFileArgs struct {
 
 func GetMoveFileTool() mcp.Tool {
 	return mcp.NewTool("move_file",
-		mcp.WithDescription("Move or rename a file in the Daytona sandbox."),
+		mcp.WithDescription("Move or rename a file in the Cogbox sandbox."),
 		mcp.WithString("sourcePath", mcp.Required(), mcp.Description("Source path of the file to move.")),
 		mcp.WithString("destPath", mcp.Required(), mcp.Description("Destination path where to move the file.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to move the file in.")),
@@ -29,7 +30,7 @@ func GetMoveFileTool() mcp.Tool {
 }
 
 func MoveFile(ctx context.Context, request mcp.CallToolRequest, args MoveFileArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient.GetApiClient(nil, cogboxMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}

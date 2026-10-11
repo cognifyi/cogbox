@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package organization
@@ -13,13 +14,13 @@ import (
 
 var OrganizationCmd = &cobra.Command{
 	Use:     "organization",
-	Short:   "Manage Daytona organizations",
-	Long:    "Commands for managing Daytona organizations",
+	Short:   "Manage Cogbox organizations",
+	Long:    "Commands for managing Cogbox organizations",
 	Aliases: []string{"organizations", "org", "orgs"},
 	GroupID: internal.USER_GROUP,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if config.IsApiKeyAuth() {
-			return errors.New("organization commands are not available when using API key authentication - run `daytona login` to reauthenticate with browser")
+			return errors.New("organization commands are not available when using API key authentication - run `cogbox login` to reauthenticate with browser")
 		}
 
 		return nil

@@ -1,5 +1,6 @@
 /**
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,7 +16,7 @@
  * of Pi's grep output closely enough for the model.
  */
 
-import type { Sandbox } from '@daytona/sdk'
+import type { Sandbox } from '@cogbox/sdk'
 import { execCommand } from './sandbox.ts'
 import { shellQuote } from './util.ts'
 

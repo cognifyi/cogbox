@@ -1,11 +1,12 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { useAuth } from 'react-oidc-context'
 import { useCallback } from 'react'
-import { WebhookInitializationStatus } from '@daytona/api-client'
+import { WebhookInitializationStatus } from '@cogbox/api-client'
 
 export function useWebhookService() {
   const { user } = useAuth()

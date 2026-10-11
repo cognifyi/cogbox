@@ -1,10 +1,10 @@
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 
 async function main() {
-  const daytona = new Daytona()
+  const cogbox = new Cogbox()
 
   // Auto-delete is disabled by default
-  const sandbox1 = await daytona.create()
+  const sandbox1 = await cogbox.create()
   console.log(sandbox1.autoDeleteInterval)
 
   // Auto-delete after the Sandbox has been stopped for 1 hour
@@ -20,7 +20,7 @@ async function main() {
   console.log(sandbox1.autoDeleteInterval)
 
   // Auto-delete after the Sandbox has been stopped for 1 day
-  const sandbox2 = await daytona.create({
+  const sandbox2 = await cogbox.create({
     autoDeleteInterval: 1440,
   })
   console.log(sandbox2.autoDeleteInterval)

@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -8,11 +9,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 )
 
 func main() {
-	client, err := daytona.NewClient()
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -21,12 +22,12 @@ func main() {
 
 	// Example 1: Iterate through sandboxes (Go 1.23+ range-over-func)
 	limit := 10
-	sort := daytona.SandboxListSortFieldCreatedAt
-	order := daytona.SandboxListSortDirectionDesc
-	for sandbox, err := range client.ListSeq(ctx, &daytona.ListSandboxesQuery{
+	sort := cogbox.SandboxListSortFieldCreatedAt
+	order := cogbox.SandboxListSortDirectionDesc
+	for sandbox, err := range client.ListSeq(ctx, &cogbox.ListSandboxesQuery{
 		Limit:  &limit,
 		Labels: map[string]string{"env": "dev"},
-		States: []daytona.SandboxState{daytona.SandboxStateStarted},
+		States: []cogbox.SandboxState{cogbox.SandboxStateStarted},
 		Sort:   &sort,
 		Order:  &order,
 	}) {

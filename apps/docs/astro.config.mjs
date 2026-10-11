@@ -9,11 +9,11 @@ import config from './gt.config.json'
 import { generateI18nConfig } from './src/i18n/generateI18nConfig'
 
 const jsonDarkString = fs.readFileSync(
-  new URL(`src/assets/themes/daytona-code-dark.json`, import.meta.url),
+  new URL(`src/assets/themes/cogbox-code-dark.json`, import.meta.url),
   'utf-8'
 )
 const jsonLightString = fs.readFileSync(
-  new URL(`src/assets/themes/daytona-code-light.json`, import.meta.url),
+  new URL(`src/assets/themes/cogbox-code-light.json`, import.meta.url),
   'utf-8'
 )
 const myThemeDark = ExpressiveCodeTheme.fromJSONString(jsonDarkString)
@@ -26,7 +26,7 @@ export default defineConfig({
   integrations: [
     react(),
     starlight({
-      title: 'Daytona',
+      title: 'Cogbox',
       favicon: '/favicon.ico',
       social: [
         {
@@ -69,8 +69,8 @@ export default defineConfig({
   ],
   security: {
     allowedDomains: [
-      { hostname: 'daytona.io' },
-      { hostname: 'www.daytona.io' },
+      { hostname: 'cogbox.pazity.com' },
+      { hostname: 'cogbox.pazity.com' },
       { hostname: 'localhost' },
     ],
   },

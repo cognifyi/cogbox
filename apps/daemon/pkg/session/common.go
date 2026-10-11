@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package session
@@ -15,7 +16,7 @@ func isDevVersion(version string) bool {
 }
 
 func IsCombinedOutput(sdkVersion string, versionComparison *int, requestHeader http.Header) bool {
-	return (versionComparison != nil && *versionComparison < 0 && !isDevVersion(sdkVersion)) || (sdkVersion == "" && requestHeader.Get("X-Daytona-Split-Output") != "true")
+	return (versionComparison != nil && *versionComparison < 0 && !isDevVersion(sdkVersion)) || (sdkVersion == "" && requestHeader.Get("X-Cogbox-Split-Output") != "true")
 }
 
 func SkipServerDemux(sdkVersion string) bool {

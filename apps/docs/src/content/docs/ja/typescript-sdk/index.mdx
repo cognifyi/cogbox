@@ -1,38 +1,38 @@
 ---
 title: TypeScript SDK リファレンス
-description: TypeScript SDK を使用して Daytona のサンドボックスを操作する
-next: /docs/typescript-sdk/daytona
+description: TypeScript SDK を使用して Cogbox のサンドボックスを操作する
+next: /docs/typescript-sdk/cogbox
 ---
 
-Daytona の TypeScript SDK は、Daytona のサンドボックスをプログラムから操作するための強力なインターフェースを提供します。
+Cogbox の TypeScript SDK は、Cogbox のサンドボックスをプログラムから操作するための強力なインターフェースを提供します。
 
 ## インストール
 
-npm を使用して Daytona の TypeScript SDK をインストールします：
+npm を使用して Cogbox の TypeScript SDK をインストールします：
 
 ```bash
-npm install @daytona/sdk
+npm install @cogbox/sdk
 ```
 
 または yarn を使用します：
 
 ```bash
-yarn add @daytona/sdk
+yarn add @cogbox/sdk
 ```
 
 ## はじめに
 
-Daytona の TypeScript SDK を使い始めるための簡単な例を紹介します:
+Cogbox の TypeScript SDK を使い始めるための簡単な例を紹介します:
 
 ```typescript
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 
 async function main() {
   // SDK を初期化（デフォルトで環境変数を使用）
-  const daytona = new Daytona()
+  const cogbox = new Cogbox()
 
   // 新しいサンドボックスを作成
-  const sandbox = await daytona.create({
+  const sandbox = await cogbox.create({
     language: 'typescript',
     envVars: { NODE_ENV: 'development' },
   })
@@ -50,15 +50,15 @@ main().catch(console.error)
 SDK は環境変数を使うか、コンストラクターにオプションを渡して設定できます:
 
 ```typescript
-import { Daytona } from '@daytona/sdk';
+import { Cogbox } from '@cogbox/sdk';
 
-// 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
-const daytona = new Daytona();
+// 環境変数を使用 (COGBOX_API_KEY, COGBOX_API_URL, COGBOX_TARGET)
+const cogbox = new Cogbox();
 
 // 明示的な設定を指定
-const daytona = new Daytona({
+const cogbox = new Cogbox({
   apiKey: 'your-api-key',
-  apiUrl: 'https://app.daytona.io/api',
+  apiUrl: 'https://cogbox.pazity.com/api',
   target: 'us'
 });
 ```

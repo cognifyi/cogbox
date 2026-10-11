@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -162,7 +163,7 @@ export function WebhooksEndpointTable({
                     <p>Create an endpoint to start receiving webhook events.</p>
                     <p>
                       <a
-                        href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
+                        href="https://cogbox.pazity.com/docs/en/tools/api/#cogbox/webhook/undefined/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline font-medium"

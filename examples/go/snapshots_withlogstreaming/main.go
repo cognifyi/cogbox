@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -8,14 +9,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 	"github.com/google/uuid"
 )
 
 // This example demonstrates creating a snapshot with log streaming
 func exampleSnapshotWithLogs() {
-	client, err := daytona.NewClient()
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -66,8 +67,8 @@ func exampleSnapshotWithLogs() {
 
 // This example demonstrates creating a snapshot with a custom Dockerfile
 func exampleSnapshotWithCustomImage() {
-	// Create a new Daytona client
-	client, err := daytona.NewClient()
+	// Create a new Cogbox client
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -78,7 +79,7 @@ func exampleSnapshotWithCustomImage() {
 	log.Println("=" + string(make([]byte, 60)) + "=")
 
 	// Build a custom image with Python and some packages
-	image := daytona.Base("python:3.11-slim").
+	image := cogbox.Base("python:3.11-slim").
 		Run("apt-get update && apt-get install -y git curl").
 		Run("pip install --no-cache-dir requests numpy pandas")
 

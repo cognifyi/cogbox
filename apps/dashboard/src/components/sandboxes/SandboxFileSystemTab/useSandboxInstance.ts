@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 
@@ -22,7 +23,7 @@ export function useSandboxInstance(sandboxId: string) {
       return null
     }
 
-    return new Daytona({
+    return new Cogbox({
       jwtToken: user.access_token,
       apiUrl,
       organizationId: selectedOrganization.id,

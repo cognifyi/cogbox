@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { handleApiError } from '@/lib/error-handling'
-import { Organization } from '@daytona/api-client'
+import { Organization } from '@cogbox/api-client'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { queryKeys } from './queryKeys'

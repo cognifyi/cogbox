@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -11,7 +12,7 @@ import {
   getColumnSizeStyles,
   getTableSizeStyles,
 } from '@/lib/utils/table'
-import { Region, Runner, RunnerState } from '@daytona/api-client'
+import { Region, Runner, RunnerState } from '@cogbox/api-client'
 import {
   ColumnDef,
   flexRender,

@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytona/sdk'
+import { Cogbox, Sandbox } from '@cogbox/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 import { Session } from './session.js'
@@ -13,13 +14,13 @@ dotenv.config()
 
 // Create sandbox, start OpenCode server, and run an interactive query loop.
 async function main(): Promise<void> {
-  const apiKey = process.env.DAYTONA_API_KEY
+  const apiKey = process.env.COGBOX_API_KEY
   if (!apiKey) {
-    console.error('Error: DAYTONA_API_KEY environment variable is not set')
+    console.error('Error: COGBOX_API_KEY environment variable is not set')
     process.exit(1)
   }
 
-  const daytona = new Daytona({ apiKey })
+  const cogbox = new Cogbox({ apiKey })
   let sandbox: Sandbox | undefined
 
   // Delete sandbox and exit on Ctrl+C or error.
@@ -36,7 +37,7 @@ async function main(): Promise<void> {
 
   try {
     console.log('Creating sandbox...')
-    sandbox = await daytona.create({ public: true })
+    sandbox = await cogbox.create({ public: true })
     process.once('SIGINT', cleanup)
 
     console.log('Installing OpenCode in sandbox...')

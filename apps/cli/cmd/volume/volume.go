@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package volume
@@ -10,8 +11,8 @@ import (
 
 var VolumeCmd = &cobra.Command{
 	Use:     "volume",
-	Short:   "Manage Daytona volumes",
-	Long:    "Commands for managing Daytona volumes",
+	Short:   "Manage Cogbox volumes",
+	Long:    "Commands for managing Cogbox volumes",
 	Aliases: []string{"volumes"},
 	GroupID: internal.SANDBOX_GROUP,
 }

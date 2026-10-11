@@ -1,0 +1,9 @@
+name: cogbox organization use
+synopsis: Set active organization
+usage: cogbox organization use [ORGANIZATION] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox organization - Manage Cogbox organizations

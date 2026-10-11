@@ -1,0 +1,9 @@
+name: cogbox volume delete
+synopsis: Delete a volume
+usage: cogbox volume delete [VOLUME_ID_OR_NAME] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox volume - Manage Cogbox volumes

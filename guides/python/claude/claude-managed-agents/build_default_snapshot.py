@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 """
@@ -8,12 +9,13 @@ Names the snapshot using host_lib.default_snapshot_name() so the orchestrator
 and this builder cannot drift, and skips the build if a snapshot with that
 name already exists. Streams build logs.
 """
+
 import sys
 
 import dotenv
 import host_lib
 
-from daytona import CreateSnapshotParams, Daytona, DaytonaNotFoundError, Image, Resources
+from cogbox import Cogbox, CogboxNotFoundError, CreateSnapshotParams, Image, Resources
 
 dotenv.load_dotenv(override=True)
 
@@ -28,16 +30,16 @@ def main() -> int:
 
     name = host_lib.default_snapshot_name()
 
-    daytona = Daytona()
+    cogbox = Cogbox()
     try:
-        existing = daytona.snapshot.get(name)
+        existing = cogbox.snapshot.get(name)
         print(f"snapshot {name} already exists (id {existing.id}); skipping build")
         return 0
-    except DaytonaNotFoundError:
+    except CogboxNotFoundError:
         pass
 
     print(f"building snapshot {name} from {DOCKERFILE} (this is slow)...")
-    snapshot = daytona.snapshot.create(
+    snapshot = cogbox.snapshot.create(
         CreateSnapshotParams(
             name=name,
             image=Image.from_dockerfile(str(DOCKERFILE)),

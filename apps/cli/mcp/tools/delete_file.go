@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package tools
@@ -21,14 +22,14 @@ type DeleteFileArgs struct {
 
 func GetDeleteFileTool() mcp.Tool {
 	return mcp.NewTool("delete_file",
-		mcp.WithDescription("Delete a file or directory in the Daytona sandbox."),
+		mcp.WithDescription("Delete a file or directory in the Cogbox sandbox."),
 		mcp.WithString("filePath", mcp.Required(), mcp.Description("Path to the file or directory to delete.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to delete the file in.")),
 	)
 }
 
 func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFileArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient_cli.GetApiClient(nil, cogboxMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}

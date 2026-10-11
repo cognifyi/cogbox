@@ -1,9 +1,10 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 import Anthropic from '@anthropic-ai/sdk'
@@ -43,7 +44,7 @@ class ProjectManagerAgent {
         max_tokens: 4096,
         system: `You are a Project Manager Agent. Your role is to:
 1. Understand user requirements and break them down into clear tasks
-2. Delegate coding tasks to a Developer Agent that works in a Daytona sandbox
+2. Delegate coding tasks to a Developer Agent that works in a Cogbox sandbox
 3. Review the Developer Agent's responses and outputs
 4. Communicate results back to the user
 
@@ -131,12 +132,12 @@ When you're done with all tasks, say "TASK_COMPLETE" to finish.`,
 }
 
 async function main() {
-  // Get the Daytona API key from environment variables
-  const daytonaApiKey = process.env.DAYTONA_API_KEY
+  // Get the Cogbox API key from environment variables
+  const cogboxApiKey = process.env.COGBOX_API_KEY
 
-  if (!daytonaApiKey) {
-    console.error('Error: DAYTONA_API_KEY environment variable is not set')
-    console.error('Please create a .env file with your Daytona API key')
+  if (!cogboxApiKey) {
+    console.error('Error: COGBOX_API_KEY environment variable is not set')
+    console.error('Please create a .env file with your Cogbox API key')
     process.exit(1)
   }
 
@@ -155,13 +156,13 @@ async function main() {
     console.log('Using shared API key for both agents (SANDBOX_ANTHROPIC_API_KEY not set)')
   }
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey: daytonaApiKey })
+  // Initialize the Cogbox client
+  const cogbox = new Cogbox({ apiKey: cogboxApiKey })
 
   try {
-    // Create a new Daytona sandbox for the Developer Agent
+    // Create a new Cogbox sandbox for the Developer Agent
     console.log('Creating Developer Agent sandbox...')
-    const sandbox = await daytona.create({
+    const sandbox = await cogbox.create({
       envVars: {
         ANTHROPIC_API_KEY: sandboxApiKey,
       },
@@ -201,7 +202,7 @@ async function main() {
     // Start the interactive prompt loop
     console.log('\n=== Two-Agent System Ready ===')
     printPM('Project Manager Agent: Manages tasks and delegates to Developer (Green text)')
-    console.log('Developer Agent: Executes code in Daytona sandbox (White text)')
+    console.log('Developer Agent: Executes code in Cogbox sandbox (White text)')
     console.log('Press Ctrl+C at any time to exit.\n')
 
     while (true) {

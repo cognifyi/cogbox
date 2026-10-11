@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package interpreter
@@ -184,7 +185,7 @@ func (c *Context) start() error {
 
 	// Create (or reuse) a single shared worker script file
 	tempDir := os.TempDir()
-	workerPath := filepath.Join(tempDir, "daytona_repl_worker.py")
+	workerPath := filepath.Join(tempDir, "cogbox_repl_worker.py")
 
 	// Check if worker file exists, if not create it
 	if _, err := os.Stat(workerPath); os.IsNotExist(err) {

@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Daytona Billing API
- * Daytona Billing API
+ * Cogbox Billing API
+ * Cogbox Billing API
  *
  * The version of the OpenAPI document: v0.0.0-dev
  * 

@@ -18,7 +18,7 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN apk add --no-cache git
 
-WORKDIR /daytona
+WORKDIR /cogbox
 
 # Yarn caching layer
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -56,10 +56,10 @@ RUN apk update && apk upgrade --no-cache openssl pcre2 \
 
 WORKDIR /usr/local/bin
 
-COPY --from=build /daytona/dist/apps/otel-collector/daytona-otel-collector daytona-otel-collector
-COPY --from=build /daytona/apps/otel-collector/config.yaml /otelcol/collector-config.yaml
+COPY --from=build /cogbox/dist/apps/otel-collector/cogbox-otel-collector cogbox-otel-collector
+COPY --from=build /cogbox/apps/otel-collector/config.yaml /otelcol/collector-config.yaml
 
-RUN chmod +x daytona-otel-collector
+RUN chmod +x cogbox-otel-collector
 
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:13133/health/status" ]
 
@@ -68,6 +68,6 @@ EXPOSE 4318
 EXPOSE 13133
 EXPOSE 8888
 
-ENTRYPOINT ["daytona-otel-collector"]
+ENTRYPOINT ["cogbox-otel-collector"]
 
 CMD ["--config", "/otelcol/collector-config.yaml"]

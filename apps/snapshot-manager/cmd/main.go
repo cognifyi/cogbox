@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -55,5 +56,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Info("Daytona Snapshot manager stopped")
+	log.Info("Cogbox Snapshot manager stopped")
 }

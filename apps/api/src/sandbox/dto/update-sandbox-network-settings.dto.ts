@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -26,7 +27,7 @@ export class UpdateSandboxNetworkSettingsDto {
 
   @ApiPropertyOptional({
     description: 'Comma-separated list of allowed domains for the sandbox',
-    example: 'example.com,*.daytona.io',
+    example: 'example.com,*.cogbox.pazity.com',
   })
   @ValidateIf((_, value) => value !== undefined)
   @IsString()

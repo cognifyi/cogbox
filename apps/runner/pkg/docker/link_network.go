@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -20,16 +21,16 @@ const (
 	// linkNetworkPrefix is prepended to the owner sandbox id to form the per-owner
 	// link-network name. Presence of a network with this prefix is the single source
 	// of truth for "this sandbox owns a link network" during Destroy.
-	linkNetworkPrefix = "daytona-link-"
+	linkNetworkPrefix = "cogbox-link-"
 
 	// sandboxNameLabel carries the human-readable sandbox name on the container.
 	// It is used as the DNS alias when attaching to a link network so other linked
 	// sandboxes can resolve each other by name.
-	sandboxNameLabel = "daytona.sandbox_name"
+	sandboxNameLabel = "cogbox.sandbox_name"
 
 	// linkOwnerLabel is attached to the link network itself (not the container)
 	// and records which sandbox id owns the network.
-	linkOwnerLabel = "daytona.link_network_owner"
+	linkOwnerLabel = "cogbox.link_network_owner"
 )
 
 // linkNetworkName returns the per-owner link-network name for the given owner sandbox id.
@@ -38,7 +39,7 @@ func linkNetworkName(ownerId string) string {
 }
 
 // networkAliasForOwner resolves the alias to use when attaching the owner container
-// to its link network. Prefers the daytona.sandbox_name label; falls back to the
+// to its link network. Prefers the cogbox.sandbox_name label; falls back to the
 // sandbox id for containers created before that label existed.
 func networkAliasForOwner(owner *container.InspectResponse) string {
 	if owner != nil && owner.Config != nil {

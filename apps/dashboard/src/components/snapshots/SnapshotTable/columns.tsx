@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -7,7 +8,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { getRelativeTimeString } from '@/lib/utils'
 import { getTableColumnMaxResizeSize } from '@/lib/utils/table'
-import { SnapshotDto, SnapshotState } from '@daytona/api-client'
+import { SnapshotDto, SnapshotState } from '@cogbox/api-client'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
 import { Loader2, MoreHorizontal } from 'lucide-react'
 import React from 'react'

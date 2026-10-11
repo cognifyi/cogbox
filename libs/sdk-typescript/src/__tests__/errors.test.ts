@@ -1,34 +1,35 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { AxiosError, AxiosHeaders } from 'axios'
 import {
-  createDaytonaError,
-  createAxiosDaytonaError,
-  DaytonaConnectionError,
-  DaytonaError,
-  DaytonaNotFoundError,
-  DaytonaTimeoutError,
-} from '../errors/DaytonaError'
+  createCogboxError,
+  createAxiosCogboxError,
+  CogboxConnectionError,
+  CogboxError,
+  CogboxNotFoundError,
+  CogboxTimeoutError,
+} from '../errors/CogboxError'
 
-describe('Daytona error mapping', () => {
+describe('Cogbox error mapping', () => {
   it('classifies Axios timeouts before generic network failures', () => {
     const error = new AxiosError('timeout of 1000ms exceeded', 'ECONNABORTED')
 
-    const daytonaError = createAxiosDaytonaError(error)
+    const cogboxError = createAxiosCogboxError(error)
 
-    expect(daytonaError).toBeInstanceOf(DaytonaTimeoutError)
-    expect(daytonaError.message).toBe('Operation timed out')
+    expect(cogboxError).toBeInstanceOf(CogboxTimeoutError)
+    expect(cogboxError.message).toBe('Operation timed out')
   })
 
   it('classifies Axios connection failures without a response', () => {
     const error = new AxiosError('connect ECONNREFUSED', 'ERR_NETWORK', undefined, {} as never)
 
-    const daytonaError = createAxiosDaytonaError(error)
+    const cogboxError = createAxiosCogboxError(error)
 
-    expect(daytonaError).toBeInstanceOf(DaytonaConnectionError)
+    expect(cogboxError).toBeInstanceOf(CogboxConnectionError)
   })
 
   it('maps HTTP status codes and structured error codes from Axios responses', () => {
@@ -44,12 +45,12 @@ describe('Daytona error mapping', () => {
       statusText: 'Not Found',
     })
 
-    const daytonaError = createAxiosDaytonaError(error)
+    const cogboxError = createAxiosCogboxError(error)
 
-    expect(daytonaError).toBeInstanceOf(DaytonaNotFoundError)
-    expect(daytonaError.statusCode).toBe(404)
-    expect(daytonaError.errorCode).toBe('FILE_NOT_FOUND')
-    expect(daytonaError.headers).toBe(headers)
+    expect(cogboxError).toBeInstanceOf(CogboxNotFoundError)
+    expect(cogboxError.statusCode).toBe(404)
+    expect(cogboxError.errorCode).toBe('FILE_NOT_FOUND')
+    expect(cogboxError.headers).toBe(headers)
   })
 
   it('extracts alternative structured error code fields', () => {
@@ -61,9 +62,9 @@ describe('Daytona error mapping', () => {
       statusText: 'Too Many Requests',
     })
 
-    const daytonaError = createAxiosDaytonaError(error)
+    const cogboxError = createAxiosCogboxError(error)
 
-    expect(daytonaError.errorCode).toBe('RATE_LIMITED')
+    expect(cogboxError.errorCode).toBe('RATE_LIMITED')
   })
 
   it('stringifies object payloads when mapping axios errors', () => {
@@ -75,23 +76,23 @@ describe('Daytona error mapping', () => {
       statusText: 'Server Error',
     })
 
-    const daytonaError = createAxiosDaytonaError(error)
+    const cogboxError = createAxiosCogboxError(error)
 
-    expect(daytonaError).toBeInstanceOf(DaytonaError)
-    expect(daytonaError.message).toBe('{"nested":{"reason":"bad request"}}')
+    expect(cogboxError).toBeInstanceOf(CogboxError)
+    expect(cogboxError.message).toBe('{"nested":{"reason":"bad request"}}')
   })
 
-  it('creates generic DaytonaError for unknown non-network axios failures', () => {
+  it('creates generic CogboxError for unknown non-network axios failures', () => {
     const error = new AxiosError('unknown failure')
 
-    const daytonaError = createAxiosDaytonaError(error)
+    const cogboxError = createAxiosCogboxError(error)
 
-    expect(daytonaError).toBeInstanceOf(DaytonaError)
-    expect(daytonaError).not.toBeInstanceOf(DaytonaConnectionError)
+    expect(cogboxError).toBeInstanceOf(CogboxError)
+    expect(cogboxError).not.toBeInstanceOf(CogboxConnectionError)
   })
 
-  it('creates structured Daytona errors directly', () => {
-    const error = createDaytonaError('conflict', 409, undefined, 'ALREADY_EXISTS')
+  it('creates structured Cogbox errors directly', () => {
+    const error = createCogboxError('conflict', 409, undefined, 'ALREADY_EXISTS')
 
     expect(error.message).toBe('conflict')
     expect(error.statusCode).toBe(409)

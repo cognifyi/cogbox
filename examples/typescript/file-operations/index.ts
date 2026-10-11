@@ -1,12 +1,12 @@
-import { Daytona } from '@daytona/sdk'
+import { Cogbox } from '@cogbox/sdk'
 import * as fs from 'fs'
 import * as path from 'path'
 
 async function main() {
-  const daytona = new Daytona()
+  const cogbox = new Cogbox()
 
   //  first, create a sandbox
-  const sandbox = await daytona.create()
+  const sandbox = await cogbox.create()
 
   try {
     console.log(`Created sandbox with ID: ${sandbox.id}`)
@@ -151,7 +151,7 @@ Script: ${scriptResult.exitCode === 0 ? 'Executed successfully' : 'Failed'}
     console.error('Error:', error)
   } finally {
     //  cleanup
-    await daytona.delete(sandbox)
+    await cogbox.delete(sandbox)
   }
 }
 

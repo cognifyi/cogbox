@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package config
@@ -27,7 +28,7 @@ type Config struct {
 	TLSCertFile           string             `envconfig:"TLS_CERT_FILE"`
 	TLSKeyFile            string             `envconfig:"TLS_KEY_FILE"`
 	EnableTLS             bool               `envconfig:"ENABLE_TLS"`
-	DaytonaApiUrl         string             `envconfig:"DAYTONA_API_URL" validate:"required"`
+	CogboxApiUrl          string             `envconfig:"COGBOX_API_URL" validate:"required"`
 	Oidc                  OidcConfig         `envconfig:"OIDC"`
 	Redis                 *cache.RedisConfig `envconfig:"REDIS"`
 	ToolboxOnlyMode       bool               `envconfig:"TOOLBOX_ONLY_MODE"`
@@ -36,7 +37,7 @@ type Config struct {
 	ApiClientTimeoutSec   int                `envconfig:"API_CLIENT_TIMEOUT_SEC"`
 	ApiClient             *apiclient.APIClient
 	// ApiHTTPTransport is the shared transport for HTTP clients that talk to the
-	// Daytona API. Tighter IdleConnTimeout than http.DefaultTransport so we
+	// Cogbox API. Tighter IdleConnTimeout than http.DefaultTransport so we
 	// don't reuse a connection the API server has already closed.
 	ApiHTTPTransport http.RoundTripper
 }
@@ -107,7 +108,7 @@ func GetConfig() (*Config, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
-			URL: config.DaytonaApiUrl,
+			URL: config.CogboxApiUrl,
 		},
 	}
 
@@ -137,10 +138,10 @@ func GetConfig() (*Config, error) {
 
 	ctx := context.Background()
 
-	// Retry fetching Daytona API config with exponential backoff
+	// Retry fetching Cogbox API config with exponential backoff
 	err = utils.RetryWithExponentialBackoff(
 		ctx,
-		"get Daytona API config",
+		"get Cogbox API config",
 		10,
 		time.Second,
 		1*time.Minute,

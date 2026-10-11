@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { formatAmount } from '@/lib/utils'
-import { Charge } from '@daytona/billing-api-client'
+import { Charge } from '@cogbox/billing-api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { SortOrderIcon } from '../SortIcon'

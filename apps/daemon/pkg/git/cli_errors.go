@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package git
@@ -39,7 +40,7 @@ func (s *Service) gitCLIRun(op string, args []string, auth *http.BasicAuth, tail
 		return fmt.Errorf("git binary not found in PATH: %w", err)
 	}
 
-	askDir, err := os.MkdirTemp("", "daytona-git-*")
+	askDir, err := os.MkdirTemp("", "cogbox-git-*")
 	if err != nil {
 		return fmt.Errorf("create askpass temp dir: %w", err)
 	}

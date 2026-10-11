@@ -1,7 +1,7 @@
 {
-  "name": "@daytona/runner-api-client",
+  "name": "@cogbox/runner-api-client",
   "version": "0.0.0-dev",
-  "description": "OpenAPI client for @daytona/runner-api-client",
+  "description": "OpenAPI client for @cogbox/runner-api-client",
   "author": "OpenAPI-Generator Contributors",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "typescript",
     "openapi-client",
     "openapi-generator",
-    "@daytona/runner-api-client"
+    "@cogbox/runner-api-client"
   ],
   "license": "Unlicense",
   "main": "./src/index.js",

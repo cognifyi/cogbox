@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -23,7 +24,7 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useOrganizationRolesQuery } from '@/hooks/queries/useOrganizationRolesQuery'
-import { CreateOrganizationInvitationRoleEnum, OrganizationRole } from '@daytona/api-client'
+import { CreateOrganizationInvitationRoleEnum, OrganizationRole } from '@cogbox/api-client'
 import { useForm } from '@tanstack/react-form'
 import { AlertTriangle } from 'lucide-react'
 import React, {

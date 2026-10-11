@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -8,15 +9,15 @@ import (
 	"log"
 	"time"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/options"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 )
 
 func main() {
-	// Create a new Daytona client using environment variables
-	// Set DAYTONA_API_KEY before running
-	client, err := daytona.NewClient()
+	// Create a new Cogbox client using environment variables
+	// Set COGBOX_API_KEY before running
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -56,12 +57,12 @@ func main() {
 
 	log.Println("Listing all sandboxes...")
 	limit := 10
-	sort := daytona.SandboxListSortFieldCreatedAt
-	order := daytona.SandboxListSortDirectionDesc
-	for sandbox, err := range client.ListSeq(ctx, &daytona.ListSandboxesQuery{
+	sort := cogbox.SandboxListSortFieldCreatedAt
+	order := cogbox.SandboxListSortDirectionDesc
+	for sandbox, err := range client.ListSeq(ctx, &cogbox.ListSandboxesQuery{
 		Limit:  &limit,
 		Labels: map[string]string{"env": "dev"},
-		States: []daytona.SandboxState{daytona.SandboxStateStarted},
+		States: []cogbox.SandboxState{cogbox.SandboxStateStarted},
 		Sort:   &sort,
 		Order:  &order,
 	}) {

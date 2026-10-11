@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -8,11 +9,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from daytona.common.computer_use import ScreenshotOptions, ScreenshotRegion
+from cogbox.common.computer_use import ScreenshotOptions, ScreenshotRegion
 
 
 def _make_async_computer_use():
-    from daytona._async.computer_use import AsyncComputerUse
+    from cogbox._async.computer_use import AsyncComputerUse
 
     api_client = AsyncMock()
     return AsyncComputerUse(api_client), api_client

@@ -1,44 +1,44 @@
 ---
 title: Python SDK Reference
-description: Interact with Daytona Sandboxes using the Python SDK
-next: /docs/python-sdk/daytona
+description: Interact with Cogbox Sandboxes using the Python SDK
+next: /docs/python-sdk/cogbox
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-The Daytona Python SDK provides a robust interface for programmatically interacting with Daytona Sandboxes.
+The Cogbox Python SDK provides a robust interface for programmatically interacting with Cogbox Sandboxes.
 
 ## Installation
 
-Install the Daytona Python SDK using pip:
+Install the Cogbox Python SDK using pip:
 
 ```bash
-pip install daytona
+pip install cogbox
 ```
 
 Or using poetry:
 
 ```bash
-poetry add daytona
+poetry add cogbox
 ```
 
 ## Getting Started
 
 ### Create a Sandbox
 
-Create a Daytona Sandbox to run your code securely in an isolated environment. The following snippet is an example "Hello World" program that runs securely inside a Daytona Sandbox.
+Create a Cogbox Sandbox to run your code securely in an isolated environment. The following snippet is an example "Hello World" program that runs securely inside a Cogbox Sandbox.
 
 <Tabs>
   <TabItem label="Sync" icon="seti:python">
     ```python
-    from daytona import Daytona
+    from cogbox import Cogbox
 
     def main():
         # Initialize the SDK (uses environment variables by default)
-        daytona = Daytona()
+        cogbox = Cogbox()
 
         # Create a new sandbox
-        sandbox = daytona.create()
+        sandbox = cogbox.create()
 
         # Execute a command
         response = sandbox.process.exec("echo 'Hello, World!'")
@@ -52,13 +52,13 @@ Create a Daytona Sandbox to run your code securely in an isolated environment. T
   <TabItem label="Async" icon="seti:python">
     ```python
     import asyncio
-    from daytona import AsyncDaytona
+    from cogbox import AsyncCogbox
 
     async def main():
         # Initialize the SDK (uses environment variables by default)
-        async with AsyncDaytona() as daytona:
+        async with AsyncCogbox() as cogbox:
             # Create a new sandbox
-            sandbox = await daytona.create()
+            sandbox = await cogbox.create()
 
             # Execute a command
             response = await sandbox.process.exec("echo 'Hello, World!'")
@@ -72,47 +72,47 @@ Create a Daytona Sandbox to run your code securely in an isolated environment. T
 
 ## Configuration
 
-The Daytona SDK can be configured using environment variables or by passing options to the constructor:
+The Cogbox SDK can be configured using environment variables or by passing options to the constructor:
 
 <Tabs>
   <TabItem label="Sync" icon="seti:python">
     ```python
-    from daytona import Daytona, DaytonaConfig
+    from cogbox import Cogbox, CogboxConfig
 
-    # Using environment variables (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
-    daytona = Daytona()
+    # Using environment variables (COGBOX_API_KEY, COGBOX_API_URL, COGBOX_TARGET)
+    cogbox = Cogbox()
 
     # Using explicit configuration
-    config = DaytonaConfig(
+    config = CogboxConfig(
         api_key="YOUR_API_KEY",
-        api_url="https://app.daytona.io/api",
+        api_url="https://cogbox.pazity.com/api",
         target="us"
     )
-    daytona = Daytona(config)
+    cogbox = Cogbox(config)
     ```
   </TabItem>
 
   <TabItem label="Async" icon="seti:python">
     ```python
     import asyncio
-    from daytona import AsyncDaytona, DaytonaConfig
+    from cogbox import AsyncCogbox, CogboxConfig
 
     async def main():
         try:
-            # Using environment variables (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
-            daytona = AsyncDaytona()
+            # Using environment variables (COGBOX_API_KEY, COGBOX_API_URL, COGBOX_TARGET)
+            cogbox = AsyncCogbox()
             # Your async code here
             pass
         finally:
-            await daytona.close()
+            await cogbox.close()
 
         # Using explicit configuration
-        config = DaytonaConfig(
+        config = CogboxConfig(
             api_key="YOUR_API_KEY",
-            api_url="https://app.daytona.io/api",
+            api_url="https://cogbox.pazity.com/api",
             target="us"
         )
-        async with AsyncDaytona(config) as daytona:
+        async with AsyncCogbox(config) as cogbox:
             # Your code here
             pass
 
@@ -122,4 +122,4 @@ The Daytona SDK can be configured using environment variables or by passing opti
   </TabItem>
 </Tabs>
 
-For more information on configuring the Daytona SDK, see [configuration](/docs/en/configuration).
+For more information on configuring the Cogbox SDK, see [configuration](/docs/en/configuration).

@@ -1,0 +1,13 @@
+name: cogbox snapshot
+synopsis: Manage Cogbox snapshots
+description: Commands for managing Cogbox snapshots
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI
+  - cogbox snapshot create - Create a snapshot
+  - cogbox snapshot delete - Delete a snapshot
+  - cogbox snapshot list - List all snapshots
+  - cogbox snapshot push - Push local snapshot

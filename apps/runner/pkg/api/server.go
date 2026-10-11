@@ -1,9 +1,10 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
-//	@title			Daytona Runner API
+//	@title			Cogbox Runner API
 //	@version		v0.0.0-dev
-//	@description	Daytona Runner API
+//	@description	Cogbox Runner API
 //	@license.name	Apache-2.0
 //	@license.url	https://www.apache.org/licenses/LICENSE-2.0
 
@@ -80,8 +81,8 @@ type ApiServer struct {
 }
 
 func (a *ApiServer) Start(ctx context.Context) error {
-	docs.SwaggerInfo.Description = "Daytona Runner API"
-	docs.SwaggerInfo.Title = "Daytona Runner API"
+	docs.SwaggerInfo.Description = "Cogbox Runner API"
+	docs.SwaggerInfo.Title = "Cogbox Runner API"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Version = internal.Version
 
@@ -106,7 +107,7 @@ func (a *ApiServer) Start(ctx context.Context) error {
 	if a.logRequests {
 		a.router.Use(sloggin.New(a.logger))
 	}
-	a.router.Use(otelgin.Middleware("daytona-runner"))
+	a.router.Use(otelgin.Middleware("cogbox-runner"))
 	a.router.Use(common_errors.NewErrorMiddleware(common.HandlePossibleDockerError))
 	a.router.Use(middlewares.RecoverableErrorsMiddleware())
 

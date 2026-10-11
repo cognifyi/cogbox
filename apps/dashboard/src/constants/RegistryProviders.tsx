@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -9,7 +10,7 @@ import dockerIcon from '@/assets/docker.svg'
 import githubIcon from '@/assets/github.svg'
 import googleIcon from '@/assets/google.svg'
 import { cn } from '@/lib/utils'
-import { DAYTONA_DOCS_URL } from './ExternalLinks'
+import { COGBOX_DOCS_URL } from './ExternalLinks'
 
 export type RegistryProvider = 'generic' | 'dockerhub' | 'gcp' | 'ghcr' | 'ecr'
 
@@ -163,12 +164,12 @@ export const REGISTRY_PROVIDER_SPECS: Record<RegistryProvider, ProviderFormSpec>
     username: {
       required: true,
       label: 'Role ARN',
-      placeholder: 'arn:aws:iam::123456789012:role/daytona-ecr-puller',
+      placeholder: 'arn:aws:iam::123456789012:role/cogbox-ecr-puller',
       helper: (
         <>
-          Daytona will assume this role on every pull.{' '}
+          Cogbox will assume this role on every pull.{' '}
           <a
-            href={`${DAYTONA_DOCS_URL}/snapshots#amazon-elastic-container-registry-ecr`}
+            href={`${COGBOX_DOCS_URL}/snapshots#amazon-elastic-container-registry-ecr`}
             target="_blank"
             rel="noopener noreferrer"
           >

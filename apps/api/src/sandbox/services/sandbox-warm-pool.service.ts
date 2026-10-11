@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -89,9 +90,7 @@ export class SandboxWarmPoolService {
         where: snapshotFilter,
       })
       if (!snapshot) {
-        throw new BadRequestError(
-          `Snapshot ${sandboxSnapshot} not found. Did you add it through the Daytona Dashboard?`,
-        )
+        throw new BadRequestError(`Snapshot ${sandboxSnapshot} not found. Did you add it through the Cogbox Dashboard?`)
       }
     } else {
       snapshot = params.snapshot

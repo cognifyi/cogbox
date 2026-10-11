@@ -1,0 +1,14 @@
+name: cogbox volume create
+synopsis: Create a volume
+usage: cogbox volume create [NAME] [flags]
+options:
+  - name: size
+    shorthand: s
+    default_value: '10'
+    usage: Size of the volume in GB
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox volume - Manage Cogbox volumes

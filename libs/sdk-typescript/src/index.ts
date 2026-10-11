@@ -1,17 +1,18 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { CodeLanguage, Daytona } from './Daytona'
+export { CodeLanguage, Cogbox } from './Cogbox'
 export type {
   CreateSandboxBaseParams,
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
-  DaytonaConfig,
+  CogboxConfig,
   Resources,
   VolumeMount,
-} from './Daytona'
+} from './Cogbox'
 export { FileSystem } from './FileSystem'
 export type {
   DownloadProgress,
@@ -32,16 +33,16 @@ export { Process } from './Process'
 // export { LspServer } from './LspServer'
 // export type { LspLanguageId, Position } from './LspServer'
 export {
-  DaytonaAuthenticationError,
-  DaytonaAuthorizationError,
-  DaytonaConflictError,
-  DaytonaConnectionError,
-  DaytonaError,
-  DaytonaNotFoundError,
-  DaytonaRateLimitError,
-  DaytonaTimeoutError,
-  DaytonaValidationError,
-} from './errors/DaytonaError'
+  CogboxAuthenticationError,
+  CogboxAuthorizationError,
+  CogboxConflictError,
+  CogboxConnectionError,
+  CogboxError,
+  CogboxNotFoundError,
+  CogboxRateLimitError,
+  CogboxTimeoutError,
+  CogboxValidationError,
+} from './errors/CogboxError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { ListSandboxesQuery } from './Sandbox'
@@ -72,7 +73,7 @@ export {
   SandboxListSortField,
   SandboxListSortDirection,
   SandboxClass,
-} from '@daytona/api-client'
+} from '@cogbox/api-client'
 export type {
   FileInfo,
   GitStatus,
@@ -80,7 +81,7 @@ export type {
   Match,
   ReplaceResult,
   SearchFilesResponse,
-} from '@daytona/toolbox-api-client'
+} from '@cogbox/toolbox-api-client'
 
 export type {
   ScreenshotRegion,

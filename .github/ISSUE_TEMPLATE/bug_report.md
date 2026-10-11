@@ -26,8 +26,8 @@ If applicable, add screenshots to help explain your problem.
 **Environment (required fields):**
 
 - Deployment: [Production/OSS]
-- Daytona client: [e.g. Python SDK v0.0.1 or Daytona CLI v0.0.1]
-- Daytona Version: [Found in the dashboard]
+- Cogbox client: [e.g. Python SDK v0.0.1 or Cogbox CLI v0.0.1]
+- Cogbox Version: [Found in the dashboard]
 
 **Additional context**
 Add any other context about the problem here.

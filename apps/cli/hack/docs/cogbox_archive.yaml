@@ -1,0 +1,9 @@
+name: cogbox archive
+synopsis: Archive a sandbox
+usage: cogbox archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox - Cogbox CLI

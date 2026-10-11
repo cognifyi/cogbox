@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { FlueContext } from '@flue/sdk/client'
-import { Daytona } from '@daytona/sdk'
-import { daytona } from '../connectors/daytona'
+import { Cogbox } from '@cogbox/sdk'
+import { cogbox } from '../connectors/cogbox'
 import * as v from 'valibot'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -54,14 +55,14 @@ export default async function ({ init, payload, env }: FlueContext) {
     throw new Error(`Invalid issueNumber: ${issueNumber} (must be a positive integer)`)
   }
 
-  const daytonaApiKey = requireEnv(env, 'DAYTONA_API_KEY')
+  const cogboxApiKey = requireEnv(env, 'COGBOX_API_KEY')
   const githubToken = requireEnv(env, 'GITHUB_TOKEN')
   const model = env.MODEL ?? 'anthropic/claude-sonnet-4-6'
-  const projectDir = '/home/daytona/project'
+  const projectDir = '/home/cogbox/project'
 
   console.log(`[bug-fix] target: ${repo}#${issueNumber} (model: ${model})`)
 
-  const client = new Daytona({ apiKey: daytonaApiKey })
+  const client = new Cogbox({ apiKey: cogboxApiKey })
   const sandbox = await client.create({
     envVars: { GH_TOKEN: githubToken },
   })
@@ -73,7 +74,7 @@ export default async function ({ init, payload, env }: FlueContext) {
 
   try {
     setupAgent = await init({
-      sandbox: daytona(sandbox, { cleanup: true }),
+      sandbox: cogbox(sandbox, { cleanup: true }),
       model,
     })
     const setup = await setupAgent.session()
@@ -177,7 +178,7 @@ export default async function ({ init, payload, env }: FlueContext) {
 
     projectAgent = await init({
       id: `bug-fix-${issueNumber}`,
-      sandbox: daytona(sandbox),
+      sandbox: cogbox(sandbox),
       cwd: projectDir,
       model,
     })

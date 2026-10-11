@@ -1,9 +1,11 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 # pylint: disable=no-member
 
 """Shared host-side orchestration for self-hosted Managed Agents work."""
+
 from __future__ import annotations
 
 import fcntl
@@ -17,7 +19,7 @@ import anthropic
 import dotenv
 import host_lib
 
-from daytona import Daytona, DaytonaNotFoundError
+from cogbox import Cogbox, CogboxNotFoundError
 
 dotenv.load_dotenv(override=True)
 
@@ -27,7 +29,7 @@ JANITOR_SECONDS = int(os.environ.get("JANITOR_SECONDS", "60"))
 MAX_IDLE_DAYS = float(os.environ.get("MAX_IDLE_DAYS", "30"))
 
 CLIENT = anthropic.Anthropic(auth_token=ANTHROPIC_ENVIRONMENT_KEY)
-DAYT = Daytona()
+DAYT = Cogbox()
 
 DRAIN_LOCK = threading.RLock()
 SESSION_LOCKS_LOCK = threading.Lock()
@@ -320,7 +322,7 @@ def drain_work(
 
 
 def janitor_once(*, recover_crashed_runners: bool = True) -> None:
-    """One pass over labeled Daytona sandboxes."""
+    """One pass over labeled Cogbox sandboxes."""
     page_number = 1
     deleted = 0
     archived = 0
@@ -337,7 +339,7 @@ def janitor_once(*, recover_crashed_runners: bool = True) -> None:
                 limit=100,
             )
         except Exception as e:
-            print(f"[janitor] daytona list failed: {type(e).__name__}: {e}", flush=True)
+            print(f"[janitor] cogbox list failed: {type(e).__name__}: {e}", flush=True)
             return
 
         for sb in page.items:
@@ -406,7 +408,7 @@ def janitor_once(*, recover_crashed_runners: bool = True) -> None:
         with session_lock(sid):
             try:
                 sb = DAYT.get(sandbox_id)
-            except DaytonaNotFoundError:
+            except CogboxNotFoundError:
                 print(f"[janitor] recovery sandbox {sandbox_id} no longer exists", flush=True)
                 continue
             except Exception as e:

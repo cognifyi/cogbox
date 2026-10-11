@@ -1,11 +1,11 @@
 import asyncio
 
-from daytona import AsyncDaytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
+from cogbox import AsyncCogbox, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 async def main():
-    async with AsyncDaytona() as daytona:
-        async for sandbox in daytona.list(
+    async with AsyncCogbox() as cogbox:
+        async for sandbox in cogbox.list(
             ListSandboxesQuery(
                 limit=10,
                 labels={"env": "dev"},

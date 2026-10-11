@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -44,7 +45,7 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { SnapshotInfoResponse } from '@daytona/runner-api-client'
+import { SnapshotInfoResponse } from '@cogbox/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RegionType } from '../../region/enums/region-type.enum'
@@ -1334,7 +1335,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         .where('sr.state = :readyState', { readyState: SnapshotRunnerState.READY })
         .andWhere(`bi.lastUsedAt < now() - ${stalenessInterval}`)
         .andWhere(`sr.updatedAt < now() - ${stalenessInterval}`)
-        .andWhere("sr.snapshotRef LIKE 'daytona-%'")
+        .andWhere("sr.snapshotRef LIKE 'cogbox-%'")
         .limit(500)
         .getMany()
 
@@ -1508,7 +1509,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     if (!snapshot.ref) {
       const sanitizedUrl = internalRegistry.url.replace(/^https?:\/\//, '')
-      updateData.ref = `${sanitizedUrl}/${internalRegistry.project || 'daytona'}/daytona-${hash}:daytona`
+      updateData.ref = `${sanitizedUrl}/${internalRegistry.project || 'cogbox'}/cogbox-${hash}:cogbox`
     }
 
     if (snapshot.size == null && typeof sizeGB === 'number') {

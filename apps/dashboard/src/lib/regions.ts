@@ -1,9 +1,10 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Region, RegionType } from '@daytona/api-client'
+import { Region, RegionType } from '@cogbox/api-client'
 
 export const EMPTY_REGIONS: Region[] = []
 

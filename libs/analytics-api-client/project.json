@@ -22,7 +22,7 @@
       "options": {
         "commands": [
           "rm -rf {projectRoot}/src",
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i tmp/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/analytics-api-client/src"
+          "yarn run openapi-generator-cli generate --git-repo-id=cogbox --git-user-id=cognifyi -i tmp/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/analytics-api-client/src"
         ],
         "parallel": false
       }
@@ -41,7 +41,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}/dist/libs/analytics-api-client",
-        "command": "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
+        "command": "VER=${NPM_PKG_VERSION#v}; PKGVERSION=$(npm view @cogbox/analytics-api-client@$VER version 2>/dev/null); if [ -n \"$PKGVERSION\" ]; then echo \"@cogbox/analytics-api-client@$VER already on npm, skipping publish\"; else npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN; fi",
         "parallel": false
       },
       "dependsOn": ["build"]

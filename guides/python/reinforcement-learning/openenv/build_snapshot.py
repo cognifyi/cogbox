@@ -1,7 +1,8 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
-"""Build a Daytona snapshot for finqa_env.
+"""Build a Cogbox snapshot for finqa_env.
 
 Creates a snapshot from the openenv-base image with finqa_env installed
 and the FinQA dataset pre-downloaded from HuggingFace, ensuring fast
@@ -17,7 +18,7 @@ import os
 
 from dotenv import load_dotenv
 
-from daytona import CreateSnapshotParams, Daytona, DaytonaConfig, Image
+from cogbox import Cogbox, CogboxConfig, CreateSnapshotParams, Image
 
 OPENENV_REPO = "https://github.com/meta-pytorch/OpenEnv.git"
 SERVER_CMD = "cd /app/env && uvicorn finqa_env.server.app:app --host 0.0.0.0 --port 8000"
@@ -26,7 +27,7 @@ SERVER_CMD = "cd /app/env && uvicorn finqa_env.server.app:app --host 0.0.0.0 --p
 def main():
     load_dotenv()
 
-    parser = argparse.ArgumentParser(description="Build a Daytona snapshot for finqa_env.")
+    parser = argparse.ArgumentParser(description="Build a Cogbox snapshot for finqa_env.")
     parser.add_argument(
         "--snapshot-name",
         default="openenv-finqa",
@@ -34,7 +35,7 @@ def main():
     )
     args = parser.parse_args()
 
-    daytona = Daytona(DaytonaConfig(api_key=os.environ.get("DAYTONA_API_KEY")))
+    cogbox = Cogbox(CogboxConfig(api_key=os.environ.get("COGBOX_API_KEY")))
 
     image = (
         Image.base("ghcr.io/meta-pytorch/openenv-base:latest")
@@ -65,7 +66,7 @@ def main():
     print(f"Building snapshot '{args.snapshot_name}'...")
     print("This may take 3-5 minutes on first build.\n")
 
-    snapshot = daytona.snapshot.create(
+    snapshot = cogbox.snapshot.create(
         CreateSnapshotParams(name=args.snapshot_name, image=image),
         on_logs=lambda line: print(f"  {line}"),
     )

@@ -1,22 +1,22 @@
 import asyncio
 import os
 
-from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, VolumeMount
+from cogbox import AsyncCogbox, CreateSandboxFromSnapshotParams, VolumeMount
 
 
 async def main():
-    async with AsyncDaytona() as daytona:
+    async with AsyncCogbox() as cogbox:
         # Create a new volume or get an existing one
-        volume = await daytona.volume.get("my-volume", create=True)
+        volume = await cogbox.volume.get("my-volume", create=True)
 
         # Mount the volume to the sandbox
-        mount_dir_1 = "/home/daytona/volume"
+        mount_dir_1 = "/home/cogbox/volume"
 
         params = CreateSandboxFromSnapshotParams(
             language="python",
             volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1)],
         )
-        sandbox = await daytona.create(params)
+        sandbox = await cogbox.create(params)
 
         # Create a new directory in the mount directory
         new_dir = os.path.join(mount_dir_1, "new-dir")
@@ -28,13 +28,13 @@ async def main():
 
         # Create a new sandbox with the same volume
         # and mount it to the different path
-        mount_dir_2 = "/home/daytona/my-files"
+        mount_dir_2 = "/home/cogbox/my-files"
 
         params = CreateSandboxFromSnapshotParams(
             language="python",
             volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_2)],
         )
-        sandbox2 = await daytona.create(params)
+        sandbox2 = await cogbox.create(params)
 
         # List files in the mount directory
         files = await sandbox2.fs.list_files(mount_dir_2)
@@ -46,13 +46,13 @@ async def main():
 
         # Mount a specific subpath within the volume
         # This is useful for isolating data or implementing multi-tenancy
-        mount_dir_3 = "/home/daytona/subpath"
+        mount_dir_3 = "/home/cogbox/subpath"
 
         params = CreateSandboxFromSnapshotParams(
             language="python",
             volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_3, subpath="users/alice")],
         )
-        sandbox3 = await daytona.create(params)
+        sandbox3 = await cogbox.create(params)
 
         # This sandbox will only see files within the 'users/alice' subpath
         # Create a file in the subpath
@@ -60,13 +60,13 @@ async def main():
         await sandbox3.fs.upload_file(b"Hello from Alice's subpath!", subpath_file)
 
         # The file is stored at: volume-root/users/alice/alice-file.txt
-        # but appears at: /home/daytona/subpath/alice-file.txt in the sandbox
+        # but appears at: /home/cogbox/subpath/alice-file.txt in the sandbox
 
         # Cleanup
-        await daytona.delete(sandbox)
-        await daytona.delete(sandbox2)
-        await daytona.delete(sandbox3)
-        # daytona.volume.delete(volume)
+        await cogbox.delete(sandbox)
+        await cogbox.delete(sandbox2)
+        await cogbox.delete(sandbox3)
+        # cogbox.volume.delete(volume)
 
 
 if __name__ == "__main__":

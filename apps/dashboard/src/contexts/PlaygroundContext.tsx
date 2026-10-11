@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -25,7 +26,7 @@ import {
   Resources,
   ScreenshotOptions,
   ScreenshotRegion,
-} from '@daytona/sdk'
+} from '@cogbox/sdk'
 import { createContext, ReactNode } from 'react'
 
 export interface ParameterFormItem {

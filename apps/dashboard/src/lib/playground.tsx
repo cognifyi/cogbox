@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { ReactNode } from 'react'
-import { CodeLanguage } from '@daytona/sdk'
+import { CodeLanguage } from '@cogbox/sdk'
 
 export const createErrorMessageOutput = (error: unknown): ReactNode => {
   return (
@@ -21,17 +22,17 @@ export const getLanguageCodeToRun = (language?: CodeLanguage): string => {
       return `function greet(name: string): string {
 \treturn \`Hello, \${name}!\`;
 }
-console.log(greet("Daytona"));`
+console.log(greet("Cogbox"));`
     case CodeLanguage.JAVASCRIPT:
       return `function greet(name) {
 \treturn \`Hello, \${name}!\`;
 }
-console.log(greet("Daytona"));`
+console.log(greet("Cogbox"));`
     default:
       // Python is default language if none specified
       return `def greet(name):
 \treturn f"Hello, {name}!"
-print(greet("Daytona"))`
+print(greet("Cogbox"))`
   }
 }
 

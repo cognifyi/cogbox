@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   translate:
     runs-on: ubuntu-latest
-    if: github.repository == 'daytonaio/daytona' || github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox'
     permissions:
       contents: write
       pull-requests: write

@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { cn } from '@/lib/utils'
-import { RegionUsageOverview } from '@daytona/api-client/src'
+import { RegionUsageOverview } from '@cogbox/api-client/src'
 
 export function UsageOverviewIndicator({
   usage,

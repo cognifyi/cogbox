@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -206,7 +207,7 @@ export class ToolboxController {
           const runnerApiKey = req._runnerApiKey
 
           try {
-            proxyReq.setHeader('X-Daytona-Authorization', `Bearer ${runnerApiKey}`)
+            proxyReq.setHeader('X-Cogbox-Authorization', `Bearer ${runnerApiKey}`)
           } catch {
             // Ignore error - headers are already set
             return

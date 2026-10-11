@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -16,7 +17,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
-import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
+import { COGBOX_DOCS_URL, COGBOX_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
@@ -37,13 +38,13 @@ function useDashboardCommands() {
         id: 'open-slack',
         label: 'Open Slack',
         icon: <SlackLogoIcon className="w-4 h-4" />,
-        onSelect: () => window.open(DAYTONA_SLACK_URL, '_blank'),
+        onSelect: () => window.open(COGBOX_SLACK_URL, '_blank'),
       },
       {
         id: 'open-docs',
         label: 'Open Docs',
         icon: <BookOpen className="w-4 h-4" />,
-        onSelect: () => window.open(DAYTONA_DOCS_URL, '_blank'),
+        onSelect: () => window.open(COGBOX_DOCS_URL, '_blank'),
       },
       {
         id: 'search-docs',

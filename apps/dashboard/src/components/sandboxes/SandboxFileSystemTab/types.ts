@@ -1,13 +1,14 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { Daytona } from '@daytona/sdk'
+import type { Cogbox } from '@cogbox/sdk'
 
 export type PreviewKind = 'binary' | 'image' | 'text'
 
-export type SandboxInstance = Awaited<ReturnType<Daytona['get']>>
+export type SandboxInstance = Awaited<ReturnType<Cogbox['get']>>
 
 export type SandboxFileSystemNode = {
   group: string

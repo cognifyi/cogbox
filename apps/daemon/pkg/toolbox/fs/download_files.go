@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package fs
@@ -59,7 +60,7 @@ func DownloadFiles(c *gin.Context) {
 		return
 	}
 
-	const boundary = "DAYTONA-FILE-BOUNDARY"
+	const boundary = "COGBOX-FILE-BOUNDARY"
 	c.Status(http.StatusOK)
 	c.Header("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", boundary))
 

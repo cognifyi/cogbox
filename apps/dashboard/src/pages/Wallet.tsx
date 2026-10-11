@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -27,7 +28,7 @@ import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
 import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
+import { AutomaticTopUp, BillingType, Invoice } from '@cogbox/billing-api-client'
 import { CreditCardIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'

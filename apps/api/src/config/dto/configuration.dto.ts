@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -103,24 +104,24 @@ export class OidcConfig {
 
   @ApiProperty({
     description: 'OIDC client ID',
-    example: 'daytona-client',
+    example: 'cogbox-client',
   })
   @IsString()
   clientId: string
 
   @ApiProperty({
     description: 'OIDC audience',
-    example: 'daytona-api',
+    example: 'cogbox-api',
   })
   @IsString()
   audience: string
 }
 
 @ApiExtraModels(Announcement)
-@ApiSchema({ name: 'DaytonaConfiguration' })
+@ApiSchema({ name: 'CogboxConfiguration' })
 export class ConfigurationDto {
   @ApiProperty({
-    description: 'Daytona version',
+    description: 'Cogbox version',
     example: '0.0.1',
   })
   @IsString()

@@ -1,11 +1,11 @@
 dist:
-  name: daytona-otel-collector
-  description: Daytona OpenTelemetry Collector
+  name: cogbox-otel-collector
+  description: Cogbox OpenTelemetry Collector
   output_path: dist/apps/otel-collector
 
 exporters:
   - gomod: github.com/cognifyi/cogbox/otel-collector/exporter v0.0.1
-    name: daytonaexporter
+    name: cogboxexporter
     path: apps/otel-collector/exporter
 
 receivers:

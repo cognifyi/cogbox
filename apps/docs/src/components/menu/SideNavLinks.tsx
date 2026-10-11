@@ -8,7 +8,7 @@ const SideNavLinksContent = () => {
     <T>
       <div className="nav-item call">
         <a
-          href="https://app.daytona.io"
+          href="https://cogbox.pazity.com"
           target="_blank"
           className="nav__link"
           rel="noreferrer"

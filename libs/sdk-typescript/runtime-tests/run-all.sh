@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
-# Runtime compatibility tests for @daytona/sdk
+# Runtime compatibility tests for @cogbox/sdk
 #
 # For each subdirectory containing a `run.sh`, this orchestrator:
-#   1. Installs the locally-built SDK as `@daytona/sdk` via npm pack tarball
+#   1. Installs the locally-built SDK as `@cogbox/sdk` via npm pack tarball
 #   2. Executes the runtime's `run.sh`
 #   3. Records pass/fail and continues to the next runtime
 #
-# Required env: DAYTONA_API_KEY, DAYTONA_API_URL — passed through to each test.
+# Required env: COGBOX_API_KEY, COGBOX_API_URL — passed through to each test.
 # Optional env: ONLY="comma,separated,runtimes" to run a subset.
 
 set -uo pipefail
@@ -22,8 +23,8 @@ if [ -z "$DIST" ] || [ ! -f "$DIST/package.json" ]; then
   exit 1
 fi
 
-if [ -z "${DAYTONA_API_KEY:-}" ] || [ -z "${DAYTONA_API_URL:-}" ]; then
-  echo "ERROR: DAYTONA_API_KEY and DAYTONA_API_URL must be set" >&2
+if [ -z "${COGBOX_API_KEY:-}" ] || [ -z "${COGBOX_API_URL:-}" ]; then
+  echo "ERROR: COGBOX_API_KEY and COGBOX_API_URL must be set" >&2
   exit 1
 fi
 
@@ -55,9 +56,9 @@ echo "==> Packing api-client, toolbox-api-client, and sdk"
 API_TARBALL="$ROOT/.api-client.tgz"
 TOOLBOX_TARBALL="$ROOT/.toolbox-api-client.tgz"
 TARBALL="$ROOT/.sdk.tgz"
-pack_pkg "$API_CLIENT_DIST" "$API_TARBALL" "@daytona/api-client"
-pack_pkg "$TOOLBOX_DIST" "$TOOLBOX_TARBALL" "@daytona/toolbox-api-client"
-pack_pkg "$DIST" "$TARBALL" "@daytona/sdk"
+pack_pkg "$API_CLIENT_DIST" "$API_TARBALL" "@cogbox/api-client"
+pack_pkg "$TOOLBOX_DIST" "$TOOLBOX_TARBALL" "@cogbox/toolbox-api-client"
+pack_pkg "$DIST" "$TARBALL" "@cogbox/sdk"
 export SDK_TARBALL="$TARBALL"
 export API_CLIENT_TARBALL="$API_TARBALL"
 export TOOLBOX_API_CLIENT_TARBALL="$TOOLBOX_TARBALL"

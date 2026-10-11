@@ -16,8 +16,8 @@ import "github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 - [type Chart](<#Chart>)
 - [type CodeLanguage](<#CodeLanguage>)
 - [type CodeRunParams](<#CodeRunParams>)
+- [type CogboxConfig](<#CogboxConfig>)
 - [type CreateSnapshotParams](<#CreateSnapshotParams>)
-- [type DaytonaConfig](<#DaytonaConfig>)
 - [type ExecuteResponse](<#ExecuteResponse>)
 - [type ExecutionArtifacts](<#ExecutionArtifacts>)
 - [type ExecutionError](<#ExecutionError>)
@@ -101,6 +101,23 @@ type CodeRunParams struct {
 }
 ```
 
+<a name="CogboxConfig"></a>
+## type CogboxConfig
+
+CogboxConfig represents the configuration for the Cogbox client. When a field is nil, the client will fall back to environment variables or defaults.
+
+```go
+type CogboxConfig struct {
+    APIKey         string
+    JWTToken       string
+    OrganizationID string
+    APIUrl         string
+    Target         string
+    OtelEnabled    bool // Enable OpenTelemetry tracing for SDK operations.
+    Experimental   *ExperimentalConfig
+}
+```
+
 <a name="CreateSnapshotParams"></a>
 ## type CreateSnapshotParams
 
@@ -114,23 +131,6 @@ type CreateSnapshotParams struct {
     Entrypoint     []string
     SkipValidation *bool
     SandboxClass   *SandboxClass
-}
-```
-
-<a name="DaytonaConfig"></a>
-## type DaytonaConfig
-
-DaytonaConfig represents the configuration for the Daytona client. When a field is nil, the client will fall back to environment variables or defaults.
-
-```go
-type DaytonaConfig struct {
-    APIKey         string
-    JWTToken       string
-    OrganizationID string
-    APIUrl         string
-    Target         string
-    OtelEnabled    bool // Enable OpenTelemetry tracing for SDK operations.
-    Experimental   *ExperimentalConfig
 }
 ```
 
@@ -189,11 +189,11 @@ type ExecutionResult struct {
 <a name="ExperimentalConfig"></a>
 ## type ExperimentalConfig
 
-ExperimentalConfig holds experimental feature flags for the Daytona client.
+ExperimentalConfig holds experimental feature flags for the Cogbox client.
 
 ```go
 type ExperimentalConfig struct {
-    // Deprecated: use DaytonaConfig.OtelEnabled. Kept for backwards compatibility.
+    // Deprecated: use CogboxConfig.OtelEnabled. Kept for backwards compatibility.
     OtelEnabled bool
 }
 ```
@@ -555,7 +555,7 @@ type SignedPreviewLink struct {
 <a name="Snapshot"></a>
 ## type Snapshot
 
-Snapshot represents a Daytona snapshot
+Snapshot represents a Cogbox snapshot
 
 ```go
 type Snapshot struct {
@@ -594,7 +594,7 @@ type SnapshotParams struct {
 <a name="Volume"></a>
 ## type Volume
 
-Volume represents a Daytona volume
+Volume represents a Cogbox volume
 
 ```go
 type Volume struct {

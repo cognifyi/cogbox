@@ -1,0 +1,9 @@
+name: cogbox mcp config
+synopsis: Outputs JSON configuration for Cogbox MCP Server
+usage: cogbox mcp config [AGENT_NAME] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for cogbox
+see_also:
+  - cogbox mcp - Manage Cogbox MCP Server

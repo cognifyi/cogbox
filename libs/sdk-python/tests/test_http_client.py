@@ -1,9 +1,10 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 import httpx
 
-from daytona.internal.http_client import build_async_http_client, build_sync_http_client
+from cogbox.internal.http_client import build_async_http_client, build_sync_http_client
 
 
 class TestBuildHttpClient:

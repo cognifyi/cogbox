@@ -1,9 +1,10 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
-"""Run a single FinQA episode on a Daytona sandbox using OpenEnv.
+"""Run a single FinQA episode on a Cogbox sandbox using OpenEnv.
 
-Demonstrates the full OpenEnv + Daytona integration pattern:
+Demonstrates the full OpenEnv + Cogbox integration pattern:
   1. Create a sandbox from a pre-built snapshot
   2. Connect to the FinQA environment over WebSocket
   3. Run a multi-turn episode: explore tables, query data, submit an answer
@@ -11,7 +12,7 @@ Demonstrates the full OpenEnv + Daytona integration pattern:
   5. Tear down the sandbox
 
 Prerequisites:
-  - DAYTONA_API_KEY set in environment (or .env file)
+  - COGBOX_API_KEY set in environment (or .env file)
   - The "openenv-finqa" snapshot already built (see build_snapshot.py)
   - Dependencies installed (pip install -e .)
 
@@ -24,7 +25,7 @@ import json
 
 from dotenv import load_dotenv
 from finqa_env import CallToolAction, FinQAEnv  # pylint: disable=import-error
-from openenv.core.containers.runtime.daytona_provider import DaytonaProvider  # pylint: disable=import-error
+from openenv.core.containers.runtime.cogbox_provider import CogboxProvider  # pylint: disable=import-error
 
 load_dotenv()
 
@@ -48,8 +49,8 @@ SERVER_CMD = "cd /app/env && uvicorn finqa_env.server.app:app --host 0.0.0.0 --p
 # Sandbox lifecycle
 # ---------------------------------------------------------------------------
 def create_sandbox():
-    """Create a Daytona sandbox, start the FinQA server, wait for health."""
-    provider = DaytonaProvider(auto_stop_interval=0, cmd=SERVER_CMD)
+    """Create a Cogbox sandbox, start the FinQA server, wait for health."""
+    provider = CogboxProvider(auto_stop_interval=0, cmd=SERVER_CMD)
 
     print(f"Creating sandbox from snapshot '{SNAPSHOT}'...")
     url = provider.start_container(f"snapshot:{SNAPSHOT}")

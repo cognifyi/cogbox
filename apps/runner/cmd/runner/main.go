@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package main
@@ -63,7 +64,7 @@ func run() int {
 		telemetryConfig := telemetry.Config{
 			Endpoint:       cfg.OtelEndpoint,
 			Headers:        cfg.GetOtelHeaders(),
-			ServiceName:    "daytona-runner",
+			ServiceName:    "cogbox-runner",
 			ServiceVersion: internal.Version,
 			Environment:    cfg.Environment,
 		}
@@ -88,7 +89,7 @@ func run() int {
 		telemetryConfig := telemetry.Config{
 			Endpoint:       cfg.OtelEndpoint,
 			Headers:        cfg.GetOtelHeaders(),
-			ServiceName:    "daytona-runner",
+			ServiceName:    "cogbox-runner",
 			ServiceVersion: internal.Version,
 			Environment:    cfg.Environment,
 		}
@@ -133,7 +134,7 @@ func run() int {
 		return 2
 	}
 
-	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
+	pluginPath, err := daemon.WriteStaticBinary("cogbox-computer-use")
 	if err != nil {
 		logger.Error("Error writing plugin binary", "error", err)
 		return 2

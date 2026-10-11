@@ -1,11 +1,12 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Configuration } from '@daytona/api-client'
+import type { Configuration } from '@cogbox/api-client'
 
 const mockCreateSandboxWebSocket = jest.fn()
 
-jest.mock('@daytona/toolbox-api-client', () => ({}), { virtual: true })
+jest.mock('@cogbox/toolbox-api-client', () => ({}), { virtual: true })
 jest.mock('../utils/WebSocket', () => ({
   createSandboxWebSocket: (...args: unknown[]) => mockCreateSandboxWebSocket(...args),
 }))
@@ -163,7 +164,7 @@ describe('CodeInterpreter', () => {
     await expect(runPromise).resolves.toEqual({ stdout: '', stderr: '' })
   })
 
-  it('throws DaytonaTimeoutError when websocket closes with timeout code', async () => {
+  it('throws CogboxTimeoutError when websocket closes with timeout code', async () => {
     const handlers: Record<string, (event?: unknown) => unknown> = {}
     const ws = {
       readyState: 1,
@@ -186,7 +187,7 @@ describe('CodeInterpreter', () => {
     await expect(runPromise).rejects.toThrow('Execution timed out')
   })
 
-  it('maps websocket close reasons to DaytonaConnectionError', async () => {
+  it('maps websocket close reasons to CogboxConnectionError', async () => {
     const handlers: Record<string, (event?: unknown) => unknown> = {}
     const ws = {
       readyState: 1,
@@ -209,7 +210,7 @@ describe('CodeInterpreter', () => {
     await expect(runPromise).rejects.toThrow('runner crashed (close code 1011)')
   })
 
-  it('maps websocket error events to DaytonaConnectionError', async () => {
+  it('maps websocket error events to CogboxConnectionError', async () => {
     const handlers: Record<string, (event?: unknown) => unknown> = {}
     const ws = {
       readyState: 1,

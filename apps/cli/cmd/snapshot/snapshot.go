@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package snapshot
@@ -10,8 +11,8 @@ import (
 
 var SnapshotsCmd = &cobra.Command{
 	Use:     "snapshot",
-	Short:   "Manage Daytona snapshots",
-	Long:    "Commands for managing Daytona snapshots",
+	Short:   "Manage Cogbox snapshots",
+	Long:    "Commands for managing Cogbox snapshots",
 	Aliases: []string{"snapshots"},
 	GroupID: internal.SANDBOX_GROUP,
 }

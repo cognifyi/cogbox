@@ -1,0 +1,95 @@
+# Copyright 2025 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: Apache-2.0
+
+from __future__ import annotations
+
+from cogbox_api_client_async import CreateVolume, VolumesApi
+from cogbox_api_client_async.exceptions import NotFoundException
+
+from .._utils.otel_decorator import with_instrumentation
+from ..common.volume import Volume
+
+
+class AsyncVolumeService:
+    """Service for managing Cogbox Volumes. Can be used to list, get, create and delete Volumes."""
+
+    def __init__(self, volumes_api: VolumesApi):
+        self.__volumes_api = volumes_api
+
+    async def list(self) -> list[Volume]:
+        """List all Volumes.
+
+        Returns:
+            list[Volume]: List of all Volumes.
+
+        Example:
+            ```python
+            async with AsyncCogbox() as cogbox:
+                volumes = await cogbox.volume.list()
+                for volume in volumes:
+                    print(f"{volume.name} ({volume.id})")
+            ```
+        """
+        return [Volume.from_dto(volume) for volume in await self.__volumes_api.list_volumes()]
+
+    @with_instrumentation()
+    async def get(self, name: str, create: bool = False) -> Volume:
+        """Get a Volume by name.
+
+        Args:
+            name (str): Name of the Volume to get.
+            create (bool): If True, create a new Volume if it doesn't exist.
+
+        Returns:
+            Volume: The Volume object.
+
+        Example:
+            ```python
+            async with AsyncCogbox() as cogbox:
+                volume = await cogbox.volume.get("test-volume-name", create=True)
+                print(f"{volume.name} ({volume.id})")
+            ```
+        """
+        try:
+            return Volume.from_dto(await self.__volumes_api.get_volume_by_name(name))
+        except NotFoundException as e:
+            if create:
+                return await self.create(name)
+            raise e
+
+    @with_instrumentation()
+    async def create(self, name: str) -> Volume:
+        """Create a new Volume.
+
+        Args:
+            name (str): Name of the Volume to create.
+
+        Returns:
+            Volume: The Volume object.
+
+        Example:
+            ```python
+            async with AsyncCogbox() as cogbox:
+                volume = await cogbox.volume.create("test-volume")
+                print(f"{volume.name} ({volume.id}); state: {volume.state}")
+            ```
+        """
+        return Volume.from_dto(await self.__volumes_api.create_volume(CreateVolume(name=name)))
+
+    @with_instrumentation()
+    async def delete(self, volume: Volume) -> None:
+        """Delete a Volume.
+
+        Args:
+            volume (Volume): Volume to delete.
+
+        Example:
+            ```python
+            async with AsyncCogbox() as cogbox:
+                volume = await cogbox.volume.get("test-volume")
+                await cogbox.volume.delete(volume)
+                print("Volume deleted")
+            ```
+        """
+        await self.__volumes_api.delete_volume(volume.id)

@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -71,7 +72,7 @@ export class CreateRegionResponseDto {
 
   @ApiProperty({
     description: 'Snapshot Manager username for the region',
-    example: 'daytona',
+    example: 'cogbox',
     nullable: true,
     required: false,
   })

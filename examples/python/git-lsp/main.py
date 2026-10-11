@@ -1,10 +1,10 @@
-from daytona import CreateSandboxFromImageParams, Daytona, Image, LspCompletionPosition
+from cogbox import Cogbox, CreateSandboxFromImageParams, Image, LspCompletionPosition
 
 
 def main():
-    daytona = Daytona()
+    cogbox = Cogbox()
 
-    sandbox = daytona.create(
+    sandbox = cogbox.create(
         CreateSandboxFromImageParams(
             image=(
                 Image.base("ubuntu:25.10").run_commands(
@@ -61,7 +61,7 @@ def main():
         print("Error executing example:", error)
     finally:
         # Cleanup
-        daytona.delete(sandbox)
+        cogbox.delete(sandbox)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 """In-sandbox SDK EnvironmentWorker wrapper."""
+
 from __future__ import annotations
 
 import asyncio

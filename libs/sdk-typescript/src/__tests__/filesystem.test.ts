@@ -1,10 +1,11 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { FileSystem } from '../FileSystem'
-import { DaytonaNotFoundError } from '../errors/DaytonaError'
+import { CogboxNotFoundError } from '../errors/CogboxError'
 
 describe('FileSystem.downloadFile', () => {
   function newFileSystem() {
@@ -31,7 +32,7 @@ describe('FileSystem.downloadFile', () => {
     const fileSystem = newFileSystem()
 
     await expect(FileSystem.prototype.downloadFile.call(fileSystem, '/workspace/missing.txt')).rejects.toBeInstanceOf(
-      DaytonaNotFoundError,
+      CogboxNotFoundError,
     )
 
     await expect(FileSystem.prototype.downloadFile.call(fileSystem, '/workspace/missing.txt')).rejects.toMatchObject({
@@ -45,7 +46,7 @@ describe('FileSystem.downloadFile', () => {
 
     await expect(
       FileSystem.prototype.downloadFile.call(fileSystem, '/workspace/missing.txt', '/tmp/out.txt'),
-    ).rejects.toBeInstanceOf(DaytonaNotFoundError)
+    ).rejects.toBeInstanceOf(CogboxNotFoundError)
 
     await expect(
       FileSystem.prototype.downloadFile.call(fileSystem, '/workspace/missing.txt', '/tmp/out.txt'),

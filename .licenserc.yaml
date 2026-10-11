@@ -4,10 +4,12 @@ header:
     copyright-owner: Daytona Platforms Inc.
     content: |
       Copyright Daytona Platforms Inc.
+      Copyright Cognifyi
       SPDX-License-Identifier: AGPL-3.0
     pattern: |
       Copyright (\d{4} )?Daytona Platforms Inc\.
-      SPDX-License-Identifier: AGPL-3\.0
+      (Copyright (\d{4} )?Cognifyi
+      )?SPDX-License-Identifier: AGPL-3\.0
   paths:
     - '**/*.go'
     - '**/*.sh'

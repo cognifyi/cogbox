@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useBillingInfoQuery } from '@/hooks/queries/useBillingInfoQuery'
 import { useOrganizationBillingPortalUrlQuery } from '@/hooks/queries/useOrganizationBillingPortalUrlQuery'
-import { BillingAddress, BillingInfo } from '@daytona/billing-api-client'
+import { BillingAddress, BillingInfo } from '@cogbox/billing-api-client'
 import { PencilIcon } from 'lucide-react'
 
 interface BillingInfoCardProps {

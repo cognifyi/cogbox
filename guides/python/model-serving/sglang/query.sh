@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 # ENDPOINT and TOKEN are printed by serve_sglang.py.
@@ -8,7 +9,7 @@
 
 # max_tokens covers reasoning plus answer; gpt-oss thinks before it speaks
 curl -sS --connect-timeout 30 --max-time 120 "$ENDPOINT/v1/chat/completions" \
-  -H "x-daytona-preview-token: $TOKEN" \
+  -H "x-cogbox-preview-token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-oss-20b",

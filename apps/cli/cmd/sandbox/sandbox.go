@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package sandbox
@@ -10,11 +11,11 @@ import (
 
 var SandboxCmd = &cobra.Command{
 	Use:     "sandbox",
-	Short:   "Manage Daytona sandboxes",
-	Long:    "Commands for managing Daytona sandboxes",
+	Short:   "Manage Cogbox sandboxes",
+	Long:    "Commands for managing Cogbox sandboxes",
 	Aliases: []string{"sandboxes"},
 	GroupID: internal.SANDBOX_GROUP,
-	Hidden:  true, // Deprecated: use top-level commands instead (e.g., "daytona start" instead of "daytona sandbox start")
+	Hidden:  true, // Deprecated: use top-level commands instead (e.g., "cogbox start" instead of "cogbox sandbox start")
 }
 
 func init() {

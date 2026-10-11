@@ -1,9 +1,10 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
-//	@title			Daytona Toolbox API
+//	@title			Cogbox Toolbox API
 //	@version		v0.0.0-dev
-//	@description	Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona Cloud: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.
+//	@description	Cogbox Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Cogbox API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Cogbox Cloud: `https://proxy.cogbox.pazity.com/toolbox/{sandboxId}`.
 //	@schemes		https
 //	@license.name	Apache-2.0
 //	@license.url	https://www.apache.org/licenses/LICENSE-2.0
@@ -121,8 +122,8 @@ func (s *server) Start() error {
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	defer s.cancel()
 
-	docs.SwaggerInfo.Description = "Daytona Toolbox API"
-	docs.SwaggerInfo.Title = "Daytona Toolbox API"
+	docs.SwaggerInfo.Description = "Cogbox Toolbox API"
+	docs.SwaggerInfo.Title = "Cogbox Toolbox API"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Version = internal.Version
 
@@ -277,10 +278,10 @@ func (s *server) Start() error {
 
 	go func() {
 		// Initialize plugin-based computer use lazily in a background goroutine
-		pluginPath := "/usr/local/lib/daytona-computer-use"
+		pluginPath := "/usr/local/lib/cogbox-computer-use"
 		// Fallback to local config directory for development
 		if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-			pluginPath = path.Join(s.configDir, "daytona-computer-use")
+			pluginPath = path.Join(s.configDir, "cogbox-computer-use")
 		}
 
 		impl, err := manager.GetComputerUse(s.logger, pluginPath)

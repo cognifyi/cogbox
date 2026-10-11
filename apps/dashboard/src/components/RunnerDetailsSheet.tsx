@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -10,7 +11,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Runner, RunnerState } from '@daytona/api-client'
+import { Runner, RunnerState } from '@cogbox/api-client'
 import { ChevronDown, ChevronUp, CircleHelp, Trash2, X } from 'lucide-react'
 import React, { Ref, useCallback, useImperativeHandle, useState } from 'react'
 import { CopyButton } from './CopyButton'
@@ -270,7 +271,7 @@ function SchedulingScore({ value }: { value?: number }) {
                 </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-[260px]">
-                Higher is better. Daytona uses this score to choose runners for new sandboxes based on health and
+                Higher is better. Cogbox uses this score to choose runners for new sandboxes based on health and
                 remaining capacity.
               </TooltipContent>
             </Tooltip>

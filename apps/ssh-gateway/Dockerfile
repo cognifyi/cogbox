@@ -18,7 +18,7 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN apk add --no-cache git
 
-WORKDIR /daytona
+WORKDIR /cogbox
 
 # Yarn caching layer
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -50,10 +50,10 @@ RUN apk update && apk upgrade --no-cache openssl pcre2
 
 WORKDIR /usr/local/bin
 
-COPY --from=build /daytona/dist/apps/ssh-gateway daytona-ssh-gateway
+COPY --from=build /cogbox/dist/apps/ssh-gateway cogbox-ssh-gateway
 
-RUN chmod +x daytona-ssh-gateway
+RUN chmod +x cogbox-ssh-gateway
 
 EXPOSE 2222
 
-ENTRYPOINT ["daytona-ssh-gateway"]
+ENTRYPOINT ["cogbox-ssh-gateway"]

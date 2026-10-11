@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 import json
@@ -11,7 +12,7 @@ from pathlib import Path
 import dspy
 import matplotlib.pyplot as plt
 import numpy as np
-from daytona_interpreter import DaytonaInterpreter
+from cogbox_interpreter import CogboxInterpreter
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -64,7 +65,7 @@ dspy.configure(lm=lm)
 
 # ── Run RLM analysis ────────────────────────────────────────────────────────
 
-interpreter = DaytonaInterpreter()
+interpreter = CogboxInterpreter()
 
 rlm = dspy.RLM(
     signature="chapters: list[str], task: str -> wealth_data: list[dict]",

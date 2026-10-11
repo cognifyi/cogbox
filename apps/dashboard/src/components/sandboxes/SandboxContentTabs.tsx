@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -9,7 +10,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import type { SandboxListItem } from '@daytona/api-client'
+import type { SandboxListItem } from '@cogbox/api-client'
 import { SandboxFileSystemTab } from './SandboxFileSystemTab'
 import { SandboxInfoPanel } from './SandboxInfoPanel'
 import { SandboxLogsTab } from './SandboxLogsTab'

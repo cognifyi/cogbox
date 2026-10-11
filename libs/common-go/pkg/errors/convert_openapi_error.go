@@ -1,4 +1,5 @@
 // Copyright Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package errors
@@ -22,12 +23,12 @@ func ConvertOpenAPIError(err error) error {
 
 	bodyString := string(openapiErr.Body())
 
-	daytonaErr := &ErrorResponse{}
-	if parseErr := json.Unmarshal([]byte(bodyString), daytonaErr); parseErr != nil {
+	cogboxErr := &ErrorResponse{}
+	if parseErr := json.Unmarshal([]byte(bodyString), cogboxErr); parseErr != nil {
 		return err
 	}
 
-	return NewCustomError(daytonaErr.StatusCode, daytonaErr.Message, daytonaErr.Code)
+	return NewCustomError(cogboxErr.StatusCode, cogboxErr.Message, cogboxErr.Code)
 }
 
 func IsRetryableOpenAPIError(err error) bool {

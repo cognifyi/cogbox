@@ -1,11 +1,11 @@
-from daytona import CreateSandboxFromSnapshotParams, Daytona
+from cogbox import Cogbox, CreateSandboxFromSnapshotParams
 
 
 def main():
-    daytona = Daytona()
+    cogbox = Cogbox()
 
     # Default interval
-    sandbox1 = daytona.create()
+    sandbox1 = cogbox.create()
     print(sandbox1.auto_archive_interval)
 
     # Set interval to 1 hour
@@ -13,11 +13,11 @@ def main():
     print(sandbox1.auto_archive_interval)
 
     # Max interval
-    sandbox2 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=0))
+    sandbox2 = cogbox.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=0))
     print(sandbox2.auto_archive_interval)
 
     # 1 day interval
-    sandbox3 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=1440))
+    sandbox3 = cogbox.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=1440))
     print(sandbox3.auto_archive_interval)
 
     sandbox1.delete()

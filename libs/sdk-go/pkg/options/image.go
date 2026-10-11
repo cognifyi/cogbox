@@ -1,9 +1,10 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package options
 
-// PipInstall holds optional parameters for [daytona.Image.PipInstall].
+// PipInstall holds optional parameters for [cogbox.Image.PipInstall].
 type PipInstall struct {
 	FindLinks      []string // URLs to search for packages
 	IndexURL       string   // Base URL of the Python Package Index
@@ -19,7 +20,7 @@ type PipInstall struct {
 //
 // Example:
 //
-//	image := daytona.Base("python:3.11").PipInstall(
+//	image := cogbox.Base("python:3.11").PipInstall(
 //	    []string{"mypackage"},
 //	    options.WithFindLinks("/path/to/wheels", "https://example.com/wheels/"),
 //	)
@@ -35,7 +36,7 @@ func WithFindLinks(links ...string) func(*PipInstall) {
 //
 // Example:
 //
-//	image := daytona.Base("python:3.11").PipInstall(
+//	image := cogbox.Base("python:3.11").PipInstall(
 //	    []string{"mypackage"},
 //	    options.WithIndexURL("https://my-pypi.example.com/simple/"),
 //	)
@@ -52,7 +53,7 @@ func WithIndexURL(url string) func(*PipInstall) {
 //
 // Example:
 //
-//	image := daytona.Base("python:3.11").PipInstall(
+//	image := cogbox.Base("python:3.11").PipInstall(
 //	    []string{"mypackage"},
 //	    options.WithExtraIndexURLs("https://private.example.com/simple/"),
 //	)
@@ -66,7 +67,7 @@ func WithExtraIndexURLs(urls ...string) func(*PipInstall) {
 //
 // Example:
 //
-//	image := daytona.Base("python:3.11").PipInstall(
+//	image := cogbox.Base("python:3.11").PipInstall(
 //	    []string{"mypackage"},
 //	    options.WithPre(),
 //	)
@@ -82,7 +83,7 @@ func WithPre() func(*PipInstall) {
 //
 // Example:
 //
-//	image := daytona.Base("python:3.11").PipInstall(
+//	image := cogbox.Base("python:3.11").PipInstall(
 //	    []string{"mypackage"},
 //	    options.WithExtraOptions("--no-cache-dir --upgrade"),
 //	)

@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 import os
@@ -8,15 +9,7 @@ import time
 import requests
 from dotenv import load_dotenv
 
-from daytona import (
-    CreateSandboxFromImageParams,
-    Daytona,
-    DaytonaConfig,
-    GpuType,
-    Image,
-    Resources,
-    SessionExecuteRequest,
-)
+from cogbox import Cogbox, CogboxConfig, CreateSandboxFromImageParams, GpuType, Image, Resources, SessionExecuteRequest
 
 load_dotenv()
 
@@ -28,10 +21,10 @@ TARGET = "us-east-1"  # current region for GPU sandboxes
 SESSION = "sglang"  # name of the background session the server runs in
 BOOT_TIMEOUT = 900  # max seconds to wait for the server to come up
 
-daytona = Daytona(DaytonaConfig(target=TARGET))
+cogbox = Cogbox(CogboxConfig(target=TARGET))
 env_vars = {"HF_TOKEN": os.environ["HF_TOKEN"]} if os.environ.get("HF_TOKEN") else {}
 print(f"creating GPU sandbox from {SGLANG_IMAGE} ...", flush=True)
-sb = daytona.create(
+sb = cogbox.create(
     CreateSandboxFromImageParams(
         image=Image.base(SGLANG_IMAGE),
         resources=Resources(
@@ -75,7 +68,7 @@ try:
     cmd_id = cmd.cmd_id
 
     pv = sb.get_preview_link(PORT)
-    hdr = {"x-daytona-preview-token": pv.token}
+    hdr = {"x-cogbox-preview-token": pv.token}
     print(f"preview: {pv.url}  (waiting for /health_generate, up to {BOOT_TIMEOUT}s)", flush=True)
 
     deadline = time.time() + BOOT_TIMEOUT
@@ -114,5 +107,5 @@ finally:
     # auto_stop_interval=0 keeps it from idle-stopping; on failure this also
     # preserves the downloaded weights. Reconnect to reuse, delete when done.
     print(f"\nsandbox left UP: {sb.id}", flush=True)
-    print(f"  reconnect:  daytona.get('{sb.id}')", flush=True)
-    print(f"  delete:     daytona.get('{sb.id}').delete()", flush=True)
+    print(f"  reconnect:  cogbox.get('{sb.id}')", flush=True)
+    print(f"  delete:     cogbox.get('{sb.id}').delete()", flush=True)

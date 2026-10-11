@@ -1,5 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -76,7 +77,7 @@ const getBrowserLocalStorage: StorageStateStorageProvider = () => {
   return window.localStorage
 }
 
-const STORAGE_STATE_CHANGE_EVENT = 'daytona:storage-state-change'
+const STORAGE_STATE_CHANGE_EVENT = 'cogbox:storage-state-change'
 
 function useStorageState<TValue>(
   key: string,

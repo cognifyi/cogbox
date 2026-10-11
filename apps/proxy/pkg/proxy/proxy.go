@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package proxy
@@ -35,9 +36,9 @@ type RunnerInfo struct {
 	ApiKey string `json:"apiKey"`
 }
 
-const SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
-const SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
-const SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
+const SANDBOX_AUTH_KEY_HEADER = "X-Cogbox-Preview-Token"
+const SANDBOX_AUTH_KEY_QUERY_PARAM = "COGBOX_SANDBOX_AUTH_KEY"
+const SANDBOX_AUTH_COOKIE_NAME = "cogbox-sandbox-auth-"
 
 // SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS bounds both the auth cookie's browser
 // Max-Age and the shared securecookie signer's server-side acceptance window.
@@ -45,8 +46,8 @@ const SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
 // cookie value for its 30-day default, well past the 1h the browser is told.
 const SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS = 3600
 
-const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
-const ACTIVITY_POLL_STOP_KEY = "daytona-activity-poll-stop"
+const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Cogbox-Skip-Last-Activity-Update"
+const ACTIVITY_POLL_STOP_KEY = "cogbox-activity-poll-stop"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
 const RECORDING_DASHBOARD_PORT = "33333"
@@ -166,8 +167,8 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 	}))
 
 	router.Use(func(ctx *gin.Context) {
-		if ctx.Request.Header.Get("X-Daytona-Disable-CORS") == "true" {
-			ctx.Request.Header.Del("X-Daytona-Disable-CORS")
+		if ctx.Request.Header.Get("X-Cogbox-Disable-CORS") == "true" {
+			ctx.Request.Header.Del("X-Cogbox-Disable-CORS")
 			return
 		}
 

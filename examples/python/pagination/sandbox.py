@@ -1,10 +1,10 @@
-from daytona import Daytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
+from cogbox import Cogbox, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 def main():
-    daytona = Daytona()
+    cogbox = Cogbox()
 
-    for sandbox in daytona.list(
+    for sandbox in cogbox.list(
         ListSandboxesQuery(
             limit=10,
             labels={"env": "dev"},

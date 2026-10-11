@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package types
@@ -42,15 +43,15 @@ const (
 	SandboxClassAndroid   SandboxClass = apiclient.SANDBOXCLASS_ANDROID
 )
 
-// ExperimentalConfig holds experimental feature flags for the Daytona client.
+// ExperimentalConfig holds experimental feature flags for the Cogbox client.
 type ExperimentalConfig struct {
-	// Deprecated: use DaytonaConfig.OtelEnabled. Kept for backwards compatibility.
+	// Deprecated: use CogboxConfig.OtelEnabled. Kept for backwards compatibility.
 	OtelEnabled bool
 }
 
-// DaytonaConfig represents the configuration for the Daytona client.
+// CogboxConfig represents the configuration for the Cogbox client.
 // When a field is nil, the client will fall back to environment variables or defaults.
-type DaytonaConfig struct {
+type CogboxConfig struct {
 	APIKey         string
 	JWTToken       string
 	OrganizationID string
@@ -131,7 +132,7 @@ type PaginatedSnapshots struct {
 	TotalPages int
 }
 
-// Volume represents a Daytona volume
+// Volume represents a Cogbox volume
 type Volume struct {
 	ID             string    `json:"id"`
 	Name           string    `json:"name"`
@@ -143,7 +144,7 @@ type Volume struct {
 	LastUsedAt     time.Time `json:"lastUsedAt,omitempty"`
 }
 
-// Snapshot represents a Daytona snapshot
+// Snapshot represents a Cogbox snapshot
 type Snapshot struct {
 	ID             string     `json:"id"`
 	OrganizationID string     `json:"organizationId,omitempty"`

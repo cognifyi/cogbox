@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -7,7 +8,7 @@ import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermi
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
 import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
-import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytona/api-client'
+import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@cogbox/api-client'
 
 import {
   ColumnDef,
@@ -139,11 +140,11 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: Da
               description={
                 hasSearch ? null : (
                   <div className="space-y-2">
-                    <p>API Keys authenticate requests made through the Daytona SDK or CLI.</p>
+                    <p>API Keys authenticate requests made through the Cogbox SDK or CLI.</p>
                     <p>
                       Generate one and{' '}
                       <a
-                        href="https://www.daytona.io/docs/api-keys"
+                        href="https://cogbox.pazity.com/docs/api-keys"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-foreground hover:underline"

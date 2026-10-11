@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -44,7 +45,7 @@ export class CreateSandboxDto {
 
   @ApiPropertyOptional({
     description: 'The user associated with the project',
-    example: 'daytona',
+    example: 'cogbox',
   })
   @IsOptional()
   @IsString()
@@ -64,7 +65,7 @@ export class CreateSandboxDto {
     description: 'Labels for the sandbox',
     type: 'object',
     additionalProperties: { type: 'string' },
-    example: { 'daytona.io/public': 'true' },
+    example: { 'cogbox.pazity.com/public': 'true' },
   })
   @IsOptional()
   @IsObject()
@@ -96,7 +97,7 @@ export class CreateSandboxDto {
 
   @ApiPropertyOptional({
     description: 'Comma-separated list of allowed domains for the sandbox',
-    example: 'example.com,*.daytona.io',
+    example: 'example.com,*.cogbox.pazity.com',
   })
   @IsOptional()
   @IsString()

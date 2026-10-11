@@ -1,4 +1,5 @@
 # Copyright Daytona Platforms Inc.
+# Copyright Cognifyi
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -7,12 +8,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from daytona.common.git import GitCommitResponse
+from cogbox.common.git import GitCommitResponse
 
 
 class TestSyncGit:
     def _make_git(self):
-        from daytona._sync.git import Git
+        from cogbox._sync.git import Git
 
         mock_api = MagicMock()
         return Git(mock_api), mock_api
@@ -133,7 +134,7 @@ class TestSyncGit:
 
 class TestAsyncGit:
     def _make_git(self):
-        from daytona._async.git import AsyncGit
+        from cogbox._async.git import AsyncGit
 
         mock_api = AsyncMock()
         return AsyncGit(mock_api), mock_api

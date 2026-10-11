@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 // Package options provides functional option types for configuring SDK operations.
@@ -49,7 +50,7 @@ func Apply[T any](opts ...func(*T)) *T {
 	return result
 }
 
-// GitClone holds optional parameters for [daytona.GitService.Clone].
+// GitClone holds optional parameters for [cogbox.GitService.Clone].
 //
 // Fields are pointers to distinguish between unset values and zero values.
 // Use the corresponding With* functions to set these options.
@@ -137,7 +138,7 @@ func WithInsecureSkipTLS(insecureSkipTLS bool) func(*GitClone) {
 	}
 }
 
-// GitCommit holds optional parameters for [daytona.GitService.Commit].
+// GitCommit holds optional parameters for [cogbox.GitService.Commit].
 type GitCommit struct {
 	AllowEmpty *bool // Allow creating commits with no staged changes
 }
@@ -158,7 +159,7 @@ func WithAllowEmpty(allowEmpty bool) func(*GitCommit) {
 	}
 }
 
-// GitDeleteBranch holds optional parameters for [daytona.GitService.DeleteBranch].
+// GitDeleteBranch holds optional parameters for [cogbox.GitService.DeleteBranch].
 type GitDeleteBranch struct {
 	Force *bool // Force delete even if branch is not fully merged
 }
@@ -179,7 +180,7 @@ func WithForce(force bool) func(*GitDeleteBranch) {
 	}
 }
 
-// GitPush holds optional parameters for [daytona.GitService.Push].
+// GitPush holds optional parameters for [cogbox.GitService.Push].
 type GitPush struct {
 	Username *string // Username for HTTPS authentication
 	Password *string // Password or token for HTTPS authentication
@@ -213,7 +214,7 @@ func WithPushPassword(password string) func(*GitPush) {
 	}
 }
 
-// GitPull holds optional parameters for [daytona.GitService.Pull].
+// GitPull holds optional parameters for [cogbox.GitService.Pull].
 type GitPull struct {
 	Username *string // Username for HTTPS authentication
 	Password *string // Password or token for HTTPS authentication

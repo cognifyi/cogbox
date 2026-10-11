@@ -1,5 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Cognifyi
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -13,7 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { OrganizationInvitation } from '@daytona/api-client'
+import { OrganizationInvitation } from '@cogbox/api-client'
 
 interface OrganizationInvitationActionDialogProps {
   invitation: OrganizationInvitation

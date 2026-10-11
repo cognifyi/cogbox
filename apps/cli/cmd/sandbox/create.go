@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: AGPL-3.0
 
 package sandbox
@@ -183,7 +184,7 @@ var CreateCmd = &cobra.Command{
 		boldStyle := lipgloss.NewStyle().Bold(true)
 
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox '%s' created successfully", sandbox.Name))
-		views_common.RenderInfoMessage(fmt.Sprintf("Connect via SSH:         %s", boldStyle.Render(fmt.Sprintf("daytona ssh %s", sandbox.Name))))
+		views_common.RenderInfoMessage(fmt.Sprintf("Connect via SSH:         %s", boldStyle.Render(fmt.Sprintf("cogbox ssh %s", sandbox.Name))))
 		views_common.RenderInfoMessage(fmt.Sprintf("Open the Web Terminal:   %s\n", views_common.LinkStyle.Render(previewUrl.Url)))
 		return nil
 	},

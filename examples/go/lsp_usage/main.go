@@ -1,4 +1,5 @@
 // Copyright 2025 Daytona Platforms Inc.
+// Copyright Cognifyi
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -8,14 +9,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/daytona"
+	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/cogbox"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/options"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/types"
 )
 
 func main() {
-	// Create Daytona client
-	client, err := daytona.NewClient()
+	// Create Cogbox client
+	client, err := cogbox.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -72,7 +73,7 @@ if __name__ == "__main__":
 
 	// Create LSP server for Python
 	log.Println("\nCreating LSP server for Python...")
-	lsp := daytona.NewLspServerService(sandbox.ToolboxClient, types.LspLanguagePython, workDir, client.Otel)
+	lsp := cogbox.NewLspServerService(sandbox.ToolboxClient, types.LspLanguagePython, workDir, client.Otel)
 
 	// Start the LSP server
 	log.Println("Starting LSP server...")
