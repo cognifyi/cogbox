@@ -9,18 +9,18 @@ SECURITY.md
 CODE_OF_CONDUCT.md
 
 # CI/CD pipelines and composite actions
-.github/workflows/         @Tpuljak
-.github/actions/           @Tpuljak
+.github/workflows/         @Cognifyi
+.github/actions/           @Cognifyi
 
 # Dependency and supply chain configuration
-.github/dependabot.yml     @Tpuljak
-.yarnrc.yml                @Tpuljak
-.npmrc                     @Tpuljak
+.github/dependabot.yml     @Cognifyi
+.yarnrc.yml                @Cognifyi
+.npmrc                     @Cognifyi
 
 # Linting and license enforcement (security-relevant)
-.github/actionlint.yaml    @Tpuljak
-.licenserc.yaml            @Tpuljak
-.licenserc-clients.yaml    @Tpuljak
+.github/actionlint.yaml    @Cognifyi
+.licenserc.yaml            @Cognifyi
+.licenserc-clients.yaml    @Cognifyi
 
 # CODEOWNERS itself (must protect itself)
-.github/CODEOWNERS         @Tpuljak
+.github/CODEOWNERS         @Cognifyi
