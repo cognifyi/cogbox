@@ -24,7 +24,7 @@ RUN python3 -m pip install --no-cache-dir pipx==1.8.0 && pipx ensurepath && pipx
 # (sdk_publish workflow) before building images, and bump together.
 RUN python3 -m pip install --no-cache-dir \
     python-lsp-server==1.14.0 \
-    cogbox==0.190.1 \
+    cogbox==0.190.2-dev \
     matplotlib==3.10.8 \
     pandas==2.2.3 \
     numpy==2.2.6

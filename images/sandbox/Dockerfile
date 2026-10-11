@@ -63,7 +63,7 @@ RUN python3 -m pip install --no-cache-dir \
     sqlalchemy==2.0.46 \
     # NOTE: must match a published cogbox PyPI version - publish the SDK
     # (sdk_publish workflow) before building images, and bump together.
-    cogbox==0.190.1 \
+    cogbox==0.190.2-dev \
     pydantic-ai==1.47.0 \
     langchain==1.2.7 \
     transformers==4.57.6 \
