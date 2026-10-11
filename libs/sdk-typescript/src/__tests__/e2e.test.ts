@@ -369,10 +369,9 @@ describe('TypeScript SDK E2E (real Cogbox API)', () => {
       console.log('[E2E][FS] Setting file permissions...')
       await sandbox.fs.uploadFile(Buffer.from('script'), 'fs-test/perm-test.txt')
       await sandbox.fs.setFilePermissions('fs-test/perm-test.txt', {
-        // TODO(rename): use cogbox/cogbox once sandbox images ship the cogbox user (images predate the rename)
         mode: '644',
-        owner: 'daytona',
-        group: 'daytona',
+        owner: 'cogbox',
+        group: 'cogbox',
       })
       // Verify by checking the file still exists (permission change succeeds without error)
       const details = await sandbox.fs.getFileDetails('fs-test/perm-test.txt')
