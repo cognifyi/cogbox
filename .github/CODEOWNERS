@@ -5,22 +5,22 @@
 # so listed owners must approve before merge.
 
 # Security and compliance policies (CISO-owned)
-SECURITY.md                @daytonaio/security
-CODE_OF_CONDUCT.md         @daytonaio/security
+SECURITY.md
+CODE_OF_CONDUCT.md
 
 # CI/CD pipelines and composite actions
-.github/workflows/         @daytonaio/security @Tpuljak
-.github/actions/           @daytonaio/security @Tpuljak
+.github/workflows/         @Cognifyi
+.github/actions/           @Cognifyi
 
 # Dependency and supply chain configuration
-.github/dependabot.yml     @daytonaio/security @Tpuljak
-.yarnrc.yml                @daytonaio/security @Tpuljak
-.npmrc                     @daytonaio/security @Tpuljak
+.github/dependabot.yml     @Cognifyi
+.yarnrc.yml                @Cognifyi
+.npmrc                     @Cognifyi
 
 # Linting and license enforcement (security-relevant)
-.github/actionlint.yaml    @daytonaio/security @Tpuljak
-.licenserc.yaml            @daytonaio/security @Tpuljak
-.licenserc-clients.yaml    @daytonaio/security @Tpuljak
+.github/actionlint.yaml    @Cognifyi
+.licenserc.yaml            @Cognifyi
+.licenserc-clients.yaml    @Cognifyi
 
 # CODEOWNERS itself (must protect itself)
-.github/CODEOWNERS         @daytonaio/security @Tpuljak
+.github/CODEOWNERS         @Cognifyi
