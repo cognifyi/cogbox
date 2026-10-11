@@ -19,8 +19,6 @@
     <a href="https://cogbox.pazity.com/docs"> Documentation </a>·
     <a href="https://github.com/cognifyi/cogbox/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+"> Report Bug </a>·
     <a href="https://github.com/cognifyi/cogbox/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+"> Request Feature </a>·
-    <a href="https://go.cogbox.pazity.com/slack"> Join our Slack </a>·
-    <a href="https://x.com/daytonaio"> Connect on X </a>
 </p>
 
 &nbsp;
@@ -40,17 +38,6 @@ Cogbox provides an extensive set of features and tools for interacting with sand
 - **Agent tools**: programmatic capabilities for application code, agents, and integrations
 - **Human tools**: interfaces and remote sessions for interacting with sandboxes
 - **System tools**: platform-level hooks and controls for lifecycle events and network access
-
-| Platform                                                                   | Sandboxes                                                               | Agent tools                                                                       | Human tools                                                               | System tools                                                  |
-| :------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------ |
-| [Organizations](https://cogbox.pazity.com/docs/organizations/)                | [Environment](https://cogbox.pazity.com/docs/configuration/)               | [Process & code execution](https://cogbox.pazity.com/docs/process-code-execution/)   | [Dashboard](https://cogbox.pazity.com/docs/getting-started#dashboard)        | [Webhooks](https://cogbox.pazity.com/docs/webhooks/)             |
-| [API Keys](https://cogbox.pazity.com/docs/api-keys/)                          | [Snapshots](https://cogbox.pazity.com/docs/snapshots/)                     | [File system operations](https://cogbox.pazity.com/docs/file-system-operations/)     | [Web terminal](https://cogbox.pazity.com/docs/web-terminal/)                 | [Network limits](https://cogbox.pazity.com/docs/network-limits/) |
-| [Limits](https://cogbox.pazity.com/docs/limits/)                              | [Declarative builder](https://cogbox.pazity.com/docs/declarative-builder/) | [Language server protocol](https://cogbox.pazity.com/docs/language-server-protocol/) | [SSH access](https://cogbox.pazity.com/docs/ssh-access/)                     |                                                               |
-| [Billing](https://cogbox.pazity.com/docs/billing/)                            | [Volumes](https://cogbox.pazity.com/docs/volumes/)                         | [Computer use](https://cogbox.pazity.com/docs/computer-use/)                         | [VNC access](https://cogbox.pazity.com/docs/vnc-access/)                     |                                                               |
-| [Audit logs](https://cogbox.pazity.com/docs/audit-logs/)                      | [Regions](https://cogbox.pazity.com/docs/regions/)                         | [MCP server](https://cogbox.pazity.com/docs/mcp/)                                    | [VPN connection](https://cogbox.pazity.com/docs/vpn-connections/)            |                                                               |
-| [OpenTelemetry](https://cogbox.pazity.com/docs/experimental/otel-collection/) |                                                                         | [Git operations](https://cogbox.pazity.com/docs/git-operations/)                     | [Preview](https://cogbox.pazity.com/docs/preview/)                           |                                                               |
-| [Integrations](https://cogbox.pazity.com/docs/guides/)                        |                                                                         | [Pseudo terminal (PTY)](https://cogbox.pazity.com/docs/pty/)                         | [Custom preview proxy](https://cogbox.pazity.com/docs/custom-preview-proxy/) |                                                               |
-| [Security exhibit](https://cogbox.pazity.com/docs/security-exhibit/)          |                                                                         | [Log streaming](https://cogbox.pazity.com/docs/log-streaming/)                       | [Playground](https://cogbox.pazity.com/docs/playground/)                     |                                                               |
 
 ## Architecture
 

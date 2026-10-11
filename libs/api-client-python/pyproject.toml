@@ -3,7 +3,7 @@ name = "cogbox_api_client"
 version = "0.0.0-dev"
 description = "Cogbox"
 authors = [
-  {name = "Cogbox Platforms Inc.",email = "support@cogbox.com"},
+  {name = "Cogbox Platforms Inc.",email = "support@pazity.com"},
 ]
 license = { text = "Apache-2.0" }
 readme = "README.md"

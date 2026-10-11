@@ -6,17 +6,14 @@
 
 export function Logo(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="27" height="28" fill="currentColor" viewBox="0 0 27 28" {...props}>
-      <g clipPath="url(#a)">
-        <path d="M11.213 18.712H1.575v3.282h9.638v-3.282ZM25.53 7.223H14.516v3.283H25.53V7.223ZM16.911.111 8.733 8.235l2.337 2.321 8.177-8.124-2.336-2.32Z" />
-        <path d="m2.503 10.202 6.28 6.239-2.336 2.321-6.28-6.239 2.336-2.32Zm7.922 17.407 6.62-6.576-2.337-2.321-6.62 6.576 2.337 2.321Zm13.969-7.432-7.4-7.35 2.337-2.321 7.4 7.35-2.337 2.32ZM8.733 12.694V4.762H5.43v7.932h3.304Z" />
-        <path d="M20.3 26.097V16.25h-3.305v9.847h3.304Z" />
-      </g>
-      <defs>
-        <clipPath id="a">
-          <path d="M0 0h27v28H0z" />
-        </clipPath>
-      </defs>
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 100 100" {...props}>
+      <path
+        d="M50,6 L88,28 L88,72 L50,94 L12,72 L12,28 Z M12,28 L50,50 L88,28 M50,50 L50,94"
+        stroke="currentColor"
+        strokeWidth="9"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }

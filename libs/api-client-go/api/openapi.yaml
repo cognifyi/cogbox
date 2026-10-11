@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   contact:
-    email: support@cogbox.com
+    email: support@pazity.com
     name: Cogbox Platforms Inc.
     url: https://cogbox.pazity.com
   description: Cogbox AI platform API Docs

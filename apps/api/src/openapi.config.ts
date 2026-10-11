@@ -11,7 +11,7 @@ const getOpenApiConfig = (oidcIssuer: string) =>
     .setTitle('Cogbox')
     .addServer('http://localhost:3000')
     .setDescription('Cogbox AI platform API Docs')
-    .setContact('Cogbox Platforms Inc.', 'https://cogbox.pazity.com', 'support@cogbox.com')
+    .setContact('Cogbox Platforms Inc.', 'https://cogbox.pazity.com', 'support@pazity.com')
     .setVersion('1.0')
     .setLicense('Apache-2.0', 'https://www.apache.org/licenses/LICENSE-2.0')
     .addBearerAuth({
