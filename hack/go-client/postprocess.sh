@@ -36,4 +36,10 @@ sed -i "s|UserAgent: *\"[^\"]*\"|UserAgent:        \"${CLIENT_NAME}/\" + ClientV
 GO_VERSION="$(awk '/^go /{print $2; exit}' go.work)"
 sed -i -E "s/^go 1\.[0-9]+(\.[0-9]+)?/go ${GO_VERSION}/" "$PROJECT_ROOT/go.mod"
 
+# Use the canonical reflect.Pointer instead of the legacy reflect.Ptr alias
+# (flagged by govet's inline analyzer in recent golangci-lint versions).
+(grep -rl 'reflect\.Ptr\b' "$PROJECT_ROOT" --include='*.go' || true) | while read -r f; do
+  sed -i -E 's/reflect\.Ptr\b/reflect.Pointer/g' "$f"
+done
+
 echo "Postprocessed Go client at $PROJECT_ROOT"
