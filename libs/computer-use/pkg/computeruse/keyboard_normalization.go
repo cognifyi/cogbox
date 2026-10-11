@@ -7,6 +7,7 @@ package computeruse
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -458,13 +459,13 @@ func hotkeyContext(raw string) string {
 func pressContext(key string, modifiers []string) string {
 	var builder strings.Builder
 	builder.WriteString("press(")
-	builder.WriteString(fmt.Sprintf("%q", key))
+	builder.WriteString(strconv.Quote(key))
 	builder.WriteString(", [")
 	for i, modifier := range modifiers {
 		if i > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString(fmt.Sprintf("%q", modifier))
+		builder.WriteString(strconv.Quote(modifier))
 	}
 	builder.WriteString("])")
 	return builder.String()

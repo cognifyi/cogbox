@@ -40,7 +40,7 @@
       "dependsOn": [
         {
           "target": "openapi",
-          "projects": "api"
+          "projects": ["api", "daemon", "runner"]
         }
       ]
     },
