@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cogbox-control.fullname" . }}-api
+  labels:
+    {{- include "cogbox-control.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cogbox-control
+      app.kubernetes.io/component: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-control
+        app.kubernetes.io/component: api
+      annotations:
+        # Roll pods whenever ANY value changes: env comes from ConfigMap/Secret
+        # refs by name, so content changes alone would never trigger a rollout.
+        checksum/values: {{ toYaml .Values | sha256sum }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default (include "cogbox-control.fullname" .) }}
+      containers:
+        - name: api
+          image: {{ include "cogbox-control.image" . | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "cogbox-control.fullname" . }}-config
+            - secretRef:
+                name: {{ include "cogbox-control.secretName" . }}
+          env:
+            - name: PORT
+              value: {{ .Values.api.port | quote }}
+            - name: NODE_ENV
+              value: production
+            - name: RUN_MIGRATIONS
+              value: "false"
+          # Liveness is public; readiness checks DB+Redis and needs the key.
+          livenessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >-
+                  curl -sf -H "Authorization: Bearer $HEALTH_CHECK_API_KEY"
+                  http://localhost:$PORT/api/health/ready
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+{{- if .Values.api.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "cogbox-control.fullname" . }}-api
+  labels:
+    {{- include "cogbox-control.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.api.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cogbox-control
+      app.kubernetes.io/component: api
+{{- end }}

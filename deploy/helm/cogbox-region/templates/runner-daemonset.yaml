@@ -1,0 +1,133 @@
+{{- /*
+Runner pool. Privileged DaemonSet on tainted runner nodes.
+REQUIRES GKE Standard (or any K8s allowing privileged pods) — Autopilot forbids this.
+An init container bootstraps the host container runtime from inside the pod
+(nsenter into the host: install Docker + sandbox-capable OCI runtime, write
+daemon.json with inter-container communication disabled and your DNS).
+Capacity: keep MIN_RUNNERS warm via your provisioner; Cluster Autoscaler /
+Karpenter grows the node pool from pending runner pods.
+*/ -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-runner
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: runner
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cogbox-region
+      app.kubernetes.io/component: runner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-region
+        app.kubernetes.io/component: runner
+        cogbox.io/region: {{ .Values.regionName | quote }}
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      initContainers:
+        - name: runtime-installer
+          image: ubuntu:24.04
+          securityContext:
+            privileged: true
+          # NOTE: nsenter switches to the HOST mount namespace before exec, so
+          # the script path itself is invisible there. The `<` redirect is
+          # evaluated by the outer (container) shell where the ConfigMap
+          # mount exists; the script body flows to the host-side bash via stdin.
+          # Keep the script self-contained (no relative file references).
+          command: ["/bin/bash", "-c"]
+          args:
+            - >-
+              nsenter --mount=/host/proc/1/ns/mnt --net=/host/proc/1/ns/net --
+              bash -s < /opt/cogbox/install-runtime.sh
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+            - name: installer
+              mountPath: /opt/cogbox
+      containers:
+        - name: runner
+          image: {{ include "cogbox-region.image" (dict "repository" .Values.runner.repository "Values" .Values) | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          securityContext:
+            privileged: true
+          ports:
+            - name: api
+              containerPort: {{ .Values.runner.apiPort }}
+              hostPort: {{ .Values.runner.apiPort }}
+            - name: ssh
+              containerPort: 2220
+              hostPort: 2220
+          env:
+            - name: COGBOX_API_URL
+              value: {{ .Values.controlPlaneApiUrl | quote }}
+            - name: COGBOX_RUNNER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: RUNNER_TOKEN
+            - name: API_PORT
+              value: {{ .Values.runner.apiPort | quote }}
+            {{- if .Values.runner.domain }}
+            - name: RUNNER_DOMAIN
+              value: {{ .Values.runner.domain | quote }}
+            {{- end }}
+            - name: SSH_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SSH_PUBLIC_KEY
+            {{- range $k, $v := .Values.runner.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cogbox
+            {{- if .Values.runner.hostPaths.dockerSock.enabled }}
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+            {{- end }}
+          resources:
+            {{- toYaml .Values.runner.resources | nindent 12 }}
+      volumes:
+        - name: host-root
+          hostPath: { path: /, type: Directory }
+        - name: installer
+          configMap:
+            name: {{ include "cogbox-region.fullname" . }}-runtime-installer
+        - name: data
+          hostPath:
+            path: {{ .Values.runner.hostPaths.varLibCogbox }}
+            type: DirectoryOrCreate
+        {{- if .Values.runner.hostPaths.dockerSock.enabled }}
+        - name: docker-sock
+          hostPath:
+            path: {{ .Values.runner.hostPaths.dockerSock.path }}
+            type: Socket
+        {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-runtime-installer
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+data:
+  install-runtime.sh: |
+    #!/bin/bash
+    # Runs on the HOST via nsenter. Idempotent: safe to re-run on every rollout.
+    set -euo pipefail
+    # 1. Install Docker + sandbox-capable OCI runtime if missing (pin versions!).
+    # 2. Write /etc/docker/daemon.json:
+    #      {"icc": false, "live-restore": true, "dns": ["YOUR_DNS_1", "YOUR_DNS_2"]}
+    #    icc:false = no inter-container communication (sandbox isolation).
+    #    live-restore = running sandboxes survive dockerd restarts during rolls.
+    # 3. Restart dockerd ONLY if daemon.json changed.
+    # Operate this script per OS image of your node pool (Ubuntu/COS notes in docs).
+    echo "runtime installer placeholder - replace with your node image script"

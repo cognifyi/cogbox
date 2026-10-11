@@ -1,0 +1,134 @@
+# Default values for cogbox-region.
+# Install ONE release per region: shared, dedicated, or custom.
+# Region credentials (PROXY_API_KEY, SSH key, snapshot creds, runner token)
+# come from the control-plane region registration — see secrets.* below.
+
+imageRegistry: cognifyi
+imageTag: "v0.190.3"
+imageDigest: ""
+imagePullPolicy: IfNotPresent
+
+# Must match the region name registered in the control plane (POST /regions).
+regionName: shared-us
+controlPlaneApiUrl: https://cogbox.example.com/api
+
+# Runner nodes are tainted cogbox.io/runner=NoSchedule and labeled per region.
+# The DaemonSet tolerates the taint; nothing else schedules there.
+nodeSelector:
+  cogbox.io/region: shared-us
+  cogbox.io/pool: standard
+tolerations:
+  - key: cogbox.io/runner
+    operator: Exists
+    effect: NoSchedule
+
+proxy:
+  repository: cogbox-proxy
+  replicaCount: 2
+  port: 4000
+  protocol: https
+  # Bare hostname. The wildcard (for {{PORT}}-{{sandboxId}} previews) is derived:
+  # proxy.example.com -> *.proxy.example.com
+  host: proxy.example.com
+  cookieDomain: example.com
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+    tlsSecret: proxy-wildcard-tls
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    cpuUtilization: 70
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 1000m, memory: 1Gi }
+  toolboxOnlyMode: false
+  previewWarningEnabled: false
+  shutdownTimeoutSec: 3600
+
+snapshotManager:
+  enabled: true
+  repository: cogbox-snapshot-manager
+  replicaCount: 1
+  port: 5000
+  host: snapshots.example.com
+  ingress:
+    className: nginx
+    clusterIssuer: public-http01
+    tlsSecret: snapshots-tls
+  storage:
+    # filesystem (PVC, default) or s3. Use s3 ONLY against a real S3 API —
+    # the registry driver needs full multipart semantics. On GCP the safe
+    # default is filesystem on a regional persistent disk.
+    driver: filesystem
+    size: 200Gi
+    storageClass: ""
+    deleteEnabled: true
+    s3:
+      region: auto
+      bucket: ""
+      endpoint: https://storage.googleapis.com
+      encrypt: false
+      secure: true
+      rootDirectory: snapshots
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 2Gi }
+
+runner:
+  repository: cogbox-runner
+  apiPort: 3003
+  # Advertised runner hostname (validated as hostname|ip — region IDs with
+  # underscores are NOT valid here). Leave empty to omit; runners self-report
+  # via healthcheck. Set to a real node/hostname only if your topology needs it.
+  domain: ""
+  # Pool token for pilot. Scaled pattern: per-node tokens issued via admin API
+  # and distributed by your runner provisioner; rotate regularly.
+  resources:
+    requests: { cpu: 1000m, memory: 2Gi }
+    limits: { cpu: 4000m, memory: 8Gi }
+  env:
+    ENVIRONMENT: production
+    CONTAINER_RUNTIME: sysbox-runc
+    RESOURCE_LIMITS_DISABLED: "false"
+    INTER_SANDBOX_NETWORK_ENABLED: "false"
+    SSH_GATEWAY_ENABLE: "true"
+    SSH_GATEWAY_PORT: "2220"
+    BUILD_ENGINE: buildkit
+    AWS_REGION: auto
+    AWS_ENDPOINT_URL: https://storage.googleapis.com
+    AWS_DEFAULT_BUCKET: cogbox-region-shared-us
+  # Host paths the runner needs (Docker data + sandbox volumes).
+  hostPaths:
+    varLibCogbox: /var/lib/cogbox
+    # Host Docker socket: the runner drives the HOST Docker daemon to spawn
+    # sandbox containers. Requires Docker installed on runner nodes (job of the
+    # runtime-installer). Disable on runtimes without host Docker (e.g. kind
+    # smoke tests) — sandboxes can't actually run there anyway.
+    dockerSock:
+      enabled: true
+      path: /var/run/docker.sock
+
+sshGateway:
+  repository: cogbox-ssh-gateway
+  replicaCount: 2
+  port: 2222
+  # Raw TCP — LoadBalancer, NOT behind Ingress.
+  serviceType: LoadBalancer
+
+# --- Secrets ---
+# Same three modes as cogbox-control. Keys are per-REGION (from registration):
+# PROXY_API_KEY, SSH_API_KEY, SNAP_USER, SNAP_PASS, RUNNER_TOKEN,
+# SSH_PRIVATE_KEY, SSH_HOST_KEY, SSH_PUBLIC_KEY (runner pool copy).
+secrets:
+  useExternalSecrets: false
+  externalSecretsStore: secretstore-gcp
+  existingSecret: ""
+  createFromValues: false
+  values: {}
+    # PROXY_API_KEY: ...
+    # SSH_API_KEY: ...
+    # SNAP_USER: ...
+    # SNAP_PASS: ...
+    # RUNNER_TOKEN: ...

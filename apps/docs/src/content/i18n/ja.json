@@ -102,5 +102,7 @@
   "sidebarconfig.verl": "veRL",
   "sidebarconfig.pty": "擬似ターミナル (PTY)",
   "sidebarconfig.ptyDescription": "CogboxのTS SDK / Python SDKを使用して、サンドボックス（Cogboxが管理する隔離された一時的な実行環境）でPTYセッションを管理する方法を学びます。",
-  "sidebarconfig.amp": "Amp Code"
+  "sidebarconfig.amp": "Amp Code",
+  "sidebarconfig.multitenantProduction": "マルチテナント本番環境",
+  "sidebarconfig.multitenantProductionDescription": "Kubernetes上での動的スケーリングを備えたマルチテナント本番デプロイ。"
 }

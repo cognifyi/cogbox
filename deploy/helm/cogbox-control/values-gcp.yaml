@@ -1,0 +1,65 @@
+# GCP landing zone overrides for cogbox-control.
+# Target: GKE Standard cluster + Cloud SQL + Memorystore + GCS + Cloud DNS.
+# WARNING: GKE Autopilot forbids privileged pods, so runner node pools
+# (deploy/helm/cogbox-region) REQUIRE GKE Standard. Run control plane on
+# a small system node pool; runners on a separate tainted pool.
+
+imagePullPolicy: IfNotPresent
+
+domain: example.com
+
+proxyDefaults:
+  protocol: https
+  domain: proxy.example.com
+  # templateUrl defaults to "https://{{PORT}}-{{sandboxId}}.proxy.example.com"
+  # (the {{PORT}}/{{sandboxId}} placeholders are Cogbox's, not Helm's).
+
+api:
+  ingress:
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: public-http01
+
+db:
+  # Cloud SQL private IP (private-services-access). TLS on, verify on.
+  host: 10.20.0.3
+  port: 5432
+  database: cogbox
+  username: cogbox
+  tlsEnabled: true
+  tlsRejectUnauthorized: true
+
+redis:
+  # Memorystore for Redis Cluster basic tier, private IP, AUTH enabled.
+  host: 10.20.0.4
+  port: 6379
+
+oidc:
+  # Option A (managed, recommended pilot): Keycloak on the same cluster.
+  # Option B: Auth0 tenant (set issuerBaseUrl/publicDomain/audience from Auth0).
+  issuerBaseUrl: https://keycloak.example.com/realms/cogbox
+  publicDomain: https://keycloak.example.com/realms/cogbox
+
+s3:
+  # GCS XML interop endpoint with per-service-account HMAC keys
+  # (stored in Secret Manager, synced via External Secrets).
+  endpoint: https://storage.googleapis.com
+  stsEndpoint: https://storage.googleapis.com
+  region: auto
+  defaultBucket: cogbox-platform
+
+# Boot-required registries: use Artifact Registry's Docker protocol
+# endpoints (one repo for transient snapshots, one for internal images).
+registry:
+  transient:
+    url: https://asia-east1-docker.pkg.dev/PROJECT/cogbox-transient
+    admin: _json_key_base64
+    projectId: cogbox
+  internal:
+    url: https://asia-east1-docker.pkg.dev/PROJECT/cogbox-internal
+    admin: _json_key_base64
+    projectId: cogbox
+
+secrets:
+  useExternalSecrets: true
+  externalSecretsStore: secretstore-gcp

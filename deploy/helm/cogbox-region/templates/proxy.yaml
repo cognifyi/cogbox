@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-proxy
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: proxy
+spec:
+  replicas: {{ .Values.proxy.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cogbox-region
+      app.kubernetes.io/component: proxy
+      cogbox.io/region: {{ .Values.regionName | quote }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-region
+        app.kubernetes.io/component: proxy
+        cogbox.io/region: {{ .Values.regionName | quote }}
+    spec:
+      containers:
+        - name: proxy
+          image: {{ include "cogbox-region.image" (dict "repository" .Values.proxy.repository "Values" .Values) | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.proxy.port }}
+          env:
+            - name: COGBOX_API_URL
+              value: {{ .Values.controlPlaneApiUrl | quote }}
+            - name: PROXY_PORT
+              value: {{ .Values.proxy.port | quote }}
+            - name: PROXY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: PROXY_API_KEY
+            - name: PROXY_PROTOCOL
+              value: {{ .Values.proxy.protocol | quote }}
+            - name: COOKIE_DOMAIN
+              value: {{ .Values.proxy.cookieDomain | quote }}
+            - name: TOOLBOX_ONLY_MODE
+              value: {{ .Values.proxy.toolboxOnlyMode | quote }}
+            - name: PREVIEW_WARNING_ENABLED
+              value: {{ .Values.proxy.previewWarningEnabled | quote }}
+            - name: SHUTDOWN_TIMEOUT_SEC
+              value: {{ .Values.proxy.shutdownTimeoutSec | quote }}
+          # OIDC_* come from the control plane: on boot the proxy fetches
+          # client/audience from COGBOX_API_URL, authenticated by PROXY_API_KEY.
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.proxy.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-proxy
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    app.kubernetes.io/name: cogbox-region
+    app.kubernetes.io/component: proxy
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-proxy
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.proxy.ingress.clusterIssuer }}
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: {{ .Values.proxy.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.proxy.host }}
+        - {{ printf "*.%s" .Values.proxy.host | quote }}
+      secretName: {{ .Values.proxy.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.proxy.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "cogbox-region.fullname" . }}-proxy
+                port: { number: 80 }
+    - host: {{ printf "*.%s" .Values.proxy.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "cogbox-region.fullname" . }}-proxy
+                port: { number: 80 }
+---
+{{- if .Values.proxy.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-proxy
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "cogbox-region.fullname" . }}-proxy
+  minReplicas: {{ .Values.proxy.hpa.minReplicas }}
+  maxReplicas: {{ .Values.proxy.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.proxy.hpa.cpuUtilization }}
+{{- end }}

@@ -1,0 +1,39 @@
+# GCP shared-region overrides for cogbox-region.
+# Cluster: GKE Standard (Autopilot CANNOT run the privileged runner DaemonSet).
+# Node pools: system pool (control plane) + runner pools below.
+
+regionName: shared-us
+controlPlaneApiUrl: https://cogbox.example.com/api
+
+nodeSelector:
+  cogbox.io/region: shared-us
+  cogbox.io/pool: standard
+
+proxy:
+  host: proxy.example.com
+  cookieDomain: example.com
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+
+snapshotManager:
+  host: snapshots.example.com
+  ingress:
+    className: nginx
+    clusterIssuer: public-http01
+  storage:
+    # Regional PD via the default GKE storage class (leave storageClass empty
+    # to use cluster default, or set e.g. premium-rwo).
+    driver: filesystem
+    size: 200Gi
+    storageClass: ""
+
+runner:
+  env:
+    AWS_REGION: auto
+    AWS_ENDPOINT_URL: https://storage.googleapis.com
+    AWS_DEFAULT_BUCKET: cogbox-region-shared-us
+
+secrets:
+  useExternalSecrets: true
+  externalSecretsStore: secretstore-gcp

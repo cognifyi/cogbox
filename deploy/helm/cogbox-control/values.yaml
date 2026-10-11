@@ -1,0 +1,184 @@
+# Default values for cogbox-control.
+# Production rule: every *_PASSWORD / *_KEY / *_SECRET comes from
+# secrets.existingSecret (or External Secrets). Never commit real values here.
+
+# Image coordinates. Pin imageTag to a release; optionally pin imageDigest too.
+imageRegistry: cognifyi
+imageTag: "v0.190.3"
+imageDigest: ""
+imagePullPolicy: IfNotPresent
+
+# Base domain of the platform, e.g. example.com.
+# Dashboard/API served at cogbox.<domain>; regions use proxy.<domain> etc.
+domain: example.com
+
+api:
+  repository: cogbox-api
+  replicaCount: 3
+  port: 3000
+  pdb:
+    enabled: true
+    minAvailable: 2
+  hpa:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    cpuUtilization: 70
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: 2000m, memory: 4Gi }
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: public-http01
+    tlsSecret: cogbox-api-tls
+
+# Database migrations run as a pre-upgrade Job. The API Deployment itself
+# runs with RUN_MIGRATIONS=false so replicas never race.
+migration:
+  enabled: true
+  backoffLimit: 3
+
+serviceAccount:
+  create: true
+  name: ""
+
+# --- Non-secret configuration (rendered into a ConfigMap) ---
+db:
+  host: postgres
+  port: 5432
+  database: cogbox
+  username: cogbox
+  tlsEnabled: true
+  tlsRejectUnauthorized: true
+
+redis:
+  host: redis
+  port: 6379
+
+oidc:
+  # Any RS256 OIDC issuer works (Keycloak, Auth0, Entra ID, Okta, Google).
+  # The proxy fetches client/audience itself from the API, so only the API needs these.
+  clientId: cogbox
+  issuerBaseUrl: https://keycloak.example.com/realms/cogbox
+  publicDomain: https://keycloak.example.com/realms/cogbox
+  audience: cogbox
+  # Management API (Auth0 M2M) — only needed for dashboard user administration
+  # backed by the IdP. Leave empty otherwise.
+  managementApiEnabled: ""
+  managementApiClientId: ""
+  managementApiAudience: ""
+
+s3:
+  endpoint: https://storage.googleapis.com
+  stsEndpoint: https://storage.googleapis.com
+  region: auto
+  defaultBucket: cogbox-platform
+
+dashboard:
+  # Served by the API itself (DONT_SERVE_DASHBOARD=false); no separate workload.
+  url: https://cogbox.example.com/dashboard
+  baseApiUrl: https://cogbox.example.com
+
+proxyDefaults:
+  # Template used when regions are created without an explicit proxyUrl,
+  # and served to proxies via /api/config (proxies fail to boot without it).
+  protocol: https
+  domain: proxy.example.com
+  # Default: "<protocol>://{{PORT}}-{{sandboxId}}.<domain>".
+  # NOTE: the {{PORT}}/{{sandboxId}} placeholders are Cogbox's, not Helm's.
+  templateUrl: ""
+
+# Snapshot referenced when the default runner is bootstrapped.
+# (Default runner creation is skipped unless defaultRunner.name is set,
+# which the chart leaves empty — runners self-register in production.)
+defaultSnapshot: cognifyi/sandbox:latest-slim
+
+# Registries are BOOT-REQUIRED: the API crashes during bootstrap when the
+# URLs are undefined. Point them at your Docker-distribution-compatible
+# registry (Harbor, GAR, Docker Hub, or the in-cluster registry service).
+registry:
+  transient:
+    url: http://registry:6000
+    admin: admin
+    projectId: cogbox
+  internal:
+    url: http://registry:6000
+    admin: admin
+    projectId: cogbox
+
+quotas:
+  defaultRegionId: us
+  defaultRegionName: us
+  enforceQuotas: true
+  totalCpuQuota: 100
+  totalMemoryQuota: 256
+  totalDiskQuota: 1000
+  maxCpuPerSandbox: 4
+  maxMemoryPerSandbox: 8
+  maxDiskPerSandbox: 50
+  snapshotQuota: 30
+  maxSnapshotSize: 20
+  volumeQuota: 100
+
+rateLimit:
+  anonymousTtl: 60
+  anonymousLimit: 30
+  authenticatedTtl: 60
+  authenticatedLimit: 300
+  sandboxCreateTtl: 60
+  sandboxCreateLimit: 10
+  sandboxLifecycleTtl: 60
+  sandboxLifecycleLimit: 60
+  failedAuthTtl: 300
+  failedAuthLimit: 10
+
+smtp:
+  host: ""
+  port: 587
+  secure: ""
+  emailFrom: "Cogbox Team <no-reply@example.com>"
+
+otel:
+  enabled: true
+  collectorUrl: http://otel-collector.observability:4318/v1/traces
+
+featureFlags:
+  # Force-enable flags without a flag provider (PostHog). organization_infrastructure
+  # gates custom-region and custom-runner APIs — core to multitenant-BYOC.
+  # Production with PostHog: leave empty and manage flags there.
+  forceEnabled: organization_infrastructure
+
+# --- Secrets ---
+# Preferred: create ExternalSecret objects from Secret Manager / Vault.
+# Fallback: reference a pre-created Secret. Dev-only: createFromValues.
+secrets:
+  useExternalSecrets: false
+  externalSecretsStore: secretstore-gcp
+  existingSecret: ""
+  createFromValues: false
+  # DEV ONLY values (empty = must be supplied). Never use in production.
+  values: {}
+    # ENCRYPTION_KEY: ...
+    # ENCRYPTION_SALT: ...
+    # DB_PASSWORD: ...
+    # REDIS_PASSWORD: ...
+    # S3_ACCESS_KEY: ...
+    # S3_SECRET_KEY: ...
+    # TRANSIENT_REGISTRY_PASSWORD: ...
+    # INTERNAL_REGISTRY_PASSWORD: ...
+    # PROXY_API_KEY: ...        # legacy global proxy key (see below)
+    # SSH_GATEWAY_API_KEY: ...  # legacy global gateway key (see below)
+    # OIDC_CLIENT_SECRET: ...
+    # OIDC_MANAGEMENT_API_CLIENT_SECRET: ...
+    # SMTP_USER: ... / SMTP_PASSWORD: ...
+    # OTEL_COLLECTOR_API_KEY: ...
+    # HEALTH_CHECK_API_KEY: ...
+    # ADMIN_API_KEY: ...
+  # Legacy global service keys live in secrets.values above (never in git).
+  # validateToken() compares EVERY API-key request against them FIRST
+  # (getOrThrow — auth fatals when empty), then falls through to user/runner
+  # keys and per-region key hashes:
+  # - Single-region: set both EQUAL to that region's keys.
+  # - Multi-region: set random values; real auth resolves via region hashes.

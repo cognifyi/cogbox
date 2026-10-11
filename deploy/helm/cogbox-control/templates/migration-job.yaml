@@ -1,0 +1,81 @@
+{{- /*
+Database migrations. The API image ships the typeorm-migration toolchain
+(ts-node + migration:run:* scripts), so deploy jobs run from this image:
+- pre-install/pre-upgrade hook: init + pre-deploy migrations
+- post-upgrade hook: post-deploy migrations
+The API Deployment itself runs with RUN_MIGRATIONS=false so replicas never race.
+*/ -}}
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cogbox-control.fullname" . }}-migrate-pre
+  labels:
+    {{- include "cogbox-control.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-control
+        app.kubernetes.io/component: migration
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default (include "cogbox-control.fullname" .) }}
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: {{ include "cogbox-control.image" . | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - >-
+              yarn migration:run:init &&
+              yarn migration:run:pre-deploy
+          envFrom:
+            - configMapRef:
+                name: {{ include "cogbox-control.fullname" . }}-config
+            - secretRef:
+                name: {{ include "cogbox-control.secretName" . }}
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1000m, memory: 2Gi }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cogbox-control.fullname" . }}-migrate-post
+  labels:
+    {{- include "cogbox-control.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-control
+        app.kubernetes.io/component: migration
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default (include "cogbox-control.fullname" .) }}
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: {{ include "cogbox-control.image" . | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args: ["yarn migration:run:post-deploy"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "cogbox-control.fullname" . }}-config
+            - secretRef:
+                name: {{ include "cogbox-control.secretName" . }}
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1000m, memory: 2Gi }
+{{- end }}
