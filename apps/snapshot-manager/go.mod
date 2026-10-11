@@ -1,6 +1,6 @@
 module github.com/cognifyi/cogbox/snapshot-manager
 
-go 1.25.0
+go 1.26.9
 
 require (
 	github.com/distribution/distribution/v3 v3.1.1

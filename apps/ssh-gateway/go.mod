@@ -1,6 +1,6 @@
 module github.com/cognifyi/cogbox/ssh-gateway
 
-go 1.25.0
+go 1.26.9
 
 require (
 	github.com/sirupsen/logrus v1.9.4

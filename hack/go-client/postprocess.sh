@@ -30,4 +30,10 @@ EOF
 grep -q 'UserAgent:.*"[^"]*"' "$PROJECT_ROOT/configuration.go" || { echo "ERROR: UserAgent string not found in configuration.go" >&2; exit 1; }
 sed -i "s|UserAgent: *\"[^\"]*\"|UserAgent:        \"${CLIENT_NAME}/\" + ClientVersion|" "$PROJECT_ROOT/configuration.go"
 
+# Align the generated module's go directive with the workspace toolchain floor
+# (the stock OpenAPI generator emits an old go version; without this the
+# committed go.mod drifts on every regeneration).
+GO_VERSION="$(awk '/^go /{print $2; exit}' go.work)"
+sed -i -E "s/^go 1\.[0-9]+(\.[0-9]+)?/go ${GO_VERSION}/" "$PROJECT_ROOT/go.mod"
+
 echo "Postprocessed Go client at $PROJECT_ROOT"

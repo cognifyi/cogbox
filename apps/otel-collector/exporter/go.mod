@@ -1,6 +1,6 @@
 module github.com/cognifyi/cogbox/otel-collector/exporter
 
-go 1.25.4
+go 1.26.9
 
 require (
 	github.com/cognifyi/cogbox/libs/api-client-go v0.190.3
