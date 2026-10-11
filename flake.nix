@@ -43,7 +43,7 @@
         #         libs/{sdk-go,api-client-go,common-go,computer-use,toolbox-api-client-go}
         # ──────────────────────────────────────────────
         goPkgs = with pkgs; [
-          go # 1.25.x — matches go.work constraint
+          go # 1.26.x — matches go.work constraint
           golangci-lint
           protobuf # provides protoc
           buf
