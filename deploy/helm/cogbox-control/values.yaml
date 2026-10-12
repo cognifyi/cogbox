@@ -98,6 +98,8 @@ defaultSnapshot: cognifyi/sandbox:latest-slim
 # Registries are BOOT-REQUIRED: the API crashes during bootstrap when the
 # URLs are undefined. Point them at your Docker-distribution-compatible
 # registry (Harbor, GAR, Docker Hub, or the in-cluster registry service).
+# Use a CLUSTER-LOCAL FQDN (registry.<ns>.svc.cluster.local) when runners
+# live in other namespaces — short names only resolve in the same namespace.
 registry:
   transient:
     url: http://registry:6000
