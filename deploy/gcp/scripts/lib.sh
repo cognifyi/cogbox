@@ -6,6 +6,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Allow overriding tool paths (PATH is searched as usual).
+HELM_BIN="${HELM_BIN:-helm}"
+KUBECTL_BIN="${KUBECTL_BIN:-kubectl}"
+
 PROJECT="${PROJECT:?set PROJECT to your GCP project id (never commit real project ids)}"
 ZONE="${ZONE:-us-west4-b}"
 CLUSTER="${CLUSTER:-cogbox-prod}"
