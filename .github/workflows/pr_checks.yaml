@@ -32,6 +32,29 @@ jobs:
           go-version-file: go.work
           cache: true
           cache-dependency-path: '**/go.sum'
+      - name: Check Go version consistency
+        run: |
+          set -euo pipefail
+          # Single source of truth: the go directive in go.work. Every workspace
+          # member, the devcontainer Go feature and all golang Docker base images
+          # must pin the exact same version, otherwise the workspace breaks
+          # (module requires go >= X but toolchain is Y) and the skew goes
+          # unnoticed until some Dependabot bump trips over it.
+          EXPECTED="$(awk '/^go /{print $2; exit}' go.work)"
+          echo "Expected Go version (from go.work): $EXPECTED"
+          FAIL=0
+          check() {
+            if [ "$2" != "$EXPECTED" ]; then echo "::error::$1 is $2, expected $EXPECTED"; FAIL=1; else echo "OK: $1 = $2"; fi
+          }
+          while IFS= read -r f; do
+            check "$f" "$(awk '/^go /{print $2; exit}' "$f")"
+          done < <(git ls-files '*/go.mod')
+          check ".devcontainer/devcontainer.json (go feature)" "$(grep -A2 'features/go:' .devcontainer/devcontainer.json | grep '"version"' | head -n1 | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')"
+          while IFS= read -r img; do
+            check "Docker base image $img" "$(echo "$img" | sed -E 's/.*golang:([0-9]+\.[0-9]+\.[0-9]+)-alpine.*/\1/')"
+          done < <(grep -rhoE 'golang:[0-9]+\.[0-9]+\.[0-9]+-alpine' --include='Dockerfile' apps hack | sort -u)
+          check "hack/computer-use/Dockerfile (mini go.work)" "$(grep -oE '"go [0-9]+\.[0-9]+\.[0-9]+' hack/computer-use/Dockerfile | head -n1 | awk '{print $2}')"
+          [ "$FAIL" -eq 0 ] || (echo "Go version skew detected!" && exit 1)
       - name: go work
         run: |
           GONOSUMDB=github.com/${{ github.repository }} go work sync
@@ -83,7 +106,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9
         with:
-          version: v2.6.2
+          version: v2.14.0
           working-directory: ${{ matrix.working-directory }}
           args: --timeout=5m ./...
       - name: format
@@ -114,7 +137,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9
         with:
-          version: v2.6.2
+          version: v2.14.0
           working-directory: libs/computer-use
           args: --timeout=5m ./...
 

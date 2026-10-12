@@ -1,6 +1,6 @@
 module github.com/cognifyi/cogbox/computer-use
 
-go 1.25.0
+go 1.26.9
 
 require (
 	github.com/go-vgo/robotgo v0.110.8

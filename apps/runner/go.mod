@@ -1,6 +1,6 @@
 module github.com/cognifyi/cogbox/runner
 
-go 1.25.5
+go 1.26.9
 
 require (
 	github.com/cognifyi/cogbox/libs/api-client-go v0.190.1

@@ -178,7 +178,7 @@ func typeCheckParameter(obj interface{}, expected string, name string) error {
 }
 
 func parameterValueToString( obj interface{}, key string ) string {
-	if reflect.TypeOf(obj).Kind() != reflect.Ptr {
+	if reflect.TypeOf(obj).Kind() != reflect.Pointer {
 		if actualObj, ok := obj.(interface{ GetActualInstanceValue() interface{} }); ok {
 			return fmt.Sprintf("%v", actualObj.GetActualInstanceValue())
 		}
@@ -252,7 +252,7 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 
 			case reflect.Interface:
 				fallthrough
-			case reflect.Ptr:
+			case reflect.Pointer:
 				parameterAddToHeaderOrQuery(headerOrQueryParams, keyPrefix, v.Elem().Interface(), style, collectionType)
 				return
 
@@ -598,7 +598,7 @@ func detectContentType(body interface{}) string {
 	kind := reflect.TypeOf(body).Kind()
 
 	switch kind {
-	case reflect.Struct, reflect.Map, reflect.Ptr:
+	case reflect.Struct, reflect.Map, reflect.Pointer:
 		contentType = "application/json; charset=utf-8"
 	case reflect.String:
 		contentType = "text/plain; charset=utf-8"

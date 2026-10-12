@@ -1,6 +1,6 @@
 module github.com/cognifyi/cogbox/cli
 
-go 1.25.4
+go 1.26.9
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0

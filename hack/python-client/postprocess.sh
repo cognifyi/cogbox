@@ -14,14 +14,19 @@ PROJECT_ROOT="$1"
 # Set license in pyproject.toml to Apache-2.0
 sed -i 's/^license = ".*"/license = "Apache-2.0"/' "$PROJECT_ROOT/pyproject.toml"
 
-# Ensure urllib3 lower bound is pinned to version 2.1.0 in pyproject.toml, setup.py, and requirements.txt.
+# Ensure urllib3 lower bound is pinned to version 2.8.0 in pyproject.toml, setup.py, and requirements.txt.
 # This prevents compatibility issues such as:
 # `TypeError: PoolKey.__new__() got an unexpected keyword argument 'key_ca_cert_data'`
 # which occur with urllib3 versions earlier than 2.1.0.
-sed -i -E 's/(urllib3[^0-9\n]*)([0-9]+\.[0-9]+\.[0-9]+)/\12.1.0/g' \
+# 2.8.0 additionally requires Python >= 3.10, matching our requires-python floor.
+sed -i -E 's/(urllib3[^0-9\n]*)([0-9]+\.[0-9]+\.[0-9]+)/\12.8.0/g' \
   "$PROJECT_ROOT/pyproject.toml" \
   "$PROJECT_ROOT/setup.py" \
   "$PROJECT_ROOT/requirements.txt"
+
+# Normalize the Python floor to >= 3.10 (the stock OpenAPI generator emits >= 3.9).
+sed -i -E 's/^requires-python = ">=3\.[0-9]+"/requires-python = ">=3.10"/' "$PROJECT_ROOT/pyproject.toml"
+sed -i -E 's/^PYTHON_REQUIRES = ">= 3\.[0-9]+"/PYTHON_REQUIRES = ">= 3.10"/' "$PROJECT_ROOT/setup.py"
 
 # Replace all aliases with serialization_aliases in the models directory so that type checking works.
 pkg_root=$(find "$PROJECT_ROOT" -mindepth 1 -maxdepth 2 -type f -name "py.typed" -printf '%h\n' | head -n 1)
