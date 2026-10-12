@@ -1,0 +1,59 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Shared-region runner pool (TEST): plain Deployment running the runner with
+# its own internal Docker daemon (privileged, no host socket). Gives the
+# shared `us` region real execution capacity so regular users' sandboxes
+# can schedule. Production runs one DaemonSet per runner node pool instead.
+# Token: register via POST /api/admin/runners {regionId:"us",...} and store
+# the SERVER-ISSUED key in secret/runner-us-token (test-grade: kubectl secret;
+# production: External Secrets).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runner-us
+  namespace: region-shared
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: runner-us }
+  template:
+    metadata:
+      labels: { app: runner-us }
+    spec:
+      containers:
+        - name: runner
+          image: cognifyi/cogbox-runner:v0.190.3
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          ports:
+            - name: api
+              containerPort: 3003
+          env:
+            - name: COGBOX_API_URL
+              value: http://control-control-api.control.svc.cluster.local/api
+            - name: COGBOX_RUNNER_TOKEN
+              valueFrom:
+                secretKeyRef: { name: runner-us-token, key: token }
+            - { name: API_PORT, value: "3003" }
+            - { name: ENVIRONMENT, value: production }
+            - { name: RESOURCE_LIMITS_DISABLED, value: "false" }
+            - { name: INTER_SANDBOX_NETWORK_ENABLED, value: "false" }
+            - { name: SSH_GATEWAY_ENABLE, value: "false" }
+            - name: SSH_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef: { name: region-shared-creds, key: SSH_PUBLIC_KEY }
+            - { name: AWS_REGION, value: us-east-1 }
+            - { name: AWS_ENDPOINT_URL, value: http://rustfs.control.svc.cluster.local:9000 }
+            - { name: AWS_ACCESS_KEY_ID, value: localpass }
+            - { name: AWS_SECRET_ACCESS_KEY, value: localpass }
+            - { name: AWS_DEFAULT_BUCKET, value: cogbox }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/cogbox }
+          resources:
+            requests: { cpu: 1000m, memory: 2Gi }
+            limits: { cpu: 4000m, memory: 8Gi }
+      volumes:
+        - name: data
+          emptyDir: {}
