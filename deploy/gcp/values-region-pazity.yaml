@@ -1,0 +1,40 @@
+# Pazity production overlay for the shared region.
+# Storage (30Gi standard disk, expandable) is claimed HERE at service init
+# by the chart's PVC — nothing is provisioned at cluster creation.
+regionName: shared
+controlPlaneApiUrl: https://cogbox.pazity.com/api
+
+nodeSelector:
+  cogbox.io/region: shared
+  cogbox.io/pool: standard
+
+proxy:
+  host: proxy.cogbox.pazity.com
+  cookieDomain: cogbox.pazity.com
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+
+snapshotManager:
+  host: snapshots.cogbox.pazity.com
+  ingress:
+    className: nginx
+    clusterIssuer: public-http01
+  storage:
+    # Cheapest durable option: 30Gi pd-standard zonal. Grows later with:
+    #   kubectl patch pvc <claim> -p '{"spec":{"resources":{"requests":{"storage":"60Gi"}}}}'
+    # (GKE `standard` StorageClass allows expansion; filesystem must allow
+    # online resize — ext4 does.)
+    driver: filesystem
+    size: 30Gi
+    storageClass: standard
+
+runner:
+  env:
+    AWS_REGION: auto
+    AWS_ENDPOINT_URL: https://storage.googleapis.com
+    AWS_DEFAULT_BUCKET: REPLACE_ME_GCS_REGION_BUCKET
+
+secrets:
+  useExternalSecrets: true
+  externalSecretsStore: secretstore-gcp
