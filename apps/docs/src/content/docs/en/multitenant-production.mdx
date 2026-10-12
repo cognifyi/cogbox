@@ -292,6 +292,9 @@ Both satisfy the API (standard RS256 OIDC via JWKS; switching providers later me
 
 Minimal Keycloak shape: one realm (or one per tenant for hard separation), one public client per surface (dashboard PKCE, proxy callback), registration + "verify email" + password policy on, brute-force protection on, admin console never exposed publicly, realm export versioned in git alongside the charts.
 
+Two Keycloak behaviors verified the hard way — configure them from day one:
+`KC_PROXY_HEADERS=xforwarded` (without it Keycloak ignores `X-Forwarded-Proto` behind ingress and mints `http://` issuers that can never match the public issuer the API validates), and `KC_HOSTNAME` + `KC_HOSTNAME_STRICT=true` with the API fetching discovery through the **public** URL (so token `iss`, discovery `issuer`, and JWKS all agree; verified end-to-end with a PKCE code flow test).
+
 ### Keycloak specifics verified by testing
 
 - **Audience mapper is mandatory.** Unlike Auth0 (which honors the `audience` request parameter natively), Keycloak only puts `cogbox` into `aud` when the client has an `oidc-audience-mapper` (`included.client.audience: cogbox`, ID + access token claims on). Without it, every platform call 401s even with a valid signature — the local realm JSON ships this mapper.
