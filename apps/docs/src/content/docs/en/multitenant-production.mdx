@@ -172,6 +172,7 @@ spec:
 
 - Keep the DNS caveat in mind: a `*.proxy` record proxied through a CDN that has no certificate for that depth breaks TLS — serve it DNS-only and terminate TLS at Ingress.
 - `COOKIE_DOMAIN` set to the region's base domain; `PROXY_API_KEY` is the **region-scoped** key returned at region registration, unique per region. `TOOLBOX_ONLY_MODE` / `PREVIEW_WARNING_ENABLED` can vary per tenant tier.
+- **Shared vs dedicated proxy**: a proxy presenting a *region* key only serves that region's sandboxes (the API's sandbox guard compares regions — cross-region requests fail with "not found"). A proxy presenting the *legacy global* key serves all regions. Single-operator platforms typically run one shared proxy on the global key; strict per-region isolation needs one proxy per region plus per-region preview hostnames.
 
 HPA shape used for proxy (same pattern for API):
 
