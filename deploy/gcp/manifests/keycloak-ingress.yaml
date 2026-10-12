@@ -1,0 +1,28 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Public HTTPS for Keycloak (exact hostname, HTTP-01 is enough — no wildcard).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  namespace: control
+  labels:
+    app: keycloak
+  annotations:
+    cert-manager.io/cluster-issuer: public-http01
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [keycloak.cogbox.pazity.com]
+      secretName: keycloak-tls
+  rules:
+    - host: keycloak.cogbox.pazity.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port: { number: 8080 }

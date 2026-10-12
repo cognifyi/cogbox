@@ -68,8 +68,11 @@ spec:
             # NOTE: issuer follows the request host in test mode (strict off).
             # Production sets KC_HOSTNAME (+strict) and the API fetches
             # discovery through the PUBLIC URL so token iss always matches.
-            - { name: KC_HOSTNAME_STRICT, value: "false" }
+            - { name: KC_HOSTNAME, value: keycloak.cogbox.pazity.com }
+            - { name: KC_HOSTNAME_URL, value: https://keycloak.cogbox.pazity.com }
+            - { name: KC_HOSTNAME_STRICT, value: "true" }
             - { name: KC_PROXY, value: edge }
+            - { name: KC_PROXY_HEADERS, value: xforwarded }
             - { name: KC_HEALTH_ENABLED, value: "true" }
             - { name: KC_METRICS_ENABLED, value: "true" }
             - name: KC_SMTP_HOST
