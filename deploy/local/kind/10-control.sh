@@ -28,11 +28,12 @@ if ! kube -n control get secret local-infra >/dev/null 2>&1; then
 fi
 
 kube apply -f "$SCRIPT_DIR/manifests/infra.yaml"
-kube apply -f "$SCRIPT_DIR/manifests/dex-nodeports.yaml"
+kube apply -f "$SCRIPT_DIR/manifests/nodeports.yaml"
 kube -n control wait --for=condition=ready pod -l app=postgres --timeout=180s >/dev/null
 kube -n control wait --for=condition=ready pod -l app=redis --timeout=180s >/dev/null
 kube -n control wait --for=condition=ready pod -l app=rustfs --timeout=240s >/dev/null
-kube -n control wait --for=condition=ready pod -l app=dex --timeout=240s >/dev/null
+# Dex was replaced by Keycloak (05-keycloak.sh) — the API requires a
+# reachable OIDC discovery document at boot.
 
 # --- control secrets overlay (regenerate only when missing) ---
 OVERLAY="$WORK_DIR/control-secrets.yaml"

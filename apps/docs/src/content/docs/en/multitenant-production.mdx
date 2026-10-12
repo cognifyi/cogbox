@@ -107,7 +107,6 @@ Deployed once per platform, in a dedicated `control` namespace or cluster. Sugge
 Ready-to-use packaging lives in this repo under `deploy/`:
 
 - `deploy/helm/cogbox-control/` — the control-plane chart (`values.yaml` + `values-gcp.yaml`)
-- `deploy/compose/docker-compose.control.yaml` + `.env.example` — pilot-stage control plane on a single host (same secrets, no placeholders allowed)
 
 | Module | Production shape | Notes |
 | --- | --- | --- |
@@ -137,6 +136,7 @@ Kubernetes is required for the data plane: the runner pool is a **privileged Dae
 - Scheduling stays in the API (filter by `region` + `sandboxClass`, sort by `availabilityScore`); the platform's job is to guarantee *capacity exists*.
 - `RESOURCE_LIMITS_DISABLED=false` in production so per-sandbox CPU/memory/disk limits are enforced; sandbox classes map to node pools (e.g. GPU class → GPU pool with matching `gpuType`).
 - Never mix runner nodes with control-plane nodes. Node pools per region: `standard` (default classes), `gpu` (GPU classes), optionally `arm`.
+- **Privilege boundary**: only the runner needs `privileged` — its init container bootstraps the host container runtime via `nsenter`, and its main container runs an internal Docker daemon that spawns sandbox containers. Nothing else does: API, proxy, snapshot-manager, and SSH gateway run unprivileged with no host mounts, so the control chart (and the non-runner region components) can even run on Autopilot-style hardened clusters — only runner node pools require Standard/privileged.
 - **Reachability is bidirectional**: runners poll the API, but the API also dials runners back (exec, preview proxying) at the runner's advertised `apiUrl`. Set `RUNNER_DOMAIN` to an address the control plane can actually route to — auto-detection may pick a VPN/tunnel interface. Sandbox subnets must not collide with existing host networks (the runner bridge defaults to a fixed subnet; stale bridges poison routing).
 
 Minimal node-pool wiring (conceptual — adapt to your autoscaler):
@@ -292,6 +292,33 @@ Both satisfy the API (standard RS256 OIDC via JWKS; switching providers later me
 
 Minimal Keycloak shape: one realm (or one per tenant for hard separation), one public client per surface (dashboard PKCE, proxy callback), registration + "verify email" + password policy on, brute-force protection on, admin console never exposed publicly, realm export versioned in git alongside the charts.
 
+### Keycloak specifics verified by testing
+
+- **Audience mapper is mandatory.** Unlike Auth0 (which honors the `audience` request parameter natively), Keycloak only puts `cogbox` into `aud` when the client has an `oidc-audience-mapper` (`included.client.audience: cogbox`, ID + access token claims on). Without it, every platform call 401s even with a valid signature — the local realm JSON ships this mapper.
+- **Service-created users need profile attributes.** Users created via the Admin API without `firstName`/`lastName` fail password grants with "Account is not fully set up". Browser self-registration collects them; scripts must set them.
+- **Direct grants are for testing.** The local realm enables Direct Access Grants so password-grant tokens can prove the JWT path end-to-end; production browser flows use authorization code + PKCE, and direct grants can be disabled on the client afterwards.
+
+### Keycloak production environment (formal list)
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `KC_BOOTSTRAP_ADMIN_USERNAME` / `KC_BOOTSTRAP_ADMIN_PASSWORD` | yes (first boot) | Initial admin; rotate/disable after break-glass accounts exist |
+| `KC_DB` | yes | `postgres` (never file dev storage) |
+| `KC_DB_URL_HOST` / `KC_DB_URL_PORT` / `KC_DB_URL_DATABASE` | yes | Cloud SQL private IP + dbname |
+| `KC_DB_USERNAME` / `KC_DB_PASSWORD` | yes | From Secret Manager |
+| `KC_HOSTNAME` | yes | Public IdP hostname, e.g. `keycloak.example.com` |
+| `KC_HOSTNAME_STRICT` | yes | `true` in production (issuer must match exactly what the API validates) |
+| `KC_HOSTNAME_ADMIN` | recommended | Separate internal hostname so the admin console is never public |
+| `KC_PROXY` | yes (behind ingress) | `edge` (TLS terminated at ingress-nginx) |
+| `KC_HTTP_ENABLED` | yes | `true`; terminate TLS at ingress, keep pod-to-pod http |
+| `KC_HEALTH_ENABLED` / `KC_METRICS_ENABLED` | yes | `/health/*` probes and Prometheus metrics |
+| `KC_CACHE` | recommended | `ispn` (default) for multi-replica; single replica may stay local |
+| `KC_LOG_LEVEL` | recommended | `info` (debug only while troubleshooting) |
+| `KC_SMTP_HOST` / `KC_SMTP_PORT` / `KC_SMTP_FROM` | **yes — hard requirement** | Registration + email verification + password reset all send mail; no relay = no onboarding |
+| `KC_SMTP_USER` / `KC_SMTP_PASSWORD` | if relay needs auth | SendGrid/SES/Mailgun credentials |
+
+GitHub / Google login (optional, per realm): Identity Providers → Add `github` / `google`, paste the OAuth client ID/secret from the provider console, set the Keycloak redirect URI (`https://<keycloak-host>/realms/cogbox/broker/<alias>/endpoint`) on the provider side. Secrets live in the IdP-broker config inside Keycloak (backed up with its DB) — never in git. The local realm JSON intentionally ships these providers absent; add them in the admin console when needed.
+
 - **Humans**: external OIDC only (see table above).
 - **Machines**: tenant API keys (rotatable, least-privilege scopes), per-region service keys (`PROXY_API_KEY`, runner token, SSH gateway key) generated at region registration and stored in sealed/external secrets — never shared across regions.
 - **Registries**: private-image credentials resolved centrally per pull via cross-account roles (broker `AssumeRole` with org ExternalId), never baked into runner images or static docker auth files.
@@ -307,7 +334,7 @@ Minimal Keycloak shape: one realm (or one per tenant for hard separation), one p
 
 ## 9. Secret Inventory
 
-Every secret the platform needs, in one place. Control-plane keys live under `<release>-control/*`, per-region keys under `<release>/*` in your secret manager (Secret Manager / Vault), synced by External Secrets. The charts (`deploy/helm/cogbox-control`, `deploy/helm/cogbox-region`) and `deploy/compose/.env.example` implement exactly this inventory — CI fails the build if a placeholder value is rendered.
+Every secret the platform needs, in one place. Control-plane keys live under `<release>-control/*`, per-region keys under `<release>/*` in your secret manager (Secret Manager / Vault), synced by External Secrets. The charts (`deploy/helm/cogbox-control`, `deploy/helm/cogbox-region`) implement exactly this inventory — CI fails the build if a placeholder value is rendered.
 
 Control plane:
 
@@ -438,7 +465,7 @@ Measure, don't guess: size from sandbox-create p95, runner CPU/memory allocation
 
 ## 15. Migrating from Compose
 
-1. Stand up the control plane on a dev cluster with managed Postgres/Redis; run migrations as a Job — or start on a single host with `deploy/compose/docker-compose.control.yaml` (same secrets, external OIDC, quotas on).
+1. Stand up the control plane on a dev cluster with managed Postgres/Redis; run migrations as a Job.
 2. Install one region release (`region-shared`), register two runners; create two test orgs with distinct quotas and verify scheduling routes by region.
 3. Move proxy DNS (`proxy.` + `*.proxy.`) to cert-manager DNS-01 wildcards; cut over one tenant's traffic and compare sandbox-create p95.
 4. Add GPU/custom pools and dedicated regions as demand grows; decommission the Compose host last.

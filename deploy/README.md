@@ -12,28 +12,7 @@ deploy/
   helm/cogbox-region/       data plane: proxy + snapshot-manager + runner pool + SSH gateway
     values.yaml             one release PER REGION (shared / dedicated / custom)
     values-gcp-shared.yaml  GCP shared-region example (GKE Standard, GCS, regional PD)
-  compose/
-    docker-compose.control.yaml   pilot-stage control plane on a single host
-    .env.example                  every secret/key the platform needs, in one place
-```
-
-## Pilot path (single host control plane + remote runners)
-
-```bash
-cp deploy/compose/.env.example deploy/compose/.env   # fill in for real
-openssl rand -hex 32   # use for ENCRYPTION_KEY / ENCRYPTION_SALT / *_API_KEY
-
-docker compose -f deploy/compose/docker-compose.control.yaml \
-  --env-file deploy/compose/.env up -d
-
-# migrations run from the API image (same toolchain as CI release jobs)
-docker compose -f deploy/compose/docker-compose.control.yaml \
-  --env-file deploy/compose/.env run --rm api yarn migration:run:init
-docker compose -f deploy/compose/docker-compose.control.yaml \
-  --env-file deploy/compose/.env run --rm api yarn migration:run:pre-deploy
-# ... start API, then:
-docker compose -f deploy/compose/docker-compose.control.yaml \
-  --env-file deploy/compose/.env run --rm api yarn migration:run:post-deploy
+  local/kind/               reproducible local test (kind + scripts, generated-only secrets)
 ```
 
 ## Kubernetes path (production)

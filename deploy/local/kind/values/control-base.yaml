@@ -31,8 +31,8 @@ redis:
 
 oidc:
   clientId: cogbox
-  issuerBaseUrl: http://dex:5556/dex
-  publicDomain: http://dex:5556/dex
+  issuerBaseUrl: http://keycloak:8080/realms/cogbox
+  publicDomain: http://keycloak:8080/realms/cogbox
   audience: cogbox
 
 # Overridden per-machine by the overlay (kind node IP is not stable).
