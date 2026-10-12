@@ -1,0 +1,110 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Keycloak for LOCAL TEST ONLY (dev mode, file DB). Production runs
+# Keycloak in production mode against Cloud SQL - see the docs guide.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: maildev }
+  template:
+    metadata:
+      labels: { app: maildev }
+    spec:
+      containers:
+        - name: maildev
+          image: maildev/maildev:latest
+          # Pin the policy: :latest defaults to Always, which breaks on
+          # egress-restricted nodes after sideloading.
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 1025 }, { containerPort: 1080 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  ports:
+    - { name: smtp, port: 1025 }
+    - { name: web, port: 1080 }
+  selector: { app: maildev }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: keycloak }
+  template:
+    metadata:
+      labels: { app: keycloak }
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.8.0
+          imagePullPolicy: IfNotPresent
+          args: ["start-dev", "--import-realm"]
+          ports: [{ containerPort: 8080 }]
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef: { name: keycloak-admin, key: username }
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: keycloak-admin, key: password }
+            - { name: KC_DB, value: dev-file }
+            - { name: KC_HTTP_ENABLED, value: "true" }
+            - { name: KC_HOSTNAME, value: keycloak }
+            - { name: KC_HOSTNAME_STRICT, value: "false" }
+            - { name: KC_HEALTH_ENABLED, value: "true" }
+            - { name: KC_METRICS_ENABLED, value: "true" }
+            # SMTP is REQUIRED (registration + email verification depend on it).
+            # Local default is the in-cluster maildev; production MUST override
+            # via the keycloak-smtp secret (05-keycloak.sh fails fast if empty).
+            - name: KC_SMTP_HOST
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: host }
+            - name: KC_SMTP_PORT
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: port }
+            - name: KC_SMTP_FROM
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: from }
+            - name: KC_SMTP_USER
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: user }
+            - name: KC_SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: password }
+          volumeMounts:
+            - { name: realm, mountPath: /opt/keycloak/data/import }
+          # Health lives on the management interface (:9000), not :8080.
+          readinessProbe:
+            httpGet: { path: /health/ready, port: 9000 }
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            failureThreshold: 12
+          resources:
+            requests: { cpu: 500m, memory: 1Gi }
+            limits: { cpu: 2000m, memory: 3Gi }
+      volumes:
+        - name: realm
+          configMap: { name: keycloak-realm }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: control
+spec:
+  ports: [{ port: 8080 }]
+  selector: { app: keycloak }

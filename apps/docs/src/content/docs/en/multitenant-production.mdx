@@ -1,0 +1,471 @@
+---
+title: Multitenant Production Deployment
+description: The complete production architecture for serving multiple tenants on Kubernetes — all modules, tenant isolation, dynamic scaling, and day-2 operations.
+---
+
+This is the reference architecture for running Cogbox as a **multitenant production platform**. It covers every module, how tenants are isolated, how compute scales dynamically on Kubernetes, whether any code changes are needed, and how to operate it day to day.
+
+| Guide | Scope |
+| --- | --- |
+| [Open Source Deployment](/docs/en/oss-deployment) | Single-host Docker Compose for evaluation and development |
+| [Bring Your Own Compute](/docs/en/bring-your-own-compute) | Registering your own runner machines in a custom region |
+| **This guide** | Full production platform: HA control plane + scalable regions + tenant operations |
+
+## 1. Design Goals and Principles
+
+- **Shared control plane, scalable data plane.** One highly available control plane serves all tenants; each region owns an independent, autoscaled compute pool.
+- **Three region types** (see [Regions](/docs/en/regions)): `shared` for small tenants with quota enforcement, `dedicated` for large tenants with exclusive managed infrastructure, `custom` for tenants bringing their own compute (BYOC).
+- **Isolation by default.** Tenants are separated at identity (OIDC + organization), scheduling (region + quota), network (policies + egress rules), storage (per-org prefixes/projects), and secrets (per-region keys).
+- **Everything scales on Kubernetes.** No single-host components in the serving path; every stateless service has HPA, every stateful service has HA + backup.
+- **GitOps releases.** One Helm release per control plane and per region; no in-place mutations of live deployments.
+
+## 2. Platform Architecture
+
+```
+                            ┌──────── Edge ────────┐
+                            │ DNS + cert-manager   │
+                            │ (DNS-01 wildcard)    │
+                            │ Ingress (proxy/API)  │
+                            │ WAF / CDN (optional) │
+                            └─────────┬────────────┘
+                                      │
+┌─ Control plane (shared, HA, 1x per platform) ──────────────────┐
+│ API (HPA) + Dashboard (static/CDN)                             │
+│ Postgres HA + PITR · Redis Sentinel/Cluster                    │
+│ External OIDC (Keycloak/Auth0) · Registry · S3                 │
+│ SMTP relay · OTEL gateway -> metrics/logs/traces               │
+│ Backup jobs · Admin API                                        │
+└───────────────┬────────────────────────────────────────────────┘
+                │ region registration, heartbeats, scheduling
+    ┌───────────┴────────────┐                  ┌─────────┴──────────┐
+    │ Region: shared (us)    │                  │ Region: dedicated  │
+    │ Proxy (HPA+Ingress)    │                  │ or custom (BYOC)   │
+    │ Snapshot Manager       │                  │ (same components,  │
+    │ Runner pool (autoscale)│                  │  dedicated nodes,   │
+    │ SSH Gateway (LB)       │                  │  bucket, hostname) │
+    └────────────────────────┘                  └────────────────────┘
+```
+
+The control plane never executes tenant code. All sandbox execution happens on runners inside a region; the control plane only stores metadata, credential references, and scheduling state.
+
+## 3. Do You Need Code Changes?
+
+Short answer: **no new services are required to go multitenant** — the domain model already supports it. What you must build is **deployment packaging** (Helm charts, autoscaling, secrets wiring), plus small optional enhancements listed below.
+
+What already works out of the box (configuration + deployment only):
+
+| Capability | Where it lives | What to do |
+| --- | --- | --- |
+| Organizations, invitations, roles, per-org API keys | `apps/api` organization + auth modules | Use as-is; front with external OIDC |
+| First-login provisioning (JIT personal org + default quota) | JWT strategy validates any RS256 issuer via JWKS and auto-creates the user/org | Point `OIDC_ISSUER_BASE_URL` / JWKS at Keycloak/Auth0 — config change only |
+| Shared vs custom regions, org binding | `Region` entity (`SHARED` must have no org, `CUSTOM` must have one) | Use as-is |
+| Per-region endpoints + credentials | Region carries `proxyUrl`, `toolboxProxyUrl`, `sshGatewayUrl`, `snapshotManagerUrl`; creation issues `proxyApiKey`, `sshGatewayApiKey`, snapshot-manager username/password and stores only hashes | Call `POST /regions`, render returned secrets into the region release |
+| Key rotation | Regenerate endpoints for proxy / SSH-gateway / snapshot-manager credentials | Wire into runbooks; restart region pods after rotation |
+| Org-scoped runner registration | `POST /runners` requires `X-Cogbox-Organization-ID` and a custom region owned by that org; admin endpoints cover shared-region runners | Use as-is |
+| Quota enforcement | Org quotas + per-`(org, region, sandboxClass)` region quotas, enforced when the region has `enforceQuotas=true` | Set `DEFAULT_REGION_ENFORCE_QUOTAS=true` and create quota rows at onboarding |
+| Rate limiting | Guards for anonymous / authenticated / sandbox-create / lifecycle / failed-auth | Set all `RATE_LIMIT_*` vars (empty = disabled) |
+| Runner health states | `READY` / `UNRESPONSIVE` / draining / unschedulable flow, decommission pipeline | Drive with an ops CronJob (below), no new service |
+
+What is deployment work, not application code:
+
+- **Helm charts** (`cogbox-control`, `cogbox-region`) — new YAML files, zero Go/TypeScript changes.
+- **Runner capacity automation** — a manager that keeps warm runners and grows node pools. Start without new code: Runner Manager behavior can be delivered as a **CronJob + Cluster Autoscaler** driving the existing runner APIs (section 6). A dedicated in-cluster manager service is an optimization for later, not a launch blocker.
+- **Stale-runner reaper** — a CronJob that lists runners stuck `unresponsive` past a grace period and marks them unschedulable/draining through the existing admin APIs. Ops script, not a new module.
+
+What *may* need small code enhancements later (not for launch):
+
+- IdP group → organization auto-mapping (today the org comes from the request header; personal orgs are auto-created, but enterprise "join by domain/claim" rules are deployment-specific).
+- A single proxy fleet serving N regions with key→region resolution (the recommended topology is one proxy per region, which needs no change — this is only if you want to consolidate).
+- Usage metering export per tenant for billing (metering clients exist; the pricing/aggregation layer is business-specific).
+
+## 4. Tenant Model
+
+### 4.1 Organizations, regions, quotas
+
+- Every tenant is an **Organization**. Users, API keys, sandboxes, snapshots, volumes, and registries all belong to exactly one organization.
+- Every sandbox is scheduled into a **Region** (`target` parameter, see [Regions](/docs/en/regions)):
+  - **Shared** (`us`, `eu`): managed by the platform, available to all organizations, **quotas enforced**. Default home for small tenants.
+  - **Dedicated**: managed by the platform, provisioned exclusively for one organization. For large tenants needing capacity guarantees and noisy-neighbor immunity.
+  - **Custom**: created and managed by the tenant's own team with their own runner machines. No platform-side concurrency limits; the tenant owns capacity planning.
+- Each organization gets a **RegionQuota** row per `(region, sandboxClass)`: total CPU/memory/disk/GPU, per-sandbox maximums, snapshot and volume quotas. Regions with `enforceQuotas=true` reject provisioning without a quota row — production shared regions must enforce quotas.
+- **Rate limits** (`RATE_LIMIT_*`) must all be set (anonymous, authenticated, sandbox-create, sandbox-lifecycle, failed-auth). They are disabled when empty, which is only acceptable in Compose evaluation.
+
+### 4.2 Tenant onboarding
+
+1. Create the organization (Admin API or dashboard) — generates org ID, default quotas, and API key.
+2. Assign home region: shared region + `RegionQuota` rows, or provision a dedicated/custom region (sections 5–6).
+3. Configure identity: OIDC client / connection mapped to the organization (section 7).
+4. Issue credentials: tenant API key, registry credentials if using private images, SSH key pair.
+5. Verify: create → start → preview → SSH → snapshot → destroy one sandbox in the assigned region.
+
+Offboarding reverses the flow: drain sandboxes, revoke keys and OIDC grants, retain snapshots per contract, then delete quota rows and (for dedicated regions) decommission the release.
+
+## 5. Control Plane Modules (Shared, HA)
+
+Deployed once per platform, in a dedicated `control` namespace or cluster. Suggested chart: `cogbox-control`.
+
+Ready-to-use packaging lives in this repo under `deploy/`:
+
+- `deploy/helm/cogbox-control/` — the control-plane chart (`values.yaml` + `values-gcp.yaml`)
+
+| Module | Production shape | Notes |
+| --- | --- | --- |
+| **API** (`apps/api`) | Deployment 3+ replicas + HPA (CPU/RPS); migrations as pre-upgrade Job, `RUN_MIGRATIONS` only there; PDB `minAvailable: 2` | Stateless; all session/scheduling state in Postgres + Redis. Pin image digests. |
+| **Dashboard** (`apps/dashboard`) | Static build served by API or CDN; `DONT_SERVE_DASHBOARD=false` only on one serving path | No server state; put behind the same Ingress with cache headers. |
+| **Postgres** | Managed service (RDS/Cloud SQL/AlloyDB) preferred; self-hosted only with primary + sync replica + PITR + tested restore | Holds orgs, quotas, sandboxes, runners, regions. TLS required (`DB_TLS_ENABLED=true`). |
+| **Redis** | Sentinel (3 nodes) or managed memory store; persistence AOF + snapshotting | Rate limits, quota usage cache, notifications, proxy sessions. Set `REDIS_PASSWORD`. |
+| **OIDC provider** | External: Keycloak or Auth0 (see section 7). Dex (sqlite, single static user) is Compose-only | One client per tenant-facing app; `org_id` claim → organization; MFA enforced at the provider. |
+| **Registry** | Managed registry or HA Harbor; **project/namespace per organization** | Snapshot images reference per-org projects so tenants can neither list nor pull each other's images. |
+| **S3 object storage** | Managed S3/GCS or erasure-coded self-hosted; **prefix per org** (`org/{orgId}/`) with scoped IAM | Snapshot payloads, build contexts, backups. Snapshot-manager and runners in a region must share the region bucket (section 6.3). |
+| **SMTP** | Managed relay (SES/SendGrid), not MailDev | Verification + notifications; per-tenant `SMTP_EMAIL_FROM` if branded. |
+| **OTEL / observability** | Collector gateway (Deployment + HPA, real `OTEL_COLLECTOR_API_KEY`) → Prometheus/Mimir + Loki + Tempo + ClickHouse for sandbox telemetry | Per-tenant dashboards and quota-exhaustion alerts (section 10). |
+| **Backup jobs** | CronJobs: Postgres PITR verification, S3 cross-region replication, etcd snapshots | Quarterly restore drills; RPO/RTO documented per tier. |
+
+Auxiliary Compose-only services (**PgAdmin, Registry UI, MailDev, Jaeger all-in-one, Dex**) are replaced by the rows above or run outside the serving path with SSO + network restrictions — never exposed with BasicAuth on public ports as in the Compose domain setup.
+
+## 6. Data Plane: Region Modules
+
+Every region — shared, dedicated, or custom — runs the **same four components**. Suggested chart: `cogbox-region`, one Helm release per region (`region-shared-us`, `region-acme`, …). The chart source ships in this repo at `deploy/helm/cogbox-region/` (`values.yaml` + `values-gcp-shared.yaml`); every object below maps to a template there.
+
+Kubernetes is required for the data plane: the runner pool is a **privileged DaemonSet**, which managed control planes that forbid privileged pods cannot run. On GCP that means **GKE Standard** — Autopilot is excluded for runner node pools (see section 12).
+
+### 6.1 Runner pool (`apps/runner`)
+
+- **DaemonSet** on a dedicated node pool tainted `cogbox.io/runner=NoSchedule`, privileged. An init/sidecar container bootstraps the container runtime on each node from inside the pod (via `nsenter` into the host: install Docker + an OCI runtime with sandbox isolation, write `daemon.json` with `icc:false` and your DNS), then the main `runner` container starts and registers with the control plane using the region's runner token.
+- A **capacity manager** keeps a floor of warm runners (`MIN_RUNNERS >= 2` so losing one node never strands a region) and grows the pool from pending-sandbox pressure. Day one this is a CronJob + Cluster Autoscaler driving existing APIs; it becomes a dedicated controller only when you outgrow that.
+- Scheduling stays in the API (filter by `region` + `sandboxClass`, sort by `availabilityScore`); the platform's job is to guarantee *capacity exists*.
+- `RESOURCE_LIMITS_DISABLED=false` in production so per-sandbox CPU/memory/disk limits are enforced; sandbox classes map to node pools (e.g. GPU class → GPU pool with matching `gpuType`).
+- Never mix runner nodes with control-plane nodes. Node pools per region: `standard` (default classes), `gpu` (GPU classes), optionally `arm`.
+- **Privilege boundary**: only the runner needs `privileged` — its init container bootstraps the host container runtime via `nsenter`, and its main container runs an internal Docker daemon that spawns sandbox containers. Nothing else does: API, proxy, snapshot-manager, and SSH gateway run unprivileged with no host mounts, so the control chart (and the non-runner region components) can even run on Autopilot-style hardened clusters — only runner node pools require Standard/privileged.
+- **Reachability is bidirectional**: runners poll the API, but the API also dials runners back (exec, preview proxying) at the runner's advertised `apiUrl`. Set `RUNNER_DOMAIN` to an address the control plane can actually route to — auto-detection may pick a VPN/tunnel interface. Sandbox subnets must not collide with existing host networks (the runner bridge defaults to a fixed subnet; stale bridges poison routing).
+
+Minimal node-pool wiring (conceptual — adapt to your autoscaler):
+
+```yaml
+# Runner nodes: tainted, labeled per pool, scaled by Cluster Autoscaler / Karpenter
+# - taint:    cogbox.io/runner=NoSchedule  (runner DaemonSet tolerates it, nothing else schedules)
+# - labels:   cogbox.io/region=shared-us, cogbox.io/pool=standard|gpu
+# - DaemonSet toleration + nodeSelector on the same labels
+# - Autoscaler watches pending runner pods → adds nodes → runners register → API schedules
+```
+
+### 6.2 Proxy (`apps/proxy`)
+
+- Deployment + HPA; Ingress with **two rules derived from one `proxyUrl`**: the bare hostname (OIDC callback, API) and the wildcard (`*.proxy.<domain>`) for `{{PORT}}-{{sandboxId}}` preview routing.
+- Wildcard TLS via **cert-manager DNS-01** — HTTP-01 cannot validate wildcards, so the proxy certificate needs a DNS-01 `ClusterIssuer`:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: wildcard-dns01
+spec:
+  acme:
+    email: ops@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: wildcard-dns01-key
+    solvers:
+    - dns01:
+        cloudflare: {}   # or route53 / digitalocean — token via secretRef
+```
+
+- Keep the DNS caveat in mind: a `*.proxy` record proxied through a CDN that has no certificate for that depth breaks TLS — serve it DNS-only and terminate TLS at Ingress.
+- `COOKIE_DOMAIN` set to the region's base domain; `PROXY_API_KEY` is the **region-scoped** key returned at region registration, unique per region. `TOOLBOX_ONLY_MODE` / `PREVIEW_WARNING_ENABLED` can vary per tenant tier.
+
+HPA shape used for proxy (same pattern for API):
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: proxy
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: proxy }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+```
+
+Prefer request-rate / p95-latency custom metrics over CPU once Prometheus adapters exist — sandbox creation is bursty and CPU lags it.
+
+### 6.3 Snapshot Manager (`apps/snapshot-manager`)
+
+- Deployment + Ingress + storage backend. Backend rule: **real S3 API → `s3` driver; anything else (compactible shims, gateways) → `filesystem` driver on a PVC**, because the registry's S3 driver needs full multipart-upload semantics and crashes on partial implementations.
+- The region bucket is shared by the snapshot-manager **and** every runner pod in that region (declarative build contexts flow through it) — same bucket, same region, credentials that can read and write. Verify from a runner pod before going live:
+
+```bash
+# every runner pod must read/write the SAME bucket the snapshot-manager uses
+kubectl -n region-shared-us exec daemonset/cogbox-runner -c runner -- \
+  env | grep -E '^AWS_'
+```
+
+- `deleteEnabled` follows the tenant's snapshot-retention policy; dedicated regions may use dedicated buckets for data-residency contracts.
+
+### 6.4 SSH Gateway (`apps/ssh-gateway`)
+
+- Dedicated `LoadBalancer` Service per region (raw TCP 2222, **not** behind Ingress), `replicaCount >= 2` with pod anti-affinity.
+- Uses the **region-scoped** gateway key (`POST /regions/<id>/regenerate-ssh-gateway-api-key`); an org-level key boots the gateway but every session fails validation. The runner pool must carry the matching client public key or sandboxes silently refuse gateway connections.
+- Register `sshGatewayUrl` on the region so dashboard/CLI print working `ssh` commands.
+
+### 6.5 Region-type matrix
+
+| Concern | Shared | Dedicated | Custom (BYOC) |
+| --- | --- | --- | --- |
+| Nodes | Shared pools, quota-separated | Exclusive pools per org | Tenant-owned (any infra, incl. non-K8s via runner binary) |
+| Proxy hostname | `proxy.<platform>` + wildcard | `proxy.<tenant>.<platform>` + wildcard | Tenant domain, tenant-managed TLS |
+| Bucket | Shared bucket, per-org prefixes | Dedicated bucket | Tenant bucket, tenant IAM |
+| SSH gateway | Shared LB, per-region key | Dedicated LB | Tenant LB or platform LB per contract |
+| Quotas | Enforced, tight defaults | Enforced, contracted values | Not enforced by platform |
+| Scaling | Platform autoscaler | Platform autoscaler, reserved floor | Tenant responsibility |
+
+### 6.6 Installing a region (directly actionable flow)
+
+The control plane issues per-region credentials at registration; the region release consumes them. Automate exactly this sequence in your pipeline (shown with `curl`; the dashboard `Regions` page does the same):
+
+```bash
+# 1. Create the region — response contains proxyApiKey, sshGatewayApiKey,
+#    and snapshot-manager basic-auth credentials (only shown once)
+curl -s https://api.<platform>/api/regions \
+  -H "Authorization: Bearer $ADMIN_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "shared-us",
+    "proxyUrl": "https://proxy.example.com",
+    "sshGatewayUrl": "ssh://ssh.example.com:2222",
+    "snapshotManagerUrl": "https://snapshots.example.com"
+  }' | tee region-creds.json
+
+# 2. Render the secrets into the region namespace (use External Secrets in production;
+#    SealedSecrets/kubectl shown here for clarity)
+kubectl -n region-shared-us create secret generic region-creds \
+  --from-literal=PROXY_API_KEY="$(jq -r .proxyApiKey region-creds.json)" \
+  --from-literal=SSH_API_KEY="$(jq -r .sshGatewayApiKey region-creds.json)" \
+  --from-literal=SNAP_USER="$(jq -r .snapshotManagerUsername region-creds.json)" \
+  --from-literal=SNAP_PASS="$(jq -r .snapshotManagerPassword region-creds.json)"
+shred -u region-creds.json   # keys exist only in the API db (hashed) and the cluster secret
+
+# 3. Install one Helm release for this region
+helm upgrade --install region-shared-us ./deploy/helm/cogbox-region \
+  -n region-shared-us --create-namespace \
+  -f values-shared-us.yaml
+
+# 4. Register runners: shared regions via admin API, custom regions via the org-scoped
+#    POST /runners (returns a per-runner apiKey); runners phone home and appear READY
+# 5. Smoke test: create → preview → SSH → snapshot → destroy one sandbox with target=shared-us
+```
+
+Key rotation is the same flow in reverse: call the regenerate endpoints, update the secret, roll the region pods (`kubectl rollout restart`), verify one sandbox lifecycle, then expire the old key.
+
+## 7. Identity and Access
+
+Auth0 is **not** required. The API accepts any RS256 OIDC issuer via JWKS and provisions users and personal organizations on first login, so the choice is operational, not protocol:
+
+| Provider | Model | Use when | Note |
+| --- | --- | --- | --- |
+| Keycloak | Self-hosted (free) | Full control, data residency, no per-seat cost | Run HA on the same cluster; back up its database |
+| Auth0 | SaaS | Zero-ops login, social/enterprise connections | A Machine-to-Machine app + Management API scopes (`read:users`, `update:users`, …) is needed **only** if dashboard user administration is backed by the IdP; plain login needs just client ID, domain, audience |
+| Entra ID / Google Identity / Okta | Workforce IdP | Company already standardizes on it | The Okta `uid`/`sub` claim quirk is already handled by the API |
+
+Dex (sqlite, single static user) ships in evaluation Compose only — never production. Whatever the provider, configure one client per surface (dashboard, proxy callback), map groups/claims to organization membership, enforce MFA at the provider, and use short-lived tokens with scoped logout URIs per tenant domain.
+
+### Why Dex cannot go to production
+
+Dex here is a single static-password file on sqlite: no self-registration flow, no real email verification (production sets `SKIP_USER_EMAIL_VERIFICATION=false`, which requires the IdP to actually verify addresses via the `email_verified` claim the API already honors), no MFA, no password policy/lockout, no audit, and a single shared user — the opposite of multitenant identity.
+
+### Auth0 vs Keycloak evaluation
+
+Both satisfy the API (standard RS256 OIDC via JWKS; switching providers later means changing issuer URLs + client IDs, already parameterized in the charts). The Management-API user admin is Auth0-only and optional — plain login needs just client ID, domain, and audience.
+
+| Dimension | Auth0 (SaaS) | Keycloak (self-hosted) |
+| --- | --- | --- |
+| Ops burden | Zero — no infrastructure | You run HA Keycloak + its Postgres + SMTP + upgrades/backups |
+| Cost shape | Free tier to start, per-user pricing after | Free forever (infra cost only) |
+| Registration + verification | Hosted Universal Login, email verification, passwordless, social logins out of the box | Built-in registration, email verification, WebAuthn/passwordless, social, LDAP — all configurable per realm |
+| MFA / enterprise SSO | Built-in MFA; enterprise connections (SAML/OIDC/HRD) fastest to enable | MFA/WebAuthn supported; SAML broker supported; more assembly required |
+| Data boundary | User store lives at the vendor | Users stay in your VPC/GCP project (realm per tenant possible) |
+| Fit | Teams that want zero identity ops or need enterprise SSO yesterday | Default for self-hosted multitenant: data residency, no per-seat cost, full control |
+
+**Recommendation:** run **Keycloak** for production self-hosted (same GKE cluster, Cloud SQL, private topology, SendGrid/SES for mails) — it matches the data-residency story and stays free at any tenant count. Choose **Auth0** when identity must be zero-ops or enterprise connections are a sales requirement; the existing [Auth0 setup](/docs/en/oss-deployment#optional-configure-auth0-for-authentication) (SPA app + M2M app with `read:users update:users` scopes) applies unchanged, just point the chart's `oidc.*` values at the tenant instead of Dex.
+
+Minimal Keycloak shape: one realm (or one per tenant for hard separation), one public client per surface (dashboard PKCE, proxy callback), registration + "verify email" + password policy on, brute-force protection on, admin console never exposed publicly, realm export versioned in git alongside the charts.
+
+### Keycloak specifics verified by testing
+
+- **Audience mapper is mandatory.** Unlike Auth0 (which honors the `audience` request parameter natively), Keycloak only puts `cogbox` into `aud` when the client has an `oidc-audience-mapper` (`included.client.audience: cogbox`, ID + access token claims on). Without it, every platform call 401s even with a valid signature — the local realm JSON ships this mapper.
+- **Service-created users need profile attributes.** Users created via the Admin API without `firstName`/`lastName` fail password grants with "Account is not fully set up". Browser self-registration collects them; scripts must set them.
+- **Direct grants are for testing.** The local realm enables Direct Access Grants so password-grant tokens can prove the JWT path end-to-end; production browser flows use authorization code + PKCE, and direct grants can be disabled on the client afterwards.
+
+### Keycloak production environment (formal list)
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `KC_BOOTSTRAP_ADMIN_USERNAME` / `KC_BOOTSTRAP_ADMIN_PASSWORD` | yes (first boot) | Initial admin; rotate/disable after break-glass accounts exist |
+| `KC_DB` | yes | `postgres` (never file dev storage) |
+| `KC_DB_URL_HOST` / `KC_DB_URL_PORT` / `KC_DB_URL_DATABASE` | yes | Cloud SQL private IP + dbname |
+| `KC_DB_USERNAME` / `KC_DB_PASSWORD` | yes | From Secret Manager |
+| `KC_HOSTNAME` | yes | Public IdP hostname, e.g. `keycloak.example.com` |
+| `KC_HOSTNAME_STRICT` | yes | `true` in production (issuer must match exactly what the API validates) |
+| `KC_HOSTNAME_ADMIN` | recommended | Separate internal hostname so the admin console is never public |
+| `KC_PROXY` | yes (behind ingress) | `edge` (TLS terminated at ingress-nginx) |
+| `KC_HTTP_ENABLED` | yes | `true`; terminate TLS at ingress, keep pod-to-pod http |
+| `KC_HEALTH_ENABLED` / `KC_METRICS_ENABLED` | yes | `/health/*` probes and Prometheus metrics |
+| `KC_CACHE` | recommended | `ispn` (default) for multi-replica; single replica may stay local |
+| `KC_LOG_LEVEL` | recommended | `info` (debug only while troubleshooting) |
+| `KC_SMTP_HOST` / `KC_SMTP_PORT` / `KC_SMTP_FROM` | **yes — hard requirement** | Registration + email verification + password reset all send mail; no relay = no onboarding |
+| `KC_SMTP_USER` / `KC_SMTP_PASSWORD` | if relay needs auth | SendGrid/SES/Mailgun credentials |
+
+GitHub / Google login (optional, per realm): Identity Providers → Add `github` / `google`, paste the OAuth client ID/secret from the provider console, set the Keycloak redirect URI (`https://<keycloak-host>/realms/cogbox/broker/<alias>/endpoint`) on the provider side. Secrets live in the IdP-broker config inside Keycloak (backed up with its DB) — never in git. The local realm JSON intentionally ships these providers absent; add them in the admin console when needed.
+
+- **Humans**: external OIDC only (see table above).
+- **Machines**: tenant API keys (rotatable, least-privilege scopes), per-region service keys (`PROXY_API_KEY`, runner token, SSH gateway key) generated at region registration and stored in sealed/external secrets — never shared across regions.
+- **Registries**: private-image credentials resolved centrally per pull via cross-account roles (broker `AssumeRole` with org ExternalId), never baked into runner images or static docker auth files.
+- **Admin**: separate admin API keys with break-glass procedure, audit-logged; no shared `dev@…`-style accounts in production.
+
+## 8. Security Baseline
+
+- **Secrets**: External Secrets Operator / Vault for everything; fail CI if placeholder secrets (`supersecretkey`, `secret_api_token`, …) appear in rendered manifests (`helm template | grep` gate).
+- **Transport**: TLS everywhere — Ingress (public), Postgres/Redis/S3 (internal, `DB_TLS_ENABLED=true`, `*_REJECT_UNAUTHORIZED=true`), runner↔API, proxy↔API.
+- **Network**: default-deny `NetworkPolicy`s per namespace; runner nodes additionally get host-level egress rules blocking pod/service CIDRs, cloud metadata (`169.254.169.254`), kubelet (`:10250`) and SSH (`:22`); `INTER_SANDBOX_NETWORK_ENABLED=false` plus bridge isolation so co-resident sandboxes cannot reach each other.
+- **Supply chain**: pinned image digests, signature verification (cosign), private-image allowlists per org, read-only root filesystems where the component allows.
+- **Data**: encryption at rest (managed disks/buckets), per-org S3 prefixes + registry projects, snapshot retention per contract, audit logs immutable.
+
+## 9. Secret Inventory
+
+Every secret the platform needs, in one place. Control-plane keys live under `<release>-control/*`, per-region keys under `<release>/*` in your secret manager (Secret Manager / Vault), synced by External Secrets. The charts (`deploy/helm/cogbox-control`, `deploy/helm/cogbox-region`) implement exactly this inventory — CI fails the build if a placeholder value is rendered.
+
+Control plane:
+
+| Key | Consumer | Source |
+| --- | --- | --- |
+| `ENCRYPTION_KEY` / `ENCRYPTION_SALT` | API data protection | `openssl rand -hex 32`, generated once |
+| `DB_PASSWORD` | API → Postgres | Database user password (Cloud SQL) |
+| `REDIS_PASSWORD` | API/proxy → Redis | Memorystore AUTH string |
+| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | API → object storage | Bucket HMAC keys of the platform service account |
+| `TRANSIENT_REGISTRY_PASSWORD` | API → transient registry | Registry admin password (URL itself is boot-required config) |
+| `INTERNAL_REGISTRY_PASSWORD` | API → internal registry | Registry admin password |
+| `PROXY_API_KEY` | Legacy global proxy key — every API-key request is compared against it first | Single-region: = region key; multi-region: random (real auth via region hashes) |
+| `SSH_GATEWAY_API_KEY` | Legacy global gateway key — same mechanism | Same rule as above |
+| `OIDC_CLIENT_SECRET` | API → IdP | IdP client page (empty for public clients) |
+| `OIDC_MANAGEMENT_API_CLIENT_SECRET` | API → Auth0 M2M | Auth0 M2M app — only if IdP-backed user admin (section 7) |
+| `SMTP_USER` / `SMTP_PASSWORD` | API → mail relay | Mail provider console |
+| `OTEL_COLLECTOR_API_KEY` | API → collector gateway | Generated once |
+| `HEALTH_CHECK_API_KEY` | Probes → `/api/health/ready` | `openssl rand -hex 32` |
+| `ADMIN_API_KEY` | Bootstrap admin | `openssl rand -hex 32`, rotate after first use |
+
+Per region (from `POST /regions` + per-region keygen, section 6.6):
+
+| Key | Consumer | Source |
+| --- | --- | --- |
+| `PROXY_API_KEY` | Proxy → API (also seals preview cookies) | Region registration response |
+| `SSH_API_KEY` | SSH gateway → API | Region registration / regenerate endpoint |
+| `SNAP_USER` / `SNAP_PASS` | Snapshot-manager basic auth | Region registration response |
+| `RUNNER_TOKEN` | Runner pool → API | Admin API (shared regions) / `POST /runners` (custom) |
+| `SSH_PRIVATE_KEY` / `SSH_HOST_KEY` / `SSH_PUBLIC_KEY` | Gateway + runner pool | Generated keypair per region |
+| `SNAP_S3_ACCESS_KEY` / `SNAP_S3_SECRET_KEY` | Snapshot-manager → bucket | Region bucket HMAC keys (only for `s3` driver) |
+
+Rotation order: regenerate at the control plane → update the secret → roll the workloads (`kubectl rollout restart`) → verify one sandbox lifecycle → expire the old key.
+
+## 10. Observability (Per-Tenant)
+
+- **Metrics**: sandbox create/start/stop latency + error rate per `(org, region, class)`; runner `availabilityScore` distribution and `unresponsive` count; quota utilization vs limit; proxy p95 + 5xx per hostname; queue depth of pending sandboxes.
+- **Logs**: structured, with `organizationId`, `regionId`, `sandboxId`, `runnerId` on every record; tenant-scoped log views.
+- **Traces**: API → runner → snapshot-manager spans for create/snapshot flows; dedicated trace backend, not a Compose all-in-one.
+- **Alerts** (examples): quota >85% (warn tenant + platform), runner pool with zero schedulable runners, snapshot stuck in `error`, proxy wildcard cert expiry `&lt;14d`, Postgres replication lag, Redis evictions rising.
+
+## 11. Backup and Disaster Recovery
+
+| Data | Strategy | RPO / RTO target |
+| --- | --- | --- |
+| Postgres | PITR + daily base backup + cross-region copy; quarterly restore drill | RPO ≤ 5 min, RTO ≤ 30 min |
+| S3 (snapshots/builds) | Versioning + cross-region replication; retention per contract | RPO 0 (versioned), RTO hours |
+| Registry | Rebuildable from snapshots + S3; backup project metadata | Best-effort, RTO hours |
+| etcd / cluster state | Managed control plane or scheduled etcd snapshots | Cluster rebuild, RTO hours |
+| Region pools | Cattle, not pets: re-install chart release, runners re-register | RTO < 1 h per region |
+
+Region failure playbook: mark region `unschedulable` + `draining`, let in-flight sandboxes back up/migrate, shift shared-region tenants to the paired region (`us` ↔ `eu`), reinstall the region release, re-register runners.
+
+## 12. GCP Landing Zone
+
+Yes — GCP supports the full architecture. Concrete service mapping (also the default in `values-gcp.yaml` / `values-gcp-shared.yaml`):
+
+| Need | GCP service | Wiring |
+| --- | --- | --- |
+| Kubernetes | GKE **Standard** | Runner node pools tainted `cogbox.io/runner=NoSchedule`; control plane on a small system pool. **Autopilot is excluded**: it forbids the privileged runner DaemonSet. |
+| Postgres | Cloud SQL (private IP, HA) | `db.host` = private IP (private-services-access); `DB_TLS_ENABLED=true`, verify on |
+| Redis | Memorystore for Redis (AUTH on) | `redis.host` = private IP |
+| Object storage | GCS bucket + HMAC keys | Runner `AWS_*` and API `S3_*` point at `https://storage.googleapis.com`; snapshot-manager stays on the `filesystem` driver (regional PD) unless you verify multipart behavior first |
+| DNS + wildcard TLS | Cloud DNS + cert-manager `ClusterIssuer` (CloudDNS solver) | `proxy.` + `*.proxy.` records DNS-only; issuers: `wildcard-dns01` (proxy) and `public-http01` (API/snapshots) |
+| Images | Artifact Registry (or Docker Hub) | Pin `imageTag`, preferably `imageDigest` |
+| Secrets | Secret Manager + External Secrets Operator | `secrets.useExternalSecrets=true` with a `ClusterSecretStore secretstore-gcp`; Workload Identity binds the ESO service account |
+| Ingress | ingress-nginx + cert-manager | Prefer over GCE ingress, which handles DNS-01 wildcards less flexibly |
+
+Minimal cert-manager CloudDNS issuer (DNS-01 for the proxy wildcard):
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: wildcard-dns01
+spec:
+  acme:
+    email: ops@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: wildcard-dns01-key
+    solvers:
+    - dns01:
+        cloudDNS:
+          project: my-gcp-project
+```
+
+GKE cluster sketch (one system pool + one runner pool per region/pool type):
+
+```bash
+gcloud container clusters create cogbox-prod --zone asia-east1-a \
+  --machine-type e2-standard-4 --num-nodes 3 \
+  --enable-private-nodes --enable-ip-alias \
+  --node-taints '' --node-labels=cogbox.io/pool=system
+
+gcloud container node-pools create runners-standard-us \
+  --cluster cogbox-prod --zone asia-east1-a \
+  --machine-type n2-standard-8 --num-nodes 3 --enable-autoscaling --min-nodes 2 --max-nodes 50 \
+  --node-taints cogbox.io/runner=NoSchedule \
+  --node-labels=cogbox.io/region=shared-us,cogbox.io/pool=standard \
+  --enable-secure-boot --no-enable-autoupgrade
+```
+
+GPU pools follow the same shape with GPU machine types + the NVIDIA driver installer; sandbox GPU classes schedule onto them by label.
+
+## 13. Deployment Flow (GitOps)
+
+```
+main → CI (lint/test/scan, helm template + kubeconform, image digests pinned,
+           placeholder-secret gate)
+     → staging cluster (control + 1 shared region, e2e: onboard org → sandbox lifecycle)
+     → prod control (helm upgrade, migration Job first, canary API replicas)
+     → prod regions one by one (shared first, then dedicated; custom via tenant PR)
+```
+
+- One Helm release per control plane and per region (`region-shared-us`, `region-acme`, …) from `deploy/helm/`; values per environment in git, secrets in Vault/Secret Manager (never in values).
+- API rollouts are rolling with PDBs; runner DaemonSet rolls respect live-restore so running sandboxes survive daemon restarts.
+- Every release records image digests + chart version + migration version for rollback.
+
+## 14. Sizing Reference (Starting Point)
+
+| Tier | Control plane | Shared region | Notes |
+| --- | --- | --- | --- |
+| Pilot (≤10 orgs) | API 3×(1c/2G), PG managed db.t3.medium, Redis 3×sentinel | Proxy 2, runners 3 nodes ×(4c/16G), snapshot-manager 1 | Single shared region, quotas on |
+| Growth (≤100 orgs) | API 5+ w/ HPA, PG db.m5.large + replica, Redis cluster | Proxy HPA 2–10, runner pool autoscaled 5–50 nodes | Add 2nd shared region for latency |
+| Scale (100+ / dedicated) | API HPA + read replicas, PG multi-AZ XL, Redis cluster | Per-tenant dedicated regions + GPU pools | Per-region buckets, per-tenant dashboards |
+
+Measure, don't guess: size from sandbox-create p95, runner CPU/memory allocation ratio, and quota-exhaustion frequency — all in the section 10 dashboards.
+
+## 15. Migrating from Compose
+
+1. Stand up the control plane on a dev cluster with managed Postgres/Redis; run migrations as a Job.
+2. Install one region release (`region-shared`), register two runners; create two test orgs with distinct quotas and verify scheduling routes by region.
+3. Move proxy DNS (`proxy.` + `*.proxy.`) to cert-manager DNS-01 wildcards; cut over one tenant's traffic and compare sandbox-create p95.
+4. Add GPU/custom pools and dedicated regions as demand grows; decommission the Compose host last.

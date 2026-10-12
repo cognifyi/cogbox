@@ -1,0 +1,92 @@
+# Non-secret configuration for the API. Every sensitive value lives in the
+# Secret / ExternalSecret (templates/secrets.yaml), never here.
+# Hook-annotated (like secrets.yaml): migration hook Jobs run before regular
+# resources exist, and they mount this ConfigMap. Weight -10 sorts before the
+# pre-migrations at -5. before-hook-creation makes upgrades replace it.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cogbox-control.fullname" . }}-config
+  labels:
+    {{- include "cogbox-control.labels" . | nindent 4 }}
+  {{- if .Values.migration.enabled }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-10"
+    helm.sh/hook-delete-policy: before-hook-creation
+  {{- end }}
+data:
+  DB_HOST: {{ .Values.db.host | quote }}
+  DB_PORT: {{ .Values.db.port | quote }}
+  DB_DATABASE: {{ .Values.db.database | quote }}
+  DB_USERNAME: {{ .Values.db.username | quote }}
+  DB_TLS_ENABLED: {{ .Values.db.tlsEnabled | quote }}
+  DB_TLS_REJECT_UNAUTHORIZED: {{ .Values.db.tlsRejectUnauthorized | quote }}
+  REDIS_HOST: {{ .Values.redis.host | quote }}
+  REDIS_PORT: {{ .Values.redis.port | quote }}
+  OIDC_CLIENT_ID: {{ .Values.oidc.clientId | quote }}
+  OIDC_ISSUER_BASE_URL: {{ .Values.oidc.issuerBaseUrl | quote }}
+  PUBLIC_OIDC_DOMAIN: {{ .Values.oidc.publicDomain | quote }}
+  OIDC_AUDIENCE: {{ .Values.oidc.audience | quote }}
+  OIDC_MANAGEMENT_API_ENABLED: {{ .Values.oidc.managementApiEnabled | quote }}
+  OIDC_MANAGEMENT_API_CLIENT_ID: {{ .Values.oidc.managementApiClientId | quote }}
+  OIDC_MANAGEMENT_API_AUDIENCE: {{ .Values.oidc.managementApiAudience | quote }}
+  S3_ENDPOINT: {{ .Values.s3.endpoint | quote }}
+  S3_STS_ENDPOINT: {{ .Values.s3.stsEndpoint | quote }}
+  S3_REGION: {{ .Values.s3.region | quote }}
+  S3_DEFAULT_BUCKET: {{ .Values.s3.defaultBucket | quote }}
+  S3_ACCOUNT_ID: /
+  S3_ROLE_NAME: /
+  DASHBOARD_URL: {{ .Values.dashboard.url | quote }}
+  DASHBOARD_BASE_API_URL: {{ .Values.dashboard.baseApiUrl | quote }}
+  ENVIRONMENT: production
+  PROXY_PROTOCOL: {{ .Values.proxyDefaults.protocol | quote }}
+  PROXY_DOMAIN: {{ .Values.proxyDefaults.domain | quote }}
+  PROXY_TEMPLATE_URL: {{ .Values.proxyDefaults.templateUrl | default (printf "%s://{{PORT}}-{{sandboxId}}.%s" .Values.proxyDefaults.protocol .Values.proxyDefaults.domain) | quote }}
+  DEFAULT_SNAPSHOT: {{ .Values.defaultSnapshot | quote }}
+  TRANSIENT_REGISTRY_URL: {{ .Values.registry.transient.url | quote }}
+  TRANSIENT_REGISTRY_ADMIN: {{ .Values.registry.transient.admin | quote }}
+  TRANSIENT_REGISTRY_PROJECT_ID: {{ .Values.registry.transient.projectId | quote }}
+  INTERNAL_REGISTRY_URL: {{ .Values.registry.internal.url | quote }}
+  INTERNAL_REGISTRY_ADMIN: {{ .Values.registry.internal.admin | quote }}
+  INTERNAL_REGISTRY_PROJECT_ID: {{ .Values.registry.internal.projectId | quote }}
+  DEFAULT_REGION_ID: {{ .Values.quotas.defaultRegionId | quote }}
+  DEFAULT_REGION_NAME: {{ .Values.quotas.defaultRegionName | quote }}
+  DEFAULT_REGION_ENFORCE_QUOTAS: {{ .Values.quotas.enforceQuotas | quote }}
+  DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA: {{ .Values.quotas.totalCpuQuota | quote }}
+  DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA: {{ .Values.quotas.totalMemoryQuota | quote }}
+  DEFAULT_ORG_QUOTA_TOTAL_DISK_QUOTA: {{ .Values.quotas.totalDiskQuota | quote }}
+  DEFAULT_ORG_QUOTA_MAX_CPU_PER_SANDBOX: {{ .Values.quotas.maxCpuPerSandbox | quote }}
+  DEFAULT_ORG_QUOTA_MAX_MEMORY_PER_SANDBOX: {{ .Values.quotas.maxMemoryPerSandbox | quote }}
+  DEFAULT_ORG_QUOTA_MAX_DISK_PER_SANDBOX: {{ .Values.quotas.maxDiskPerSandbox | quote }}
+  DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA: {{ .Values.quotas.snapshotQuota | quote }}
+  DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE: {{ .Values.quotas.maxSnapshotSize | quote }}
+  DEFAULT_ORG_QUOTA_VOLUME_QUOTA: {{ .Values.quotas.volumeQuota | quote }}
+  ADMIN_TOTAL_CPU_QUOTA: {{ .Values.quotas.admin.totalCpuQuota | quote }}
+  ADMIN_TOTAL_MEMORY_QUOTA: {{ .Values.quotas.admin.totalMemoryQuota | quote }}
+  ADMIN_TOTAL_DISK_QUOTA: {{ .Values.quotas.admin.totalDiskQuota | quote }}
+  ADMIN_MAX_CPU_PER_SANDBOX: {{ .Values.quotas.admin.maxCpuPerSandbox | quote }}
+  ADMIN_MAX_MEMORY_PER_SANDBOX: {{ .Values.quotas.admin.maxMemoryPerSandbox | quote }}
+  ADMIN_MAX_DISK_PER_SANDBOX: {{ .Values.quotas.admin.maxDiskPerSandbox | quote }}
+  ADMIN_SNAPSHOT_QUOTA: {{ .Values.quotas.admin.snapshotQuota | quote }}
+  ADMIN_MAX_SNAPSHOT_SIZE: {{ .Values.quotas.admin.maxSnapshotSize | quote }}
+  ADMIN_VOLUME_QUOTA: {{ .Values.quotas.admin.volumeQuota | quote }}
+  RATE_LIMIT_ANONYMOUS_TTL: {{ .Values.rateLimit.anonymousTtl | quote }}
+  RATE_LIMIT_ANONYMOUS_LIMIT: {{ .Values.rateLimit.anonymousLimit | quote }}
+  RATE_LIMIT_AUTHENTICATED_TTL: {{ .Values.rateLimit.authenticatedTtl | quote }}
+  RATE_LIMIT_AUTHENTICATED_LIMIT: {{ .Values.rateLimit.authenticatedLimit | quote }}
+  RATE_LIMIT_SANDBOX_CREATE_TTL: {{ .Values.rateLimit.sandboxCreateTtl | quote }}
+  RATE_LIMIT_SANDBOX_CREATE_LIMIT: {{ .Values.rateLimit.sandboxCreateLimit | quote }}
+  RATE_LIMIT_SANDBOX_LIFECYCLE_TTL: {{ .Values.rateLimit.sandboxLifecycleTtl | quote }}
+  RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT: {{ .Values.rateLimit.sandboxLifecycleLimit | quote }}
+  RATE_LIMIT_FAILED_AUTH_TTL: {{ .Values.rateLimit.failedAuthTtl | quote }}
+  RATE_LIMIT_FAILED_AUTH_LIMIT: {{ .Values.rateLimit.failedAuthLimit | quote }}
+  SMTP_HOST: {{ .Values.smtp.host | quote }}
+  SMTP_PORT: {{ .Values.smtp.port | quote }}
+  SMTP_SECURE: {{ .Values.smtp.secure | quote }}
+  SMTP_EMAIL_FROM: {{ .Values.smtp.emailFrom | quote }}
+  OTEL_ENABLED: {{ .Values.otel.enabled | quote }}
+  OTEL_COLLECTOR_URL: {{ .Values.otel.collectorUrl | quote }}
+  OPENFEATURE_FORCE_ENABLED_FLAGS: {{ .Values.featureFlags.forceEnabled | quote }}
+  SKIP_USER_EMAIL_VERIFICATION: "false"
+  MAINTENANCE_MODE: "false"

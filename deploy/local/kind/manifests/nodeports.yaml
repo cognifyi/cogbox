@@ -1,0 +1,36 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# TEST-ONLY NodePorts so host processes reach cluster services without
+# port-forwards (which die with your shell). Production uses Ingress.
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-nodeport
+  namespace: control
+spec:
+  type: NodePort
+  ports: [{ port: 80, targetPort: http, nodePort: 30080 }]
+  selector:
+    app.kubernetes.io/name: cogbox-control
+    app.kubernetes.io/component: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs-nodeport
+  namespace: control
+spec:
+  type: NodePort
+  ports: [{ port: 9000, nodePort: 30090 }]
+  selector: { app: rustfs }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-nodeport
+  namespace: control
+spec:
+  type: NodePort
+  ports: [{ port: 6000, nodePort: 30060 }]
+  selector: { app: registry }

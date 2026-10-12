@@ -1,0 +1,144 @@
+{{- if .Values.snapshotManager.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-snapshots
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: snapshot-manager
+spec:
+  replicas: {{ .Values.snapshotManager.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cogbox-region
+      app.kubernetes.io/component: snapshot-manager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-region
+        app.kubernetes.io/component: snapshot-manager
+    spec:
+      containers:
+        - name: snapshot-manager
+          image: {{ include "cogbox-region.image" (dict "repository" .Values.snapshotManager.repository "Values" .Values) | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.snapshotManager.port }}
+          env:
+            - name: SNAPSHOT_MANAGER_ADDR
+              value: {{ printf ":%d" (.Values.snapshotManager.port | int) | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_DRIVER
+              value: {{ .Values.snapshotManager.storage.driver | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_DIR
+              value: /data
+            - name: SNAPSHOT_MANAGER_STORAGE_DELETE_ENABLED
+              value: {{ .Values.snapshotManager.storage.deleteEnabled | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_REGION
+              value: {{ .Values.snapshotManager.storage.s3.region | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_BUCKET
+              value: {{ .Values.snapshotManager.storage.s3.bucket | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_REGIONENDPOINT
+              value: {{ .Values.snapshotManager.storage.s3.endpoint | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_ENCRYPT
+              value: {{ .Values.snapshotManager.storage.s3.encrypt | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_SECURE
+              value: {{ .Values.snapshotManager.storage.s3.secure | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_ROOTDIRECTORY
+              value: {{ .Values.snapshotManager.storage.s3.rootDirectory | quote }}
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SNAP_S3_ACCESS_KEY
+                  optional: true
+            - name: SNAPSHOT_MANAGER_STORAGE_S3_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SNAP_S3_SECRET_KEY
+                  optional: true
+            # Basic auth matches the username/password issued at region registration.
+            - name: SNAPSHOT_MANAGER_AUTH_TYPE
+              value: basic
+            - name: SNAPSHOT_MANAGER_AUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SNAP_USER
+            - name: SNAPSHOT_MANAGER_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SNAP_PASS
+          volumeMounts:
+            {{- if eq .Values.snapshotManager.storage.driver "filesystem" }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+          resources:
+            {{- toYaml .Values.snapshotManager.resources | nindent 12 }}
+      volumes:
+        {{- if eq .Values.snapshotManager.storage.driver "filesystem" }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "cogbox-region.fullname" . }}-snapshots
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-snapshots
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  selector:
+    app.kubernetes.io/name: cogbox-region
+    app.kubernetes.io/component: snapshot-manager
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-snapshots
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.snapshotManager.ingress.clusterIssuer }}
+spec:
+  ingressClassName: {{ .Values.snapshotManager.ingress.className }}
+  tls:
+    - hosts: [{{ .Values.snapshotManager.host }}]
+      secretName: {{ .Values.snapshotManager.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.snapshotManager.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "cogbox-region.fullname" . }}-snapshots
+                port: { number: 80 }
+---
+{{- if eq .Values.snapshotManager.storage.driver "filesystem" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-snapshots
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+spec:
+  accessModes: [ReadWriteOnce]
+  {{- if .Values.snapshotManager.storage.storageClass }}
+  storageClassName: {{ .Values.snapshotManager.storage.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.snapshotManager.storage.size }}
+{{- end }}
+{{- end }}

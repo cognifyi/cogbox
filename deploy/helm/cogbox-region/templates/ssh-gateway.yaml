@@ -1,0 +1,80 @@
+{{- /*
+SSH Gateway: raw TCP LoadBalancer per region — NOT behind Ingress.
+Uses the region-scoped key (POST /regions/<id>/regenerate-ssh-gateway-api-key);
+an org-level key boots the pod but every session fails validation (403).
+Runner pods carry the matching SSH_PUBLIC_KEY or sandboxes refuse connections.
+*/ -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-ssh-gateway
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ssh-gateway
+spec:
+  replicas: {{ .Values.sshGateway.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cogbox-region
+      app.kubernetes.io/component: ssh-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cogbox-region
+        app.kubernetes.io/component: ssh-gateway
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: ssh-gateway
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: ssh-gateway
+          image: {{ include "cogbox-region.image" (dict "repository" .Values.sshGateway.repository "Values" .Values) | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: ssh
+              containerPort: {{ .Values.sshGateway.port }}
+          env:
+            - name: API_URL
+              value: {{ .Values.controlPlaneApiUrl | quote }}
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SSH_API_KEY
+            - name: SSH_GATEWAY_PORT
+              value: {{ .Values.sshGateway.port | quote }}
+            - name: SSH_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SSH_PRIVATE_KEY
+            - name: SSH_HOST_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cogbox-region.secretName" . }}
+                  key: SSH_HOST_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cogbox-region.fullname" . }}-ssh-gateway
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.sshGateway.serviceType }}
+  ports:
+    - name: ssh
+      port: {{ .Values.sshGateway.port }}
+      targetPort: ssh
+  selector:
+    app.kubernetes.io/name: cogbox-region
+    app.kubernetes.io/component: ssh-gateway

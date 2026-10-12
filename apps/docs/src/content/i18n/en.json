@@ -137,6 +137,8 @@
   "sidebarconfig.asyncSandbox": "AsyncSandbox",
   "sidebarconfig.dataAnalysis": "Data Analysis with AI",
   "sidebarconfig.ossDeployment": "Open Source",
+  "sidebarconfig.multitenantProduction": "Multitenant Production",
+  "sidebarconfig.multitenantProductionDescription": "Multitenant production deployment on Kubernetes with dynamic scaling.",
   "sidebarconfig.deployments": "Deployments",
   "sidebarconfig.security": "Security",
   "sidebarconfig.integrations": "Guides",

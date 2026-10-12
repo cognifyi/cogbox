@@ -860,6 +860,16 @@ export const getSidebarConfig = (
             icon: 'computer.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/multitenant-production', locale),
+          label: t('sidebarconfig.multitenantProduction'),
+          description: t('sidebarconfig.multitenantProductionDescription'),
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
+          },
+        },
       ],
     },
     {
