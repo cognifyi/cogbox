@@ -845,7 +845,10 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.entityManager,
       {
         name: 'Personal',
-        defaultRegionId: payload.personalOrganizationDefaultRegionId,
+        // Fall back to the platform default region so every personal org can
+        // schedule sandboxes without a dashboard visit. Explicit per-user
+        // regions (e.g. from invite flows) still take precedence.
+        defaultRegionId: payload.personalOrganizationDefaultRegionId ?? this.configService.get('defaultRegion.id'),
       },
       payload.user.id,
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,

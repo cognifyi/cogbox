@@ -62,11 +62,17 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.initializeBackupRegistry()
 
     // Default runner init is not awaited because v2 runners depend on the API to be ready
-    this.initializeDefaultRunner()
-      .then(() => this.initializeDefaultSnapshot())
-      .catch((error) => {
-        this.logger.error('Error initializing default runner', error)
-      })
+    this.initializeDefaultRunner().catch((error) => {
+      this.logger.error('Error initializing default runner', error)
+    })
+
+    // Default snapshot init runs independently (not chained behind the runner
+    // init) so the platform-provided image stays resolvable by name even when
+    // no default runner is configured. Without a runner it stays pending
+    // until one appears, instead of failing lookups as "not found".
+    this.initializeDefaultSnapshot().catch((error) => {
+      this.logger.error('Error initializing default snapshot', error)
+    })
   }
 
   private async stopAllCronJobs(): Promise<void> {
