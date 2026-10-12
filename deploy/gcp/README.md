@@ -1,8 +1,18 @@
 # GKE production runbook (cogbox.pazity.com)
 
-Zone: `us-west4-b` · machines: `e2-standard-2` · **Spot** · autoscale 0–5 ·
-storage: 100Gi `standard` (pd-standard zonal, cheapest) ·
-domain: `cogbox.pazity.com` + `*.cogbox.pazity.com` (Cloudflare DNS-only).
+```
+deploy/
+  gcp/
+    README.md                 this runbook
+    scripts/                  runnable steps (lib.sh + 00/10/20/30/31/40)
+      00-project.sh           select project + enable APIs
+      10-cluster-create.sh    Standard zonal cluster, Spot pool, autoscale 0-5, 40G pd-standard boot disks
+      20-get-credentials.sh   kubeconfig for kubectl/helm
+      30-park.sh / 31-wake.sh scale pool to 0 / back to 1
+      40-dns.sh               Cloudflare A records (DNS-only) for cogbox + wildcards
+    values-control-pazity.yaml  control overlay (fill REPLACE_ME: Cloud SQL, Memorystore, GCS, registry)
+    values-region-pazity.yaml   shared-region overlay (proxy hosts, 30Gi standard storage)
+```
 
 ## 0. Login (human does this — browser required)
 
@@ -17,6 +27,10 @@ Needed IAM on the operator: **Kubernetes Engine Admin** + **Compute Admin**
 
 ## 1. Create the Standard cluster (single Spot pool, autoscale 0–5)
 
+Runnable: `scripts/10-cluster-create.sh` (after `scripts/00-project.sh`).
+Equivalent manual command (boot disks 40G pd-standard — system disk only;
+app storage is claimed later at service init, section 3):
+
 ```bash
 gcloud container clusters create cogbox-prod \
   --zone us-west4-b \
@@ -24,7 +38,7 @@ gcloud container clusters create cogbox-prod \
   --spot \
   --num-nodes 1 \
   --enable-autoscaling --min-nodes 0 --max-nodes 5 \
-  --disk-size 100 --disk-type pd-standard \
+  --disk-size 40 --disk-type pd-standard \
   --quiet
 
 gcloud container clusters get-credentials cogbox-prod --zone us-west4-b
@@ -41,6 +55,8 @@ Notes:
 
 ## 2. Park to zero when idle / wake on demand
 
+Runnable: `scripts/30-park.sh` / `scripts/31-wake.sh`. Manual equivalents:
+
 ```bash
 # Park: everything to 0 (system pods go Pending; harmless while idle)
 gcloud container clusters resize cogbox-prod \
@@ -51,32 +67,28 @@ gcloud container clusters resize cogbox-prod \
   --node-pool default-pool --num-nodes 1 --zone us-west4-b --quiet
 ```
 
-## 3. 100G cheapest persistent storage
+## 3. Persistent storage (claimed at service init, not cluster init)
 
-GKE preinstalls the `standard` StorageClass (pd-standard, zonal HDD —
-lowest cost). Claim 100Gi from it (follows the node zone `us-west4-b`):
+App storage (snapshot-manager) is claimed by the region chart's PVC at
+install time — nothing storage-related happens during cluster creation.
+Cheapest durable option is the preinstalled `standard` StorageClass
+(pd-standard zonal HDD); the pazity overlay starts at 30Gi:
 
 ```yaml
-# deploy/gcp/pvc-snapshots-100g.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: region-shared-snapshots
-  namespace: region-shared
-spec:
-  accessModes: [ReadWriteOnce]
-  storageClassName: standard # pd-standard zonal = cheapest
-  resources:
-    requests: { storage: 100Gi }
+# values-region-pazity.yaml (excerpt)
+snapshotManager:
+  storage:
+    driver: filesystem
+    size: 30Gi
+    storageClass: standard
 ```
+
+Grow later without downtime (GKE `standard` allows expansion, ext4 resizes online):
 
 ```bash
-kubectl apply -f deploy/gcp/pvc-snapshots-100g.yaml
+kubectl patch pvc <claim-name> -n <region-ns> \
+  -p '{"spec":{"resources":{"requests":{"storage":"60Gi"}}}}'
 ```
-
-Point the region chart at it via
-`snapshotManager.storage.filesystem.existingClaim: region-shared-snapshots`
-(or let the chart create its own 100Gi PVC with `storageClass: standard`).
 
 ## 4. DNS (Cloudflare, DNS-only / grey cloud)
 
@@ -84,7 +96,10 @@ Point the region chart at it via
 > (`npm install --global cf` + `cf auth login`).
 > Needed token permission: **Zone:DNS:Edit** on `pazity.com`.
 
-After ingress-nginx is deployed, grab its external IP:
+After ingress-nginx is deployed, grab its external IP and run
+`INGRESS_IP=<ip> scripts/40-dns.sh` (skips records that already match).
+Manual equivalents (`cf` CLI — DNS is NOT wrangler; `cf auth login` first,
+token needs **Zone:DNS:Edit** on `pazity.com`):
 
 ```bash
 kubectl -n ingress-nginx get svc ingress-nginx-controller \
