@@ -90,7 +90,10 @@ runner:
     limits: { cpu: 4000m, memory: 8Gi }
   env:
     ENVIRONMENT: production
-    CONTAINER_RUNTIME: sysbox-runc
+    # OCI runtime for sandbox containers. Empty = Docker default (runc).
+    # Set to sysbox-runc ONLY on nodes where Sysbox is installed (via the
+    # runtime-installer); otherwise sandbox creation fails.
+    CONTAINER_RUNTIME: ""
     RESOURCE_LIMITS_DISABLED: "false"
     INTER_SANDBOX_NETWORK_ENABLED: "false"
     SSH_GATEWAY_ENABLE: "true"

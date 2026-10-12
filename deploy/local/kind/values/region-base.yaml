@@ -1,0 +1,43 @@
+# Base (non-secret) values for a local test region. TEST ONLY.
+# The region name MUST match the API-registered region id (20-region.sh sets it).
+regionName: shared-local
+controlPlaneApiUrl: http://control-control-api.control.svc.cluster.local/api
+
+nodeSelector:
+  cogbox.io/region: shared-local
+  cogbox.io/pool: standard
+
+proxy:
+  host: proxy.local.test
+  cookieDomain: local.test
+  protocol: http
+  replicaCount: 1
+  hpa:
+    enabled: false
+
+snapshotManager:
+  host: snapshots.local.test
+  storage:
+    driver: filesystem
+    size: 5Gi
+    deleteEnabled: true
+
+runner:
+  env:
+    ENVIRONMENT: development
+    AWS_REGION: us-east-1
+    AWS_ENDPOINT_URL: http://rustfs.control.svc.cluster.local:9000
+    AWS_ACCESS_KEY_ID: localpass
+    AWS_SECRET_ACCESS_KEY: localpass
+    AWS_DEFAULT_BUCKET: cogbox
+  hostPaths:
+    dockerSock:
+      enabled: false
+
+sshGateway:
+  replicaCount: 1
+  serviceType: ClusterIP
+
+secrets:
+  useExternalSecrets: false
+  createFromValues: true
