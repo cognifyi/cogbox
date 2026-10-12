@@ -121,6 +121,19 @@ quotas:
   snapshotQuota: 30
   maxSnapshotSize: 20
   volumeQuota: 100
+  # Admin personal-org quotas — consumed ONLY at initial setup (first boot).
+  # Give them nonzero values so the bootstrap admin can smoke-test; real
+  # tenants receive quotas at onboarding (section 4.2 of the guide).
+  admin:
+    totalCpuQuota: 100
+    totalMemoryQuota: 256
+    totalDiskQuota: 1000
+    maxCpuPerSandbox: 4
+    maxMemoryPerSandbox: 8
+    maxDiskPerSandbox: 50
+    snapshotQuota: 30
+    maxSnapshotSize: 20
+    volumeQuota: 100
 
 rateLimit:
   anonymousTtl: 60

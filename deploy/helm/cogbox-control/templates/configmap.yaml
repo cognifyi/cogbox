@@ -62,6 +62,15 @@ data:
   DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA: {{ .Values.quotas.snapshotQuota | quote }}
   DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE: {{ .Values.quotas.maxSnapshotSize | quote }}
   DEFAULT_ORG_QUOTA_VOLUME_QUOTA: {{ .Values.quotas.volumeQuota | quote }}
+  ADMIN_TOTAL_CPU_QUOTA: {{ .Values.quotas.admin.totalCpuQuota | quote }}
+  ADMIN_TOTAL_MEMORY_QUOTA: {{ .Values.quotas.admin.totalMemoryQuota | quote }}
+  ADMIN_TOTAL_DISK_QUOTA: {{ .Values.quotas.admin.totalDiskQuota | quote }}
+  ADMIN_MAX_CPU_PER_SANDBOX: {{ .Values.quotas.admin.maxCpuPerSandbox | quote }}
+  ADMIN_MAX_MEMORY_PER_SANDBOX: {{ .Values.quotas.admin.maxMemoryPerSandbox | quote }}
+  ADMIN_MAX_DISK_PER_SANDBOX: {{ .Values.quotas.admin.maxDiskPerSandbox | quote }}
+  ADMIN_SNAPSHOT_QUOTA: {{ .Values.quotas.admin.snapshotQuota | quote }}
+  ADMIN_MAX_SNAPSHOT_SIZE: {{ .Values.quotas.admin.maxSnapshotSize | quote }}
+  ADMIN_VOLUME_QUOTA: {{ .Values.quotas.admin.volumeQuota | quote }}
   RATE_LIMIT_ANONYMOUS_TTL: {{ .Values.rateLimit.anonymousTtl | quote }}
   RATE_LIMIT_ANONYMOUS_LIMIT: {{ .Values.rateLimit.anonymousLimit | quote }}
   RATE_LIMIT_AUTHENTICATED_TTL: {{ .Values.rateLimit.authenticatedTtl | quote }}

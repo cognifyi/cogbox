@@ -68,6 +68,15 @@ The full loop was exercised on `kind` and every bug found was fixed in the chart
 - Bugs fixed along the way: hook-ordered ServiceAccount/ConfigMap/Secret (weight -10), checksum auto-rollout on values change, boot-required registry/proxy/snapshot keys, legacy global service keys, `OPENFEATURE_FORCE_ENABLED_FLAGS`, optional docker-sock mount, init-container ConfigMap mount, nsenter-via-stdin pattern, `RUNNER_DOMAIN` optional (region IDs aren't valid hostnames), Helm 3-way-merge poisoning by duplicate list entries.
 - Known kind limits (not chart bugs): no Docker on kind nodes, so sandboxes can't actually execute there — runner registers and heartbeats fine; `LoadBalancer` stays Pending without MetalLB (use `ClusterIP` + port-forward locally).
 
+## Host-runner E2E notes (verified)
+
+A Docker-host runner (outside the cluster) proves the full loop: snapshot from image → sandbox create/start → exec → destroy. Requirements discovered while doing it:
+
+- **Bidirectional reachability is mandatory**: runner→API (polling) AND API→runner (exec/preview proxying, using the runner's advertised `apiUrl`). Set `RUNNER_DOMAIN` to an IP/hostname the control plane can actually dial — auto-detection may pick a VPN/tunnel interface.
+- **Sandbox subnets must not collide**: the runner hardcodes `172.20.0.0/16` for its sandbox bridge (`apps/runner/pkg/docker/client.go`). Remove or re-subnet any host network squatting on it, and re-check after every runner recreation — stale bridges linger in the host netns and poison routing (`ip link del br-xxx` the endpoint-less ones).
+- Registry/S3 URLs baked into snapshot jobs must resolve **from the runner**, not just the API: prefer NodePorts or cluster-external endpoints over `kubectl port-forward` (forwards die with your shell).
+- Quotas: a fresh bootstrap admin org has `ADMIN_*` quotas of 0 — raise them (chart `quotas.admin`, or `PATCH /api/organizations/:id/quota`) before smoke-testing sandboxes.
+
 ## GCP landing zone (summary — full version in the docs guide)
 
 | Need | GCP service | Notes |

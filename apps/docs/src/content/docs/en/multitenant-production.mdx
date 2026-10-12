@@ -137,6 +137,7 @@ Kubernetes is required for the data plane: the runner pool is a **privileged Dae
 - Scheduling stays in the API (filter by `region` + `sandboxClass`, sort by `availabilityScore`); the platform's job is to guarantee *capacity exists*.
 - `RESOURCE_LIMITS_DISABLED=false` in production so per-sandbox CPU/memory/disk limits are enforced; sandbox classes map to node pools (e.g. GPU class → GPU pool with matching `gpuType`).
 - Never mix runner nodes with control-plane nodes. Node pools per region: `standard` (default classes), `gpu` (GPU classes), optionally `arm`.
+- **Reachability is bidirectional**: runners poll the API, but the API also dials runners back (exec, preview proxying) at the runner's advertised `apiUrl`. Set `RUNNER_DOMAIN` to an address the control plane can actually route to — auto-detection may pick a VPN/tunnel interface. Sandbox subnets must not collide with existing host networks (the runner bridge defaults to a fixed subnet; stale bridges poison routing).
 
 Minimal node-pool wiring (conceptual — adapt to your autoscaler):
 
