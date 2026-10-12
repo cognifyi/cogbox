@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
 # 30: run a REAL Docker-host runner (outside the cluster) for sandbox E2E.
 # The kind-node runner proves registration/heartbeat; only a Docker host can
 # actually execute sandboxes. TEST ONLY. Requires: docker, openssl.

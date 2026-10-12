@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
 # 10: install local infra (postgres/redis/dex/registry/s3) + control chart.
 # Generates all secrets into ./local-work/ (gitignored, never committed).
 # TEST ONLY. Requires: kubectl, helm, openssl, python3.

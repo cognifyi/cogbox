@@ -325,7 +325,7 @@ Rotation order: regenerate at the control plane → update the secret → roll t
 - **Metrics**: sandbox create/start/stop latency + error rate per `(org, region, class)`; runner `availabilityScore` distribution and `unresponsive` count; quota utilization vs limit; proxy p95 + 5xx per hostname; queue depth of pending sandboxes.
 - **Logs**: structured, with `organizationId`, `regionId`, `sandboxId`, `runnerId` on every record; tenant-scoped log views.
 - **Traces**: API → runner → snapshot-manager spans for create/snapshot flows; dedicated trace backend, not a Compose all-in-one.
-- **Alerts** (examples): quota >85% (warn tenant + platform), runner pool with zero schedulable runners, snapshot stuck in `error`, proxy wildcard cert expiry <14d, Postgres replication lag, Redis evictions rising.
+- **Alerts** (examples): quota >85% (warn tenant + platform), runner pool with zero schedulable runners, snapshot stuck in `error`, proxy wildcard cert expiry `&lt;14d`, Postgres replication lag, Redis evictions rising.
 
 ## 11. Backup and Disaster Recovery
 

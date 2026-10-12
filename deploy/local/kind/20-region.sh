@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
 # 20: register a region at the control plane and install the region chart.
 # Real keys flow API -> secret overlay -> helm (nothing secret is committed).
 # TEST ONLY. Requires: kubectl, helm, openssl, python3, ssh-keygen.

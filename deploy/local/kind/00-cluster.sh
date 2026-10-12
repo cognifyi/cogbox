@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
 # 00: create the kind cluster (idempotent) and label the node for runner pools.
 # TEST ONLY. Requires: docker, kind, kubectl.
 set -euo pipefail

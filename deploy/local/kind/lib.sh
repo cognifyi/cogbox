@@ -1,3 +1,6 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
 # Common helpers for deploy/local/kind scripts. TEST ONLY.
 set -euo pipefail
 
