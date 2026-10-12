@@ -271,6 +271,27 @@ Auth0 is **not** required. The API accepts any RS256 OIDC issuer via JWKS and pr
 
 Dex (sqlite, single static user) ships in evaluation Compose only — never production. Whatever the provider, configure one client per surface (dashboard, proxy callback), map groups/claims to organization membership, enforce MFA at the provider, and use short-lived tokens with scoped logout URIs per tenant domain.
 
+### Why Dex cannot go to production
+
+Dex here is a single static-password file on sqlite: no self-registration flow, no real email verification (production sets `SKIP_USER_EMAIL_VERIFICATION=false`, which requires the IdP to actually verify addresses via the `email_verified` claim the API already honors), no MFA, no password policy/lockout, no audit, and a single shared user — the opposite of multitenant identity.
+
+### Auth0 vs Keycloak evaluation
+
+Both satisfy the API (standard RS256 OIDC via JWKS; switching providers later means changing issuer URLs + client IDs, already parameterized in the charts). The Management-API user admin is Auth0-only and optional — plain login needs just client ID, domain, and audience.
+
+| Dimension | Auth0 (SaaS) | Keycloak (self-hosted) |
+| --- | --- | --- |
+| Ops burden | Zero — no infrastructure | You run HA Keycloak + its Postgres + SMTP + upgrades/backups |
+| Cost shape | Free tier to start, per-user pricing after | Free forever (infra cost only) |
+| Registration + verification | Hosted Universal Login, email verification, passwordless, social logins out of the box | Built-in registration, email verification, WebAuthn/passwordless, social, LDAP — all configurable per realm |
+| MFA / enterprise SSO | Built-in MFA; enterprise connections (SAML/OIDC/HRD) fastest to enable | MFA/WebAuthn supported; SAML broker supported; more assembly required |
+| Data boundary | User store lives at the vendor | Users stay in your VPC/GCP project (realm per tenant possible) |
+| Fit | Teams that want zero identity ops or need enterprise SSO yesterday | Default for self-hosted multitenant: data residency, no per-seat cost, full control |
+
+**Recommendation:** run **Keycloak** for production self-hosted (same GKE cluster, Cloud SQL, private topology, SendGrid/SES for mails) — it matches the data-residency story and stays free at any tenant count. Choose **Auth0** when identity must be zero-ops or enterprise connections are a sales requirement; the existing [Auth0 setup](/docs/en/oss-deployment#optional-configure-auth0-for-authentication) (SPA app + M2M app with `read:users update:users` scopes) applies unchanged, just point the chart's `oidc.*` values at the tenant instead of Dex.
+
+Minimal Keycloak shape: one realm (or one per tenant for hard separation), one public client per surface (dashboard PKCE, proxy callback), registration + "verify email" + password policy on, brute-force protection on, admin console never exposed publicly, realm export versioned in git alongside the charts.
+
 - **Humans**: external OIDC only (see table above).
 - **Machines**: tenant API keys (rotatable, least-privilege scopes), per-region service keys (`PROXY_API_KEY`, runner token, SSH gateway key) generated at region registration and stored in sealed/external secrets — never shared across regions.
 - **Registries**: private-image credentials resolved centrally per pull via cross-account roles (broker `AssumeRole` with org ExternalId), never baked into runner images or static docker auth files.
