@@ -19,13 +19,13 @@
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 5,
   "smtpServer": {
-    "auth": "",
-    "from": "noreply@cogbox.pazity.com",
+    "auth": "true",
+    "from": "onboarding@superaihuman.ai",
     "fromDisplayName": "Cogbox",
-    "host": "maildev",
-    "port": "1025",
+    "host": "smtp.resend.com",
+    "port": "465",
     "replyTo": "",
-    "ssl": "",
+    "ssl": "true",
     "starttls": ""
   },
   "clients": [
