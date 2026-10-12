@@ -1,0 +1,35 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# ACME issuers: DNS-01 (wildcard, needs Cloudflare token) + HTTP-01 (exact names).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: wildcard-dns01
+spec:
+  acme:
+    email: noreply@cogbox.pazity.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: wildcard-dns01-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: public-http01
+spec:
+  acme:
+    email: noreply@cogbox.pazity.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: public-http01-key
+    solvers:
+      - http01:
+          ingress:
+            class: nginx

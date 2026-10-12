@@ -1,7 +1,7 @@
 # Pazity production overlay for cogbox-control.
 # Fill every REPLACE_ME before installing. Secrets come from Secret Manager
 # via External Secrets (secretstore-gcp ClusterSecretStore must exist).
-domain: cogbox.pazity.com
+domain: pazity.com
 
 api:
   replicaCount: 3
