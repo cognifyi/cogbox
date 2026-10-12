@@ -1,0 +1,234 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# In-cluster data services for the GKE TEST deployment.
+# Production cuts over to Cloud SQL / Memorystore / GAR by changing only
+# db.host, redis.host and registry/s3 URLs in values (no code changes).
+# Passwords come from the `gke-infra` Secret created by 50-infra.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: control
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: control
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18
+          ports: [{ containerPort: 5432 }]
+          env:
+            - { name: POSTGRES_USER, value: cogbox }
+            - { name: POSTGRES_DB, value: cogbox }
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: gke-infra, key: postgres-password }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U cogbox"]
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1000m, memory: 2Gi }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: standard
+        resources:
+          requests: { storage: 20Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: control
+spec:
+  ports: [{ port: 5432 }]
+  selector: { app: postgres }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: redis }
+  template:
+    metadata:
+      labels: { app: redis }
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args: ["--appendonly", "yes", "--requirepass", "$(REDIS_PASSWORD)"]
+          ports: [{ containerPort: 6379 }]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: gke-infra, key: redis-password }
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "redis-cli -a $REDIS_PASSWORD ping | grep -q PONG"]
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: control
+spec:
+  ports: [{ port: 6379 }]
+  selector: { app: redis }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: registry }
+  template:
+    metadata:
+      labels: { app: registry }
+    spec:
+      containers:
+        - name: registry
+          image: registry:2.8.2
+          env:
+            - { name: REGISTRY_HTTP_ADDR, value: 0.0.0.0:6000 }
+            - { name: REGISTRY_STORAGE_DELETE_ENABLED, value: "true" }
+          ports: [{ containerPort: 6000 }]
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/registry }
+          readinessProbe:
+            httpGet: { path: /v2/, port: 6000 }
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: registry-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registry-data
+  namespace: control
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: standard
+  resources:
+    requests: { storage: 30Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: control
+spec:
+  ports: [{ port: 6000 }]
+  selector: { app: registry }
+---
+# S3-compatible object storage for TEST. NOTE: GCS XML interop is NOT
+# compatible with the AWS SDK v3 default serializer (it sends an `x-id`
+# query parameter that GCS rejects with InvalidArgument — fails at API
+# boot in VolumeManager.testConnection). GCS support needs SDK middleware
+# work; tracked separately. Production S3 = real S3 API or rustfs/Harbor.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustfs
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: rustfs }
+  template:
+    metadata:
+      labels: { app: rustfs }
+    spec:
+      containers:
+        - name: rustfs
+          image: rustfs/rustfs:latest
+          imagePullPolicy: IfNotPresent
+          args: ["/data"]
+          ports: [{ containerPort: 9000 }, { containerPort: 9001 }]
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef: { name: gke-infra, key: s3-access-key }
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef: { name: gke-infra, key: s3-secret-key }
+            - { name: RUSTFS_REGION, value: us-east-1 }
+            - { name: RUSTFS_ADDRESS, value: ":9000" }
+            - { name: RUSTFS_CONSOLE_ADDRESS, value: ":9001" }
+            - { name: RUSTFS_CONSOLE_ENABLE, value: "true" }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          readinessProbe:
+            httpGet: { path: /health, port: 9000 }
+            periodSeconds: 10
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: control
+spec:
+  ports:
+    - { name: s3, port: 9000 }
+    - { name: console, port: 9001 }
+  selector: { app: rustfs }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: maildev }
+  template:
+    metadata:
+      labels: { app: maildev }
+    spec:
+      containers:
+        - name: maildev
+          image: maildev/maildev:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 1025 }, { containerPort: 1080 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  ports:
+    - { name: smtp, port: 1025 }
+    - { name: web, port: 1080 }
+  selector: { app: maildev }

@@ -1,0 +1,111 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Keycloak in PRODUCTION mode against the in-cluster postgres (TEST setup).
+# Production cutover: point KC_DB_* at Cloud SQL (values only, no manifest change).
+# Secrets keycloak-admin / keycloak-db / keycloak-smtp are created by 50-infra.sh.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-db-init
+  namespace: control
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: postgres:18
+          command:
+            - sh
+            - -c
+            - |
+              export PGPASSWORD="$DB_PASSWORD"
+              until pg_isready -h postgres -U cogbox; do sleep 3; done
+              psql -h postgres -U cogbox -d postgres -tc \
+                "SELECT 1 FROM pg_database WHERE datname='keycloak'" | grep -q 1 || \
+                psql -h postgres -U cogbox -d postgres -c "CREATE DATABASE keycloak"
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: gke-infra, key: postgres-password }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: keycloak }
+  template:
+    metadata:
+      labels: { app: keycloak }
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.8.0
+          imagePullPolicy: IfNotPresent
+          args: ["start", "--import-realm"]
+          ports: [{ containerPort: 8080 }]
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef: { name: keycloak-admin, key: username }
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: keycloak-admin, key: password }
+            - { name: KC_DB, value: postgres }
+            - { name: KC_DB_URL_HOST, value: postgres }
+            - { name: KC_DB_URL_DATABASE, value: keycloak }
+            - { name: KC_DB_USERNAME, value: cogbox }
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: gke-infra, key: postgres-password }
+            - { name: KC_HTTP_ENABLED, value: "true" }
+            # NOTE: issuer follows the request host in test mode (strict off).
+            # Production sets KC_HOSTNAME (+strict) and the API fetches
+            # discovery through the PUBLIC URL so token iss always matches.
+            - { name: KC_HOSTNAME_STRICT, value: "false" }
+            - { name: KC_PROXY, value: edge }
+            - { name: KC_HEALTH_ENABLED, value: "true" }
+            - { name: KC_METRICS_ENABLED, value: "true" }
+            - name: KC_SMTP_HOST
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: host }
+            - name: KC_SMTP_PORT
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: port }
+            - name: KC_SMTP_FROM
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: from }
+            - name: KC_SMTP_USER
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: user }
+            - name: KC_SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: keycloak-smtp, key: password }
+          volumeMounts:
+            - { name: realm, mountPath: /opt/keycloak/data/import }
+          readinessProbe:
+            httpGet: { path: /health/ready, port: 9000 }
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            failureThreshold: 12
+          resources:
+            requests: { cpu: 500m, memory: 1Gi }
+            limits: { cpu: 2000m, memory: 3Gi }
+      volumes:
+        - name: realm
+          configMap: { name: keycloak-realm }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: control
+spec:
+  ports: [{ port: 8080 }]
+  selector: { app: keycloak }
