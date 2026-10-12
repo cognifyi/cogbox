@@ -49,7 +49,7 @@ RUN mkdir -p dist/apps/otel-collector
 
 RUN yarn nx build otel-collector --configuration=production --nxBail=true
 
-FROM alpine:3.23 AS otel-collector
+FROM alpine:3.24 AS otel-collector
 
 RUN apk update && apk upgrade --no-cache openssl pcre2 \
   && apk add --no-cache curl

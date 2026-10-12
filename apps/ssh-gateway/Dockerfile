@@ -44,7 +44,7 @@ COPY libs/api-client-go/ libs/api-client-go/
 
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 
-FROM alpine:3.23 AS ssh-gateway
+FROM alpine:3.24 AS ssh-gateway
 
 RUN apk update && apk upgrade --no-cache openssl pcre2
 
