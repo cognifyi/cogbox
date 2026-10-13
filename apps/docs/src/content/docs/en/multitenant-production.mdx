@@ -116,7 +116,7 @@ Ready-to-use packaging lives in this repo under `deploy/`:
 | **Redis** | Sentinel (3 nodes) or managed memory store; persistence AOF + snapshotting | Rate limits, quota usage cache, notifications, proxy sessions. Set `REDIS_PASSWORD`. |
 | **OIDC provider** | External: Keycloak or Auth0 (see section 7). Dex (sqlite, single static user) is Compose-only | One client per tenant-facing app; `org_id` claim → organization; MFA enforced at the provider. |
 | **Registry** | Managed registry or HA Harbor; **project/namespace per organization** | Snapshot images reference per-org projects so tenants can neither list nor pull each other's images. |
-| **S3 object storage** | Managed S3/GCS or erasure-coded self-hosted; **prefix per org** (`org/{orgId}/`) with scoped IAM | Snapshot payloads, build contexts, backups. Snapshot-manager and runners in a region must share the region bucket (section 6.3). |
+| **S3 object storage** | Managed S3/GCS or erasure-coded self-hosted; **prefix per org** (`org/{orgId}/`) with scoped IAM | Snapshot payloads, build contexts, backups. Snapshot-manager and runners in a region must share the region bucket (section 6.3). Caution: GCS XML interop rejects the AWS SDK v3 default serializer (it sends an `x-id` query parameter on every call — verified `InvalidArgument` at API boot); use real S3 API or an S3-compatible store until SDK middleware strips it. |
 | **SMTP** | Managed relay (SES/SendGrid), not MailDev | Verification + notifications; per-tenant `SMTP_EMAIL_FROM` if branded. |
 | **OTEL / observability** | Collector gateway (Deployment + HPA, real `OTEL_COLLECTOR_API_KEY`) → Prometheus/Mimir + Loki + Tempo + ClickHouse for sandbox telemetry | Per-tenant dashboards and quota-exhaustion alerts (section 10). |
 | **Backup jobs** | CronJobs: Postgres PITR verification, S3 cross-region replication, etcd snapshots | Quarterly restore drills; RPO/RTO documented per tier. |
@@ -172,6 +172,7 @@ spec:
 
 - Keep the DNS caveat in mind: a `*.proxy` record proxied through a CDN that has no certificate for that depth breaks TLS — serve it DNS-only and terminate TLS at Ingress.
 - `COOKIE_DOMAIN` set to the region's base domain; `PROXY_API_KEY` is the **region-scoped** key returned at region registration, unique per region. `TOOLBOX_ONLY_MODE` / `PREVIEW_WARNING_ENABLED` can vary per tenant tier.
+- **Shared vs dedicated proxy**: a proxy presenting a *region* key only serves that region's sandboxes (the API's sandbox guard compares regions — cross-region requests fail with "not found"). A proxy presenting the *legacy global* key serves all regions. Single-operator platforms typically run one shared proxy on the global key; strict per-region isolation needs one proxy per region plus per-region preview hostnames.
 
 HPA shape used for proxy (same pattern for API):
 
@@ -291,6 +292,9 @@ Both satisfy the API (standard RS256 OIDC via JWKS; switching providers later me
 **Recommendation:** run **Keycloak** for production self-hosted (same GKE cluster, Cloud SQL, private topology, SendGrid/SES for mails) — it matches the data-residency story and stays free at any tenant count. Choose **Auth0** when identity must be zero-ops or enterprise connections are a sales requirement; the existing [Auth0 setup](/docs/en/oss-deployment#optional-configure-auth0-for-authentication) (SPA app + M2M app with `read:users update:users` scopes) applies unchanged, just point the chart's `oidc.*` values at the tenant instead of Dex.
 
 Minimal Keycloak shape: one realm (or one per tenant for hard separation), one public client per surface (dashboard PKCE, proxy callback), registration + "verify email" + password policy on, brute-force protection on, admin console never exposed publicly, realm export versioned in git alongside the charts.
+
+Two Keycloak behaviors verified the hard way — configure them from day one:
+`KC_PROXY_HEADERS=xforwarded` (without it Keycloak ignores `X-Forwarded-Proto` behind ingress and mints `http://` issuers that can never match the public issuer the API validates), and `KC_HOSTNAME` + `KC_HOSTNAME_STRICT=true` with the API fetching discovery through the **public** URL (so token `iss`, discovery `issuer`, and JWKS all agree; verified end-to-end with a PKCE code flow test).
 
 ### Keycloak specifics verified by testing
 

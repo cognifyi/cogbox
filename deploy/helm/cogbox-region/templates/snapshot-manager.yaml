@@ -109,6 +109,7 @@ metadata:
     {{- include "cogbox-region.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.snapshotManager.ingress.clusterIssuer }}
+    {{- toYaml .Values.snapshotManager.ingress.annotations | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.snapshotManager.ingress.className }}
   tls:

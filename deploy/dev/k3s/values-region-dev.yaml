@@ -1,0 +1,38 @@
+# Base (non-secret) values for the dev region. TEST ONLY.
+regionName: dev-local
+controlPlaneApiUrl: http://control-control-api.control.svc.cluster.local/api
+
+nodeSelector:
+  kubernetes.io/hostname: kk-hpzhan66prog1
+
+proxy:
+  host: proxy.cogboxdev.pazity.com
+  cookieDomain: cogboxdev.pazity.com
+  protocol: https
+  replicaCount: 1
+  hpa: {enabled: false}
+
+snapshotManager:
+  host: snapshots.cogboxdev.pazity.com
+  storage:
+    driver: filesystem
+    size: 30Gi
+    storageClass: standard
+    deleteEnabled: true
+
+runner:
+  env:
+    ENVIRONMENT: development
+    AWS_REGION: us-east-1
+    AWS_ENDPOINT_URL: http://rustfs.control.svc.cluster.local:9000
+    AWS_ACCESS_KEY_ID: localpass
+    AWS_SECRET_ACCESS_KEY: localpass
+    AWS_DEFAULT_BUCKET: cogbox
+
+sshGateway:
+  replicaCount: 1
+  serviceType: ClusterIP
+
+secrets:
+  useExternalSecrets: false
+  existingSecret: region-dev-creds

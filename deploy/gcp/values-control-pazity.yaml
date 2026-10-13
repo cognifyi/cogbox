@@ -1,0 +1,62 @@
+# Pazity production overlay for cogbox-control.
+# Fill every REPLACE_ME before installing. Secrets come from Secret Manager
+# via External Secrets (secretstore-gcp ClusterSecretStore must exist).
+domain: pazity.com
+
+api:
+  replicaCount: 3
+  ingress:
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: public-http01
+    tlsSecret: cogbox-api-tls
+
+db:
+  # Cloud SQL private IP (private-services-access), TLS on + verify on.
+  host: REPLACE_ME_CLOUD_SQL_PRIVATE_IP
+  port: 5432
+  database: cogbox
+  username: cogbox
+  tlsEnabled: true
+  tlsRejectUnauthorized: true
+
+redis:
+  # Memorystore private IP, AUTH on.
+  host: REPLACE_ME_MEMORSTORE_PRIVATE_IP
+  port: 6379
+
+oidc:
+  # Keycloak realm (production mode, strict hostname). Auth0 alternative:
+  # set issuerBaseUrl/publicDomain/audience from the Auth0 tenant.
+  clientId: cogbox
+  issuerBaseUrl: https://keycloak.cogbox.pazity.com/realms/cogbox
+  publicDomain: https://keycloak.cogbox.pazity.com/realms/cogbox
+  audience: cogbox
+
+s3:
+  endpoint: https://storage.googleapis.com
+  stsEndpoint: https://storage.googleapis.com
+  region: auto
+  defaultBucket: REPLACE_ME_GCS_BUCKET
+
+dashboard:
+  url: https://cogbox.pazity.com/dashboard
+  baseApiUrl: https://cogbox.pazity.com
+
+proxyDefaults:
+  protocol: https
+  domain: proxy.cogbox.pazity.com
+
+registry:
+  transient:
+    url: REPLACE_ME_ARTIFACT_REGISTRY_TRANSIENT_URL
+    admin: _json_key_base64
+    projectId: cogbox
+  internal:
+    url: REPLACE_ME_ARTIFACT_REGISTRY_INTERNAL_URL
+    admin: _json_key_base64
+    projectId: cogbox
+
+secrets:
+  useExternalSecrets: true
+  externalSecretsStore: secretstore-gcp

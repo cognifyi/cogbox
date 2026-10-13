@@ -1,0 +1,77 @@
+# Base (non-secret) values for the cogboxdev test deployment on k3s.
+# Secrets are created out-of-band (see README) and referenced via existingSecret.
+domain: cogboxdev.pazity.com
+
+api:
+  replicaCount: 1
+  pdb: {enabled: false}
+  hpa: {enabled: false}
+  ingress:
+    enabled: true
+    className: nginx
+    host: cogboxdev.pazity.com
+    tlsSecret: ""
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { cpu: 2000m, memory: 4Gi }
+
+migration:
+  enabled: true
+
+db:
+  host: postgres
+  port: 5432
+  database: cogbox
+  username: cogbox
+  tlsEnabled: false
+  tlsRejectUnauthorized: false
+
+redis:
+  host: redis
+  port: 6379
+
+oidc:
+  clientId: cogbox
+  issuerBaseUrl: http://keycloak.cogboxdev.pazity.com/realms/cogbox
+  publicDomain: http://keycloak.cogboxdev.pazity.com/realms/cogbox
+  audience: cogbox
+
+s3:
+  endpoint: http://rustfs:9000
+  stsEndpoint: http://rustfs:9000
+  region: us-east-1
+  defaultBucket: cogbox
+
+dashboard:
+  url: http://cogboxdev.pazity.com/dashboard
+  baseApiUrl: http://cogboxdev.pazity.com
+
+proxyDefaults:
+  protocol: http
+  domain: proxy.cogboxdev.pazity.com
+
+defaultSnapshot: cognifyi/sandbox:latest-slim
+
+registry:
+  transient:
+    url: http://registry:6000
+    admin: admin
+    projectId: cogbox
+  internal:
+    url: http://registry:6000
+    admin: admin
+    projectId: cogbox
+
+quotas:
+  defaultRegionId: dev
+  defaultRegionName: dev
+  enforceQuotas: false
+
+featureFlags:
+  forceEnabled: organization_infrastructure
+
+secrets:
+  useExternalSecrets: false
+  existingSecret: cogbox-dev-secrets

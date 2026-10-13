@@ -35,6 +35,10 @@ proxy:
     className: nginx
     clusterIssuer: wildcard-dns01
     tlsSecret: proxy-wildcard-tls
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
   hpa:
     enabled: true
     minReplicas: 2
@@ -57,6 +61,8 @@ snapshotManager:
     className: nginx
     clusterIssuer: public-http01
     tlsSecret: snapshots-tls
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
   storage:
     # filesystem (PVC, default) or s3. Use s3 ONLY against a real S3 API —
     # the registry driver needs full multipart semantics. On GCP the safe

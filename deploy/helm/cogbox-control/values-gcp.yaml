@@ -19,6 +19,7 @@ api:
     className: nginx
     annotations:
       cert-manager.io/cluster-issuer: public-http01
+    tlsSecret: cogbox-api-tls
 
 db:
   # Cloud SQL private IP (private-services-access). TLS on, verify on.

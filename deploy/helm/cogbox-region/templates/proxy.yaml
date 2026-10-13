@@ -86,8 +86,7 @@ metadata:
     {{- include "cogbox-region.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.proxy.ingress.clusterIssuer }}
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    {{- toYaml .Values.proxy.ingress.annotations | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.proxy.ingress.className }}
   tls:
