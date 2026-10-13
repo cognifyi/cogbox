@@ -30,9 +30,9 @@ api:
   ingress:
     enabled: true
     className: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: public-http01
-    tlsSecret: cogbox-api-tls
+    host: ""
+    annotations: {}
+    tlsSecret: ""
 
 # Database migrations run as a pre-upgrade Job. The API Deployment itself
 # runs with RUN_MIGRATIONS=false so replicas never race.

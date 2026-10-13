@@ -1,0 +1,13 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Alias so manifests written for GKE (`standard` = pd-standard) work unchanged
+# on k3s (backed by node-local disk via local-path). TEST ONLY - no redundancy,
+# no volume expansion.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+provisioner: rancher.io/local-path
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete

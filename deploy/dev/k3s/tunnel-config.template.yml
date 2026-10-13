@@ -1,0 +1,19 @@
+# cloudflared tunnel ingress for the cogboxdev test track.
+# TLS terminates at Cloudflare edge; everything behind is plain HTTP ClusterIP.
+# cloudflared runs INSIDE the cluster (Deployment below) so all service DNS
+# names resolve natively - same topology as production.
+tunnel: 893a013b-58d0-4404-92ae-100f347f4239
+credentials-file: /etc/cloudflared/creds.json
+
+ingress:
+  - hostname: cogboxdev.pazity.com
+    service: http://control-control-api.control.svc.cluster.local
+  - hostname: proxy.cogboxdev.pazity.com
+    service: http://region-dev-proxy.region-dev:4000
+  - hostname: "*.proxy.cogboxdev.pazity.com"
+    service: http://region-dev-proxy.region-dev:4000
+  - hostname: snapshots.cogboxdev.pazity.com
+    service: http://region-dev-snapshots.region-dev:80
+  - hostname: keycloak.cogboxdev.pazity.com
+    service: http://keycloak.control.svc.cluster.local:8080
+  - service: http_status:404

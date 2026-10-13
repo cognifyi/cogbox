@@ -25,12 +25,14 @@ metadata:
     {{- toYaml .Values.api.ingress.annotations | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.api.ingress.className }}
+  {{- if .Values.api.ingress.tlsSecret }}
   tls:
     - hosts:
-        - {{ printf "cogbox.%s" .Values.domain }}
+        - {{ .Values.api.ingress.host | default (printf "cogbox.%s" .Values.domain) }}
       secretName: {{ .Values.api.ingress.tlsSecret }}
+  {{- end }}
   rules:
-    - host: {{ printf "cogbox.%s" .Values.domain }}
+    - host: {{ .Values.api.ingress.host | default (printf "cogbox.%s" .Values.domain) }}
       http:
         paths:
           - path: /
