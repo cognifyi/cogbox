@@ -3,7 +3,7 @@ module github.com/cognifyi/cogbox/otel-collector/exporter
 go 1.26.9
 
 require (
-	github.com/cognifyi/cogbox/libs/api-client-go v0.190.3
+	github.com/cognifyi/cogbox/libs/api-client-go v0.190.4
 	go.opentelemetry.io/collector/client v1.50.0
 	go.opentelemetry.io/collector/component v1.50.0
 	go.opentelemetry.io/collector/config/configoptional v1.50.0
