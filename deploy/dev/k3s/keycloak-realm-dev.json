@@ -40,7 +40,9 @@
       "frontchannelLogout": true,
       "redirectUris": [
         "http://localhost:3000/*",
-        "https://cogboxdev.pazity.com/*"
+        "https://cogboxdev.pazity.com/*",
+        "https://proxy.cogboxdev.pazity.com/*",
+        "https://*.proxy.cogboxdev.pazity.com/*"
       ],
       "webOrigins": [
         "http://localhost:3000",

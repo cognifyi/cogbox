@@ -1,0 +1,23 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Alias so the short `registry:6000` host baked into snapshot image refs
+# (TRANSIENT_REGISTRY_URL=http://registry:6000, same as docker-compose OSS
+# and GCP where `registry` resolves on the shared docker network) keeps
+# working from the region-dev namespace. The real registry lives in
+# `control`; without this alias runner / snapshot-manager / dind pulls fail
+# with `lookup registry ...: no such host`.
+# NOTE: a previous hand-made ClusterIP `registry` + empty registry Deployment
+# in region-dev was removed — it answered pulls with empty content instead of
+# aliasing the real registry.
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: region-dev
+spec:
+  type: ExternalName
+  externalName: registry.control.svc.cluster.local
+  ports:
+    - port: 6000
+      targetPort: 6000

@@ -34,6 +34,12 @@ helm template region-dev deploy/helm/cogbox-region \
 echo "==> keycloak ingress"
 kubectl apply -f deploy/dev/k3s/keycloak-ingress.yaml
 
+echo "==> registry alias (region-dev -> control registry)"
+kubectl apply -f deploy/dev/k3s/registry-alias.yaml
+
+echo "==> runner service (stable FQDN)"
+kubectl apply -f deploy/dev/k3s/runner-service.yaml
+
 echo "==> waiting for rollouts"
 kubectl rollout status deploy/control-control-api -n control --timeout=600s
 kubectl rollout status deploy/region-dev-proxy -n region-dev --timeout=600s

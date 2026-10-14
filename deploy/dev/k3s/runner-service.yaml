@@ -1,0 +1,26 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Stable in-cluster address for the dev runner DaemonSet pod.
+# The runner self-reports RUNNER_DOMAIN (pod IP by default) to the control
+# plane on every healthcheck; a bare pod IP goes stale on each restart until
+# the next heartbeat. This Service gives the single dev runner a stable FQDN
+# (see runner.domain in values-region-dev.yaml) that survives restarts.
+# Ports mirror the DaemonSet hostPorts (3003 api, 2220 ssh-gateway).
+apiVersion: v1
+kind: Service
+metadata:
+  name: region-dev-runner
+  namespace: region-dev
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: cogbox-region
+    app.kubernetes.io/component: runner
+  ports:
+    - name: api
+      port: 3003
+      targetPort: 3003
+    - name: ssh
+      port: 2220
+      targetPort: 2220

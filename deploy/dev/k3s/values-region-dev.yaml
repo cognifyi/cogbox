@@ -15,6 +15,13 @@ proxy:
   protocol: https
   replicaCount: 1
   hpa: {enabled: false}
+  # Pin OIDC issuer to the exact string Keycloak returns in its discovery
+  # doc (strict go-oidc check, no trailing slash). Discovery + token calls
+  # go through ingress (public URL); in-cluster bypass was tried and fails
+  # because Keycloak answers internal requests with a request-derived issuer
+  # (http://keycloak.cogboxdev...:8080/...) that can never be pinned stably.
+  oidc:
+    domain: https://keycloak.cogboxdev.pazity.com/realms/cogbox
   ingress:
     className: nginx
     clusterIssuer: wildcard-dns01
@@ -35,6 +42,10 @@ snapshotManager:
     deleteEnabled: true
 
 runner:
+  # Stable FQDN via runner-service.yaml (ClusterIP in front of the runner
+  # DaemonSet pod). The runner advertises http(s)://<domain>:<apiPort> to the
+  # control plane; a bare pod IP would go stale on every restart.
+  domain: region-dev-runner.region-dev.svc.cluster.local
   env:
     ENVIRONMENT: development
     AWS_REGION: us-east-1
@@ -42,6 +53,15 @@ runner:
     AWS_ACCESS_KEY_ID: localpass
     AWS_SECRET_ACCESS_KEY: localpass
     AWS_DEFAULT_BUCKET: cogbox
+  # k3s dev: no host docker.sock mount — the runner drives its OWN internal
+  # dockerd (same as GCP runner-shared + kind). Mounting the host socket
+  # breaks the daemon bind mounts: WriteStaticBinary writes to the runner
+  # container's /usr/local/bin/.tmp/binaries, but a host dockerd resolves
+  # bind sources on the HOST fs (auto-mkdir'ing them as dirs) -> sandbox
+  # start fails with '"/usr/local/bin/cogbox": is a directory'.
+  hostPaths:
+    dockerSock:
+      enabled: false
 
 sshGateway:
   replicaCount: 1
