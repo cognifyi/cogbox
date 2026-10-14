@@ -2,8 +2,12 @@
 regionName: dev-local
 controlPlaneApiUrl: http://control-control-api.control.svc.cluster.local/api
 
+# Runner scheduling contract: the dev box must carry these exact labels
+# (single-node dev uses the shared-us pool label; hostname pins the box).
 nodeSelector:
   kubernetes.io/hostname: kk-hpzhan66prog1
+  cogbox.io/region: shared-us
+  cogbox.io/pool: standard
 
 proxy:
   host: proxy.cogboxdev.pazity.com
@@ -11,9 +15,19 @@ proxy:
   protocol: https
   replicaCount: 1
   hpa: {enabled: false}
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+    tlsSecret: dev-proxy-tls
+    annotations: {}
 
 snapshotManager:
   host: snapshots.cogboxdev.pazity.com
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+    tlsSecret: dev-snapshots-tls
+    annotations: {}
   storage:
     driver: filesystem
     size: 30Gi
