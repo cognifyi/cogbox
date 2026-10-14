@@ -132,10 +132,9 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "cd ../.. && GONOSUMDB=github.com/cognifyi/cogbox go work sync",
           "git add pkg/cogbox/VERSION",
           "git add ../../libs/api-client-go/VERSION ../../libs/toolbox-api-client-go/VERSION",
-          "git add go.mod go.sum ../../apps/cli/go.mod ../../apps/cli/go.sum ../../apps/otel-collector/exporter/go.mod ../../apps/otel-collector/exporter/go.sum",
+          "git add go.mod ../../apps/cli/go.mod ../../apps/otel-collector/exporter/go.mod",
           "git commit -s -m \"chore(sdk-go): bump to ${VERSION:-v0.0.0-dev}\" || true"
         ],
         "parallel": false
