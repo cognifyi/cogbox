@@ -68,6 +68,11 @@ quotas:
   defaultRegionId: dev
   defaultRegionName: dev
   enforceQuotas: false
+  # Dev track: new orgs can request up to one 4C/12G/100G sandbox
+  # (single 14G box). Per-sandbox gates enforce these even with
+  # enforceQuotas=false; existing org rows need a manual UPDATE.
+  maxMemoryPerSandbox: 12
+  maxDiskPerSandbox: 100
 
 featureFlags:
   forceEnabled: organization_infrastructure
