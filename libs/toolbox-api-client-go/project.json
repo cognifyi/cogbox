@@ -59,15 +59,20 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": [
-        "{workspaceRoot}/libs/sdk-go/go.mod",
+        "{workspaceRoot}/apps/**/go.mod",
+        "{workspaceRoot}/libs/**/go.mod",
         { "env": "VERSION" },
         { "dependentTasksOutputFiles": "**/*", "transitive": true }
       ],
-      "outputs": ["{workspaceRoot}/libs/sdk-go/go.mod", "{projectRoot}/VERSION"],
+      "outputs": [
+        "{workspaceRoot}/apps/**/go.mod",
+        "{workspaceRoot}/libs/**/go.mod",
+        "{projectRoot}/VERSION"
+      ],
       "options": {
         "cwd": "{workspaceRoot}",
         "commands": [
-          "cd libs/sdk-go && go mod edit -require=github.com/cognifyi/cogbox/libs/toolbox-api-client-go@$VERSION",
+          "for f in $(git ls-files '*/go.mod'); do if [ \"$f\" != \"libs/toolbox-api-client-go/go.mod\" ] && grep -q \"cognifyi/cogbox/libs/toolbox-api-client-go \" \"$f\"; then (cd \"$(dirname \"$f\")\" && go mod edit -require=github.com/cognifyi/cogbox/libs/toolbox-api-client-go@$VERSION); fi; done",
           "echo \"$VERSION\" > libs/toolbox-api-client-go/VERSION"
         ],
         "parallel": false
