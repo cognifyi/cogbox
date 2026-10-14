@@ -20,7 +20,7 @@ env:
 
 jobs:
   go-work:
-    if: github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox' && !startsWith(github.head_ref, 'prepare-release-')
     name: Go work
     runs-on: ubuntu-latest
     steps:
@@ -88,7 +88,7 @@ jobs:
           git diff --exit-code -- src/content/docs/en/tools/cli.mdx || (echo "CLI reference docs on the docs site are out of sync! Please run 'cd apps/docs && node tools/update-cli-reference.js --local' and commit the changes." && exit 1)
 
   golangci:
-    if: github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox' && !startsWith(github.head_ref, 'prepare-release-')
     name: Go lint
     runs-on: ubuntu-latest
     strategy:
@@ -116,7 +116,7 @@ jobs:
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
 
   lint-computer-use:
-    if: github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox' && !startsWith(github.head_ref, 'prepare-release-')
     name: Go lint (Computer Use)
     runs-on: ubuntu-latest
     steps:
@@ -173,7 +173,7 @@ jobs:
           yarn lint:py
 
   format-lint-api-clients:
-    if: github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox' && !startsWith(github.head_ref, 'prepare-release-')
     name: Format, lint and generate API clients
     runs-on: ubuntu-latest
     steps:
@@ -227,7 +227,7 @@ jobs:
             --module preserve --moduleResolution bundler
 
   test:
-    if: github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox' && !startsWith(github.head_ref, 'prepare-release-')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -246,7 +246,7 @@ jobs:
         run: yarn test
 
   build:
-    if: github.repository == 'cognifyi/cogbox'
+    if: github.repository == 'cognifyi/cogbox' && !startsWith(github.head_ref, 'prepare-release-')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
