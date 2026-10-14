@@ -49,8 +49,23 @@ spec:
               value: {{ .Values.proxy.previewWarningEnabled | quote }}
             - name: SHUTDOWN_TIMEOUT_SEC
               value: {{ .Values.proxy.shutdownTimeoutSec | quote }}
-          # OIDC_* come from the control plane: on boot the proxy fetches
-          # client/audience from COGBOX_API_URL, authenticated by PROXY_API_KEY.
+            # OIDC_* come from the control plane: on boot the proxy fetches
+            # client/audience from COGBOX_API_URL, authenticated by PROXY_API_KEY.
+            # proxy.oidc.domain/publicDomain pin the issuer explicitly when the
+            # strict provider check would otherwise fail (e.g. trailing-slash
+            # mismatch between the configured issuer and Keycloak's discovery
+            # doc). When both are set, discovery is fetched from the internal
+            # domain and the public issuer is accepted via InsecureIssuerURL.
+            {{- with .Values.proxy.oidc }}
+            {{- if .domain }}
+            - name: OIDC_DOMAIN
+              value: {{ .domain | quote }}
+            {{- end }}
+            {{- if .publicDomain }}
+            - name: OIDC_PUBLICDOMAIN
+              value: {{ .publicDomain | quote }}
+            {{- end }}
+            {{- end }}
           livenessProbe:
             httpGet: { path: /health, port: http }
             initialDelaySeconds: 20

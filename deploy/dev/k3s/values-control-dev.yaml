@@ -10,9 +10,9 @@ api:
     enabled: true
     className: nginx
     host: cogboxdev.pazity.com
-    tlsSecret: ""
+    tlsSecret: cogboxdev-api-tls
     annotations:
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      cert-manager.io/cluster-issuer: wildcard-dns01
   resources:
     requests: { cpu: 250m, memory: 512Mi }
     limits: { cpu: 2000m, memory: 4Gi }
@@ -34,8 +34,8 @@ redis:
 
 oidc:
   clientId: cogbox
-  issuerBaseUrl: http://keycloak.cogboxdev.pazity.com/realms/cogbox
-  publicDomain: http://keycloak.cogboxdev.pazity.com/realms/cogbox
+  issuerBaseUrl: https://keycloak.cogboxdev.pazity.com/realms/cogbox
+  publicDomain: https://keycloak.cogboxdev.pazity.com/realms/cogbox
   audience: cogbox
 
 s3:
@@ -45,11 +45,11 @@ s3:
   defaultBucket: cogbox
 
 dashboard:
-  url: http://cogboxdev.pazity.com/dashboard
-  baseApiUrl: http://cogboxdev.pazity.com
+  url: https://cogboxdev.pazity.com/dashboard
+  baseApiUrl: https://cogboxdev.pazity.com
 
 proxyDefaults:
-  protocol: http
+  protocol: https
   domain: proxy.cogboxdev.pazity.com
 
 defaultSnapshot: cognifyi/sandbox:latest-slim
@@ -68,6 +68,11 @@ quotas:
   defaultRegionId: dev
   defaultRegionName: dev
   enforceQuotas: false
+  # Dev track: new orgs can request up to one 4C/12G/100G sandbox
+  # (single 14G box). Per-sandbox gates enforce these even with
+  # enforceQuotas=false; existing org rows need a manual UPDATE.
+  maxMemoryPerSandbox: 12
+  maxDiskPerSandbox: 100
 
 featureFlags:
   forceEnabled: organization_infrastructure

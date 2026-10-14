@@ -1,0 +1,27 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Keycloak ingress for the dev track. LAN-only DNS (A -> 10.168.1.234),
+# TLS via cert-manager DNS-01 (same as GCP prod).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  namespace: control
+  annotations:
+    cert-manager.io/cluster-issuer: wildcard-dns01
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [keycloak.cogboxdev.pazity.com]
+      secretName: dev-keycloak-tls
+  rules:
+    - host: keycloak.cogboxdev.pazity.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port: { number: 8080 }

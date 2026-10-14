@@ -2,8 +2,12 @@
 regionName: dev-local
 controlPlaneApiUrl: http://control-control-api.control.svc.cluster.local/api
 
+# Runner scheduling contract: the dev box must carry these exact labels
+# (single-node dev uses the shared-us pool label; hostname pins the box).
 nodeSelector:
   kubernetes.io/hostname: kk-hpzhan66prog1
+  cogbox.io/region: shared-us
+  cogbox.io/pool: standard
 
 proxy:
   host: proxy.cogboxdev.pazity.com
@@ -11,9 +15,26 @@ proxy:
   protocol: https
   replicaCount: 1
   hpa: {enabled: false}
+  # Pin OIDC issuer to the exact string Keycloak returns in its discovery
+  # doc (strict go-oidc check, no trailing slash). Discovery + token calls
+  # go through ingress (public URL); in-cluster bypass was tried and fails
+  # because Keycloak answers internal requests with a request-derived issuer
+  # (http://keycloak.cogboxdev...:8080/...) that can never be pinned stably.
+  oidc:
+    domain: https://keycloak.cogboxdev.pazity.com/realms/cogbox
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+    tlsSecret: dev-proxy-tls
+    annotations: {}
 
 snapshotManager:
   host: snapshots.cogboxdev.pazity.com
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+    tlsSecret: dev-snapshots-tls
+    annotations: {}
   storage:
     driver: filesystem
     size: 30Gi
@@ -21,6 +42,10 @@ snapshotManager:
     deleteEnabled: true
 
 runner:
+  # Stable FQDN via runner-service.yaml (ClusterIP in front of the runner
+  # DaemonSet pod). The runner advertises http(s)://<domain>:<apiPort> to the
+  # control plane; a bare pod IP would go stale on every restart.
+  domain: region-dev-runner.region-dev.svc.cluster.local
   env:
     ENVIRONMENT: development
     AWS_REGION: us-east-1
@@ -28,6 +53,21 @@ runner:
     AWS_ACCESS_KEY_ID: localpass
     AWS_SECRET_ACCESS_KEY: localpass
     AWS_DEFAULT_BUCKET: cogbox
+  # k3s dev: no host docker.sock mount — the runner drives its OWN internal
+  # dockerd (same as GCP runner-shared + kind). Mounting the host socket
+  # breaks the daemon bind mounts: WriteStaticBinary writes to the runner
+  # container's /usr/local/bin/.tmp/binaries, but a host dockerd resolves
+  # bind sources on the HOST fs (auto-mkdir'ing them as dirs) -> sandbox
+  # start fails with '"/usr/local/bin/cogbox": is a directory'.
+  hostPaths:
+    dockerSock:
+      enabled: false
+  # Single 14G box: cap the runner pod at 4C/12Gi so one big sandbox fits
+  # without kubelet OOMKilling it (dind + sandboxes all live in this cgroup).
+  # 300G disk is nominal (local-path/ext4 does not enforce StorageOpt).
+  resources:
+    requests: { cpu: 1000m, memory: 2Gi }
+    limits: { cpu: 4000m, memory: 12Gi, ephemeral-storage: 300Gi }
 
 sshGateway:
   replicaCount: 1
