@@ -87,6 +87,11 @@ data:
   SMTP_EMAIL_FROM: {{ .Values.smtp.emailFrom | quote }}
   OTEL_ENABLED: {{ .Values.otel.enabled | quote }}
   OTEL_COLLECTOR_URL: {{ .Values.otel.collectorUrl | quote }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.otel.exporterEndpoint | quote }}
+  OTEL_EXPORTER_OTLP_PROTOCOL: {{ .Values.otel.exporterProtocol | quote }}
+  OTEL_COLLECTOR_ENDPOINT_URL: {{ .Values.otel.collectorEndpointUrl | quote }}
+  POSTHOG_HOST: {{ .Values.posthog.host | quote }}
+  POSTHOG_ENVIRONMENT: {{ .Values.posthog.environment | quote }}
   OPENFEATURE_FORCE_ENABLED_FLAGS: {{ .Values.featureFlags.forceEnabled | quote }}
   SKIP_USER_EMAIL_VERIFICATION: "false"
   MAINTENANCE_MODE: "false"

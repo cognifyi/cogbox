@@ -131,3 +131,40 @@ dig +short proxy.cogbox.pazity.com
 dig +short 3000-abc123.proxy.cogbox.pazity.com
 # all three must return INGRESS_IP (never Cloudflare 104.x proxy IPs)
 ```
+
+## 5. Telemetry (Grafana Cloud OTEL + PostHog US Cloud)
+
+Control-plane telemetry flows `API -> in-cluster collector -> Grafana Cloud
+OTLP`; product analytics goes direct to PostHog US Cloud. Both are already
+wired in the chart (`deploy/helm/cogbox-control`); production only needs
+secrets + the collector manifest.
+
+```bash
+# 5.1 Vendor credentials in Secret Manager (External Secrets reads
+# `<release>-control/<KEY>`; <release> is your helm release name).
+# Grafana Cloud: stack -> Connections -> OpenTelemetry (OTLP).
+# PostHog: https://us.posthog.com -> Project settings -> Project API key.
+# (The vendor OTLP endpoint itself is non-secret and lives in the
+# observability collector Secret below; the API only talks to the
+# in-cluster collector, so it needs no vendor URL.)
+echo -n 'Authorization=Basic <base64(instanceId:apiToken)>' | gcloud secrets create <release>-control/OTEL_EXPORTER_OTLP_HEADERS --data-file=-
+echo -n 'phc_...' | gcloud secrets create <release>-control/POSTHOG_API_KEY --data-file=-
+
+# 5.2 Observability collector (same manifest as the dev track).
+kubectl apply -f ../../dev/k3s/observability/otel-collector.yaml
+kubectl -n observability create secret generic otel-vendor-creds \
+  --from-literal=GRAFANA_OTLP_ENDPOINT='https://<region>.grafana.net/otlp' \
+  --from-literal=GRAFANA_OTLP_AUTH='Basic <base64(instanceId:apiToken)>'
+
+# 5.3 Verify: no `Exporting failed` in collector logs; traces for
+# service `cogbox-api` appear in Grafana Tempo within ~1 min.
+kubectl -n observability logs deploy/otel-collector --tail=20
+```
+
+Notes:
+
+* Chart defaults are empty (= telemetry disabled), so clusters without
+  these secrets behave exactly as before — no data leaves the cluster.
+* The legacy upstream PostHog key (`phc_bYtE...` / CloudFront) was removed
+  from `docker-compose`, docs, and default values; nothing reports to
+  Daytona anymore.

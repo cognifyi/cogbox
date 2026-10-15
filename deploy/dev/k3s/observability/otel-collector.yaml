@@ -1,0 +1,122 @@
+# Copyright 2026 Daytona Platforms Inc.
+# Copyright Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Shared telemetry collector for the k3s dev track.
+# API/runner/daemon -> this collector (in-cluster, no vendor keys needed
+# on app pods) -> Grafana Cloud OTLP. Vendor credentials come from the
+# `otel-vendor-creds` Secret (created out-of-band, never in git):
+#   kubectl -n observability create secret generic otel-vendor-creds \
+#     --from-literal=GRAFANA_OTLP_ENDPOINT='https://...grafana.net/otlp' \
+#     --from-literal=GRAFANA_OTLP_AUTH='Basic <base64(instanceId:apiToken)>'
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: observability
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+      batch:
+        send_batch_size: 512
+        timeout: 10s
+
+    exporters:
+      otlphttp/grafana:
+        endpoint: ${env:GRAFANA_OTLP_ENDPOINT}
+        headers:
+          Authorization: ${env:GRAFANA_OTLP_AUTH}
+        compression: gzip
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_interval: 30s
+          max_elapsed_time: 5m
+        sending_queue:
+          queue_size: 1000
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/grafana]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/grafana]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/grafana]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: otel-collector }
+  template:
+    metadata:
+      labels: { app: otel-collector }
+    spec:
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib:0.138.0
+          args: ["--config=/etc/otelcol/config.yaml"]
+          ports:
+            - { containerPort: 4317, name: otlp-grpc }
+            - { containerPort: 4318, name: otlp-http }
+            - { containerPort: 13133, name: health }
+          env:
+            - name: GRAFANA_OTLP_ENDPOINT
+              valueFrom:
+                secretKeyRef: { name: otel-vendor-creds, key: GRAFANA_OTLP_ENDPOINT }
+            - name: GRAFANA_OTLP_AUTH
+              valueFrom:
+                secretKeyRef: { name: otel-vendor-creds, key: GRAFANA_OTLP_AUTH }
+          volumeMounts:
+            - { name: config, mountPath: /etc/otelcol }
+          readinessProbe:
+            httpGet: { path: /, port: 13133 }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 1000m, memory: 1Gi }
+      volumes:
+        - name: config
+          configMap: { name: otel-collector-config }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: observability
+spec:
+  selector: { app: otel-collector }
+  ports:
+    - { name: otlp-grpc, port: 4317, targetPort: 4317 }
+    - { name: otlp-http, port: 4318, targetPort: 4318 }
