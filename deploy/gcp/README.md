@@ -163,8 +163,8 @@ kubectl -n observability logs deploy/otel-collector --tail=20
 
 Notes:
 
-* Chart defaults are empty (= telemetry disabled), so clusters without
+- Chart defaults are empty (= telemetry disabled), so clusters without
   these secrets behave exactly as before — no data leaves the cluster.
-* The legacy upstream PostHog key (`phc_bYtE...` / CloudFront) was removed
+- The legacy upstream PostHog key (`phc_bYtE...` / CloudFront) was removed
   from `docker-compose`, docs, and default values; nothing reports to
   Daytona anymore.
