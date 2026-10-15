@@ -3,7 +3,7 @@ module github.com/cognifyi/cogbox/proxy
 go 1.26.9
 
 require (
-	github.com/cognifyi/cogbox/libs/api-client-go v0.190.3
+	github.com/cognifyi/cogbox/libs/api-client-go v0.190.5
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-gonic/gin v1.10.1
