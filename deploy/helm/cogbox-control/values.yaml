@@ -158,6 +158,26 @@ smtp:
 otel:
   enabled: true
   collectorUrl: http://otel-collector.observability:4318/v1/traces
+  # OTLP exporter for the API's own telemetry (consumed by the OTEL SDKs via
+  # standard env vars). Empty = SDK defaults (localhost:4318, no auth).
+  # - Direct-to-vendor: set exporterEndpoint to the vendor OTLP base URL and
+  #   put the auth header in secrets (OTEL_EXPORTER_OTLP_HEADERS).
+  # - Via in-cluster collector (recommended): point at the collector Service
+  #   (e.g. http://otel-collector.observability:4318) and keep headers empty;
+  #   the collector holds the vendor credentials.
+  exporterEndpoint: ""
+  exporterProtocol: http/protobuf
+  # Sanitized per-org fallback outlet for sandbox telemetry routing
+  # (otelCollector.endpointUrl = OTEL_COLLECTOR_ENDPOINT_URL, else
+  # SANDBOX_OTEL_ENDPOINT_URL). Empty = unset.
+  collectorEndpointUrl: ""
+
+# Product analytics (PostHog). Empty apiKey/host = disabled (no upload).
+# host is non-secret (e.g. https://us.i.posthog.com); apiKey lives in secrets.
+posthog:
+  apiKey: ""
+  host: ""
+  environment: ""
 
 featureFlags:
   # Force-enable flags without a flag provider (PostHog). organization_infrastructure
@@ -189,6 +209,8 @@ secrets:
     # OIDC_MANAGEMENT_API_CLIENT_SECRET: ...
     # SMTP_USER: ... / SMTP_PASSWORD: ...
     # OTEL_COLLECTOR_API_KEY: ...
+    # OTEL_EXPORTER_OTLP_HEADERS: ...  # vendor auth, e.g. Grafana "Authorization=Basic ..."
+    # POSTHOG_API_KEY: ...             # PostHog Cloud project key (phc_...), empty = disabled
     # HEALTH_CHECK_API_KEY: ...
     # ADMIN_API_KEY: ...
   # Legacy global service keys live in secrets.values above (never in git).

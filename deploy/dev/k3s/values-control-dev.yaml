@@ -77,6 +77,19 @@ quotas:
 featureFlags:
   forceEnabled: organization_infrastructure
 
+# Telemetry outlets (dev track): API -> in-cluster collector -> Grafana Cloud;
+# product analytics -> PostHog US Cloud. Vendor credentials live in the
+# cogbox-dev-secrets Secret (never in git); only non-secret URLs stay here.
+otel:
+  enabled: true
+  exporterEndpoint: http://otel-collector.observability:4318
+  exporterProtocol: http/protobuf
+  collectorEndpointUrl: http://otel-collector.observability:4318
+
+posthog:
+  host: https://us.i.posthog.com
+  environment: dev
+
 secrets:
   useExternalSecrets: false
   existingSecret: cogbox-dev-secrets

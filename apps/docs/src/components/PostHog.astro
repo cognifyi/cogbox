@@ -46,12 +46,19 @@
       }),
       (e.__SV = 1))
   })(document, window.posthog || [])
-  posthog.init('phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv', {
-    api_host: 'https://d18ag4dodbta3l.cloudfront.net',
+  // Product analytics is opt-in: inject your own PostHog project key/host
+  // at build time (e.g. PUBLIC_POSTHOG_KEY / PUBLIC_POSTHOG_HOST). Empty by
+  // default so docs builds never report to the legacy upstream project.
+  var POSTHOG_KEY = '__COGBOX_POSTHOG_KEY__'
+  var POSTHOG_HOST = '__COGBOX_POSTHOG_HOST__'
+  if (POSTHOG_KEY && POSTHOG_KEY.indexOf('__COGBOX_') !== 0) {
+    posthog.init(POSTHOG_KEY, {
+      api_host: POSTHOG_HOST,
     person_profiles: 'always',
     autocapture: false,
     capture_pageview: true,
     capture_pageleave: true,
     cookieless_mode: 'always',
-  })
+    })
+  }
 </script>

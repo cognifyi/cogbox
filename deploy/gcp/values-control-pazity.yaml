@@ -60,3 +60,17 @@ registry:
 secrets:
   useExternalSecrets: true
   externalSecretsStore: secretstore-gcp
+
+# Telemetry outlets (production): API -> in-cluster collector -> Grafana Cloud;
+# product analytics -> PostHog US Cloud. Vendor credentials live in Secret
+# Manager under "<release>-control/<KEY>" (see deploy/gcp/README.md §5);
+# only non-secret URLs stay here.
+otel:
+  enabled: true
+  exporterEndpoint: http://otel-collector.observability:4318
+  exporterProtocol: http/protobuf
+  collectorEndpointUrl: http://otel-collector.observability:4318
+
+posthog:
+  host: https://us.i.posthog.com
+  environment: production
