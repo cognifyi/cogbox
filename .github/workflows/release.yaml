@@ -445,10 +445,10 @@ jobs:
         run: |
           git checkout -b "sync-gosum-$VERSION"
           GONOSUMDB=github.com/${{ github.repository }} go work sync
-          if git diff --quiet -- **/go.sum; then
-            echo "No go.sum changes detected; skipping commit and PR creation."
+          if git diff --quiet -- '*/go.mod' '*/go.sum'; then
+            echo "No Go module changes detected; skipping commit and PR creation."
           else
-            git add **/go.sum
+            git add -u -- '*/go.mod' '*/go.sum'
             git commit -s -m "chore: sync go.sum for $VERSION"
             git push origin "sync-gosum-$VERSION"
             gh pr create \
