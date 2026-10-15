@@ -16,6 +16,12 @@ TAG="${1:?usage: $0 <imageTag>  (e.g. $0 v0.191.0)}"
 cd "$REPO_ROOT"
 
 echo "==> control plane @ $TAG"
+# Migration Jobs are immutable (spec.template cannot be updated) and the
+# helm.sh/hook delete-policy only works with `helm upgrade`, not with the
+# `helm template | kubectl apply` flow used here. Delete completed Jobs from
+# the previous version first so the new image tag can be applied cleanly.
+kubectl delete job control-control-migrate-pre control-control-migrate-post \
+  -n control --ignore-not-found --wait=true
 helm template control deploy/helm/cogbox-control \
   -f deploy/helm/cogbox-control/values.yaml \
   -f deploy/dev/k3s/values-control-dev.yaml \
