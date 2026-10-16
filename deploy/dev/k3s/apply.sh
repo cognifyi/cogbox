@@ -14,6 +14,11 @@ export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/k3s-dev-config}"
 cd "$REPO_ROOT"
 
 echo "==> control plane"
+# Same immutable-Job handling as deploy.sh: drop previous migration Jobs so
+# re-applying a changed image tag (or migration command) does not hit
+# `Job.batch ... field is immutable`. No-op when nothing changed.
+kubectl delete job control-control-migrate-pre control-control-migrate-post \
+  -n control --ignore-not-found --wait=true
 helm template control deploy/helm/cogbox-control \
   -f deploy/helm/cogbox-control/values.yaml \
   -f deploy/dev/k3s/values-control-dev.yaml \
