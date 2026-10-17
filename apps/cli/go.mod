@@ -4,7 +4,7 @@ go 1.26.9
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0
-	github.com/cognifyi/cogbox/libs/api-client-go v0.191.0-dev
+	github.com/cognifyi/cogbox/libs/api-client-go v0.191.1-dev
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/mark3labs/mcp-go v0.32.0

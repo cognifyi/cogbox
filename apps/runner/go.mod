@@ -3,7 +3,7 @@ module github.com/cognifyi/cogbox/runner
 go 1.26.9
 
 require (
-	github.com/cognifyi/cogbox/libs/api-client-go v0.191.0-dev
+	github.com/cognifyi/cogbox/libs/api-client-go v0.191.1-dev
 	github.com/containerd/errdefs v1.0.0
 	github.com/coreos/go-iptables v0.8.0
 	github.com/docker/cli v29.2.1+incompatible
