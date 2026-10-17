@@ -56,6 +56,7 @@ interface DataTableProps {
   onBulkActivate?: (snapshots: SnapshotDto[]) => void
   onActivate?: (snapshot: SnapshotDto) => void
   onDeactivate?: (snapshot: SnapshotDto) => void
+  onClone?: (snapshot: SnapshotDto) => void
   onCreateSnapshot?: () => void
   onRowClick?: (snapshot: SnapshotDto, orderedSnapshots: SnapshotDto[]) => void
   activeSnapshotId?: string
@@ -122,6 +123,7 @@ export function SnapshotTable({
   onDelete,
   onActivate,
   onDeactivate,
+  onClone,
   onCreateSnapshot,
   onRowClick,
   activeSnapshotId,
@@ -202,6 +204,7 @@ export function SnapshotTable({
         loading,
         onActivate,
         onDeactivate,
+        onClone,
       },
     },
     getRowId: (row) => row.id,

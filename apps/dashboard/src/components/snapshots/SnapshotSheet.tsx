@@ -21,7 +21,7 @@ import { getGpuTypeLabel } from '@/lib/gpu-types'
 import { cn, getRelativeTimeString, truncateUUID } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@cogbox/api-client'
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
-import { ChevronDown, ChevronUp, CircleAlert, Pause, Play, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, CircleAlert, CopyPlus, Pause, Play, Trash2, X } from 'lucide-react'
 import React, { Ref, useImperativeHandle, useState } from 'react'
 
 export interface SnapshotSheetRef {
@@ -42,6 +42,7 @@ export interface SnapshotSheetProps {
   deletePermitted: boolean
   onActivate: (snapshot: SnapshotDto) => void
   onDeactivate: (snapshot: SnapshotDto) => void
+  onClone: (snapshot: SnapshotDto) => void
   onDelete: (snapshot: SnapshotDto) => void
 }
 
@@ -232,6 +233,7 @@ export function SnapshotSheet({
   deletePermitted,
   onActivate,
   onDeactivate,
+  onClone,
   onDelete,
 }: SnapshotSheetProps) {
   const [open, setOpen] = useState(false)
@@ -261,6 +263,7 @@ export function SnapshotSheet({
   const snapshotNotFound = snapshotIsError && getSnapshotQueryErrorStatus(snapshotError) === 404
   const regionNames = activeSnapshot?.regionIds?.map((id) => getRegionName(id) ?? id) ?? []
   const showActions = !!activeSnapshot && !activeSnapshot.general && (writePermitted || deletePermitted)
+  const showClone = !!activeSnapshot && writePermitted && activeSnapshot.state === SnapshotState.ACTIVE
   const showActivate = !!activeSnapshot && writePermitted && activeSnapshot.state === SnapshotState.INACTIVE
   const showDeactivate = !!activeSnapshot && writePermitted && activeSnapshot.state === SnapshotState.ACTIVE
   const showDelete = !!activeSnapshot && deletePermitted && activeSnapshot.state !== SnapshotState.REMOVING
@@ -345,6 +348,17 @@ export function SnapshotSheet({
                 {showActions && (
                   <div className="flex items-center justify-end pt-3">
                     <ButtonGroup>
+                      {showClone && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={actionsDisabled}
+                          onClick={() => onClone(activeSnapshot)}
+                        >
+                          <CopyPlus className="size-4" />
+                          Clone
+                        </Button>
+                      )}
                       {showActivate && (
                         <Button
                           variant="outline"
