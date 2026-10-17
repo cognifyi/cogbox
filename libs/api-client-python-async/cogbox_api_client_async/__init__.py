@@ -61,6 +61,7 @@ if TYPE_CHECKING:
     from cogbox_api_client_async.models.api_key_response import ApiKeyResponse
     from cogbox_api_client_async.models.audit_log import AuditLog
     from cogbox_api_client_async.models.build_info import BuildInfo
+    from cogbox_api_client_async.models.clone_snapshot import CloneSnapshot
     from cogbox_api_client_async.models.cogbox_configuration import CogboxConfiguration
     from cogbox_api_client_async.models.command import Command
     from cogbox_api_client_async.models.completion_context import CompletionContext
@@ -276,6 +277,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ApiKeyResponse": "cogbox_api_client_async.models.api_key_response",
     "AuditLog": "cogbox_api_client_async.models.audit_log",
     "BuildInfo": "cogbox_api_client_async.models.build_info",
+    "CloneSnapshot": "cogbox_api_client_async.models.clone_snapshot",
     "CogboxConfiguration": "cogbox_api_client_async.models.cogbox_configuration",
     "Command": "cogbox_api_client_async.models.command",
     "CompletionContext": "cogbox_api_client_async.models.completion_context",
@@ -505,6 +507,7 @@ __all__ = [
     "ApiKeyResponse",
     "AuditLog",
     "BuildInfo",
+    "CloneSnapshot",
     "CogboxConfiguration",
     "Command",
     "CompletionContext",

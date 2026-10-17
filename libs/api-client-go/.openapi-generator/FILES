@@ -30,6 +30,7 @@ model_api_key_list.go
 model_api_key_response.go
 model_audit_log.go
 model_build_info.go
+model_clone_snapshot.go
 model_cogbox_configuration.go
 model_command.go
 model_completion_context.go

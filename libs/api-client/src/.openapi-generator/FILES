@@ -31,6 +31,7 @@ models/api-key-list.ts
 models/api-key-response.ts
 models/audit-log.ts
 models/build-info.ts
+models/clone-snapshot.ts
 models/cogbox-configuration.ts
 models/command.ts
 models/completion-context.ts

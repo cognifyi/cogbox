@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from cogbox_api_client.models.api_key_response import ApiKeyResponse
     from cogbox_api_client.models.audit_log import AuditLog
     from cogbox_api_client.models.build_info import BuildInfo
+    from cogbox_api_client.models.clone_snapshot import CloneSnapshot
     from cogbox_api_client.models.cogbox_configuration import CogboxConfiguration
     from cogbox_api_client.models.command import Command
     from cogbox_api_client.models.completion_context import CompletionContext
@@ -213,6 +214,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ApiKeyResponse": "cogbox_api_client.models.api_key_response",
     "AuditLog": "cogbox_api_client.models.audit_log",
     "BuildInfo": "cogbox_api_client.models.build_info",
+    "CloneSnapshot": "cogbox_api_client.models.clone_snapshot",
     "CogboxConfiguration": "cogbox_api_client.models.cogbox_configuration",
     "Command": "cogbox_api_client.models.command",
     "CompletionContext": "cogbox_api_client.models.completion_context",

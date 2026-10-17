@@ -38,6 +38,21 @@ describe('[AUTH] SnapshotController', () => {
     ])
   })
 
+  it('cloneSnapshot', () => {
+    const methodName = trackMethod('cloneSnapshot')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SnapshotController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SnapshotController, methodName), [SnapshotAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SnapshotController, methodName)).toBeUndefined()
+    expectArrayMatch(getRequiredOrganizationResourcePermissions(SnapshotController, methodName), [
+      OrganizationResourcePermission.WRITE_SNAPSHOTS,
+    ])
+  })
+
   it('getSnapshot', () => {
     const methodName = trackMethod('getSnapshot')
     expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)

@@ -28,6 +28,7 @@ import java.io.IOException;
 
 
 import java.math.BigDecimal;
+import io.cogbox.api.client.model.CloneSnapshot;
 import io.cogbox.api.client.model.CreateSnapshot;
 import io.cogbox.api.client.model.PaginatedSnapshots;
 import io.cogbox.api.client.model.SnapshotDto;
@@ -216,6 +217,160 @@ public class SnapshotsApi {
     public okhttp3.Call activateSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xCogboxOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = activateSnapshotValidateBeforeCall(id, xCogboxOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for cloneSnapshot
+     * @param id Snapshot ID or name (required)
+     * @param cloneSnapshot  (required)
+     * @param xCogboxOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The snapshot has been successfully cloned. </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request - Source snapshot is not active, requested disk size is smaller than the source, or snapshot cannot be cloned </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call cloneSnapshotCall(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull CloneSnapshot cloneSnapshot, @javax.annotation.Nullable String xCogboxOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = cloneSnapshot;
+
+        // create path and map variables
+        String localVarPath = "/snapshots/{id}/clone"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xCogboxOrganizationID != null) {
+            localVarHeaderParams.put("X-Cogbox-Organization-ID", localVarApiClient.parameterToString(xCogboxOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call cloneSnapshotValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull CloneSnapshot cloneSnapshot, @javax.annotation.Nullable String xCogboxOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling cloneSnapshot(Async)");
+        }
+
+        // verify the required parameter 'cloneSnapshot' is set
+        if (cloneSnapshot == null) {
+            throw new ApiException("Missing the required parameter 'cloneSnapshot' when calling cloneSnapshot(Async)");
+        }
+
+        return cloneSnapshotCall(id, cloneSnapshot, xCogboxOrganizationID, _callback);
+
+    }
+
+    /**
+     * Clone a snapshot
+     * 
+     * @param id Snapshot ID or name (required)
+     * @param cloneSnapshot  (required)
+     * @param xCogboxOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return SnapshotDto
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The snapshot has been successfully cloned. </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request - Source snapshot is not active, requested disk size is smaller than the source, or snapshot cannot be cloned </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public SnapshotDto cloneSnapshot(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull CloneSnapshot cloneSnapshot, @javax.annotation.Nullable String xCogboxOrganizationID) throws ApiException {
+        ApiResponse<SnapshotDto> localVarResp = cloneSnapshotWithHttpInfo(id, cloneSnapshot, xCogboxOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Clone a snapshot
+     * 
+     * @param id Snapshot ID or name (required)
+     * @param cloneSnapshot  (required)
+     * @param xCogboxOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;SnapshotDto&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The snapshot has been successfully cloned. </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request - Source snapshot is not active, requested disk size is smaller than the source, or snapshot cannot be cloned </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<SnapshotDto> cloneSnapshotWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull CloneSnapshot cloneSnapshot, @javax.annotation.Nullable String xCogboxOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = cloneSnapshotValidateBeforeCall(id, cloneSnapshot, xCogboxOrganizationID, null);
+        Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Clone a snapshot (asynchronously)
+     * 
+     * @param id Snapshot ID or name (required)
+     * @param cloneSnapshot  (required)
+     * @param xCogboxOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The snapshot has been successfully cloned. </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request - Source snapshot is not active, requested disk size is smaller than the source, or snapshot cannot be cloned </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call cloneSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull CloneSnapshot cloneSnapshot, @javax.annotation.Nullable String xCogboxOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = cloneSnapshotValidateBeforeCall(id, cloneSnapshot, xCogboxOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;

@@ -34,6 +34,7 @@ lib/cogbox_api_client/models/api_key_list.rb
 lib/cogbox_api_client/models/api_key_response.rb
 lib/cogbox_api_client/models/audit_log.rb
 lib/cogbox_api_client/models/build_info.rb
+lib/cogbox_api_client/models/clone_snapshot.rb
 lib/cogbox_api_client/models/cogbox_configuration.rb
 lib/cogbox_api_client/models/command.rb
 lib/cogbox_api_client/models/completion_context.rb
