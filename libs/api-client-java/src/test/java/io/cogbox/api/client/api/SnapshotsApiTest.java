@@ -15,6 +15,7 @@ package io.cogbox.api.client.api;
 
 import io.cogbox.api.client.ApiException;
 import java.math.BigDecimal;
+import io.cogbox.api.client.model.CloneSnapshot;
 import io.cogbox.api.client.model.CreateSnapshot;
 import io.cogbox.api.client.model.PaginatedSnapshots;
 import io.cogbox.api.client.model.SnapshotDto;
@@ -45,6 +46,20 @@ public class SnapshotsApiTest {
         String id = null;
         String xCogboxOrganizationID = null;
         SnapshotDto response = api.activateSnapshot(id, xCogboxOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Clone a snapshot
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void cloneSnapshotTest() throws ApiException {
+        String id = null;
+        CloneSnapshot cloneSnapshot = null;
+        String xCogboxOrganizationID = null;
+        SnapshotDto response = api.cloneSnapshot(id, cloneSnapshot, xCogboxOrganizationID);
         // TODO: test validations
     }
 

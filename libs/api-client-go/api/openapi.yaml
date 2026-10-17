@@ -6982,6 +6982,53 @@ paths:
       summary: Create a new snapshot
       tags:
       - snapshots
+  /snapshots/{id}/clone:
+    post:
+      operationId: cloneSnapshot
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Cogbox-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Snapshot ID or name
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloneSnapshot"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotDto"
+          description: The snapshot has been successfully cloned.
+        "400":
+          description: "Bad request - Source snapshot is not active, requested disk\
+            \ size is smaller than the source, or snapshot cannot be cloned"
+        "404":
+          description: Snapshot not found
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Clone a snapshot
+      tags:
+      - snapshots
   /snapshots/{id}:
     delete:
       operationId: removeSnapshot
@@ -14196,6 +14243,36 @@ components:
       - size
       - state
       - updatedAt
+      type: object
+    CloneSnapshot:
+      example:
+        disk: 3
+        memory: 1
+        name: ubuntu-2vcpu-4ram-100gb
+        cpu: 1
+      properties:
+        name:
+          description: The name of the cloned snapshot
+          example: ubuntu-2vcpu-4ram-100gb
+          type: string
+        cpu:
+          description: CPU cores allocated to sandboxes created from the clone. Defaults
+            to the source snapshot value.
+          example: 1
+          type: integer
+        memory:
+          description: Memory allocated to sandboxes created from the clone in GB.
+            Defaults to the source snapshot value.
+          example: 1
+          type: integer
+        disk:
+          description: Disk space allocated to sandboxes created from the clone in
+            GB. Defaults to the source snapshot value. Cannot be smaller than the
+            source snapshot disk size.
+          example: 3
+          type: integer
+      required:
+      - name
       type: object
     PaginatedSnapshots:
       example:

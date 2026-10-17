@@ -6,6 +6,7 @@ export * from './api-key-list';
 export * from './api-key-response';
 export * from './audit-log';
 export * from './build-info';
+export * from './clone-snapshot';
 export * from './cogbox-configuration';
 export * from './command';
 export * from './completion-context';

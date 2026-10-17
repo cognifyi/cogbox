@@ -22,6 +22,8 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { CloneSnapshot } from '../models';
+// @ts-ignore
 import type { CreateSnapshot } from '../models';
 // @ts-ignore
 import type { PaginatedSnapshots } from '../models';
@@ -72,6 +74,55 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Clone a snapshot
+         * @param {string} id Snapshot ID or name
+         * @param {CloneSnapshot} cloneSnapshot 
+         * @param {string} [xCogboxOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cloneSnapshot: async (id: string, cloneSnapshot: CloneSnapshot, xCogboxOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('cloneSnapshot', 'id', id)
+            // verify required parameter 'cloneSnapshot' is not null or undefined
+            assertParamExists('cloneSnapshot', 'cloneSnapshot', cloneSnapshot)
+            const localVarPath = `/snapshots/{id}/clone`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            if (xCogboxOrganizationID != null) {
+                localVarHeaderParameter['X-Cogbox-Organization-ID'] = String(xCogboxOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(cloneSnapshot, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -436,6 +487,21 @@ export const SnapshotsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Clone a snapshot
+         * @param {string} id Snapshot ID or name
+         * @param {CloneSnapshot} cloneSnapshot 
+         * @param {string} [xCogboxOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async cloneSnapshot(id: string, cloneSnapshot: CloneSnapshot, xCogboxOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.cloneSnapshot(id, cloneSnapshot, xCogboxOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SnapshotsApi.cloneSnapshot']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Create a new snapshot
          * @param {CreateSnapshot} createSnapshot 
          * @param {string} [xCogboxOrganizationID] Use with JWT to specify the organization ID
@@ -560,6 +626,18 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
         },
         /**
          * 
+         * @summary Clone a snapshot
+         * @param {string} id Snapshot ID or name
+         * @param {CloneSnapshot} cloneSnapshot 
+         * @param {string} [xCogboxOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cloneSnapshot(id: string, cloneSnapshot: CloneSnapshot, xCogboxOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotDto> {
+            return localVarFp.cloneSnapshot(id, cloneSnapshot, xCogboxOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Create a new snapshot
          * @param {CreateSnapshot} createSnapshot 
          * @param {string} [xCogboxOrganizationID] Use with JWT to specify the organization ID
@@ -658,6 +736,19 @@ export class SnapshotsApi extends BaseAPI {
      */
     public activateSnapshot(id: string, xCogboxOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).activateSnapshot(id, xCogboxOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Clone a snapshot
+     * @param {string} id Snapshot ID or name
+     * @param {CloneSnapshot} cloneSnapshot 
+     * @param {string} [xCogboxOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public cloneSnapshot(id: string, cloneSnapshot: CloneSnapshot, xCogboxOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return SnapshotsApiFp(this.configuration).cloneSnapshot(id, cloneSnapshot, xCogboxOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

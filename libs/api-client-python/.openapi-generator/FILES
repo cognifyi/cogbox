@@ -32,6 +32,7 @@ cogbox_api_client/models/api_key_list.py
 cogbox_api_client/models/api_key_response.py
 cogbox_api_client/models/audit_log.py
 cogbox_api_client/models/build_info.py
+cogbox_api_client/models/clone_snapshot.py
 cogbox_api_client/models/cogbox_configuration.py
 cogbox_api_client/models/command.py
 cogbox_api_client/models/completion_context.py

@@ -22,6 +22,7 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { GpuType } from '../enums/gpu-type.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
+import { CloneSnapshotDto } from '../dto/clone-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -410,6 +411,161 @@ export class SnapshotService {
           // PostgreSQL unique violation error code
           throw new ConflictException(
             `Snapshot with name "${createSnapshotDto.name}" already exists for this organization`,
+          )
+        }
+        throw error
+      }
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
+      throw error
+    }
+  }
+
+  async cloneSnapshot(
+    organization: Organization,
+    sourceSnapshotIdOrName: string,
+    cloneSnapshotDto: CloneSnapshotDto,
+  ): Promise<Snapshot> {
+    const nameValidationError = this.validateSnapshotName(cloneSnapshotDto.name)
+    if (nameValidationError) {
+      throw new BadRequestException(nameValidationError)
+    }
+
+    const where: FindOptionsWhere<Snapshot>[] = [{ name: sourceSnapshotIdOrName, organizationId: organization.id }]
+    if (isUUID(sourceSnapshotIdOrName)) {
+      where.push({ id: sourceSnapshotIdOrName, organizationId: organization.id })
+    }
+
+    const source = await this.snapshotRepository.findOne({
+      where,
+      relations: ['snapshotRegions'],
+    })
+
+    if (!source) {
+      throw new NotFoundException(`Snapshot ${sourceSnapshotIdOrName} not found`)
+    }
+
+    if (source.state !== SnapshotState.ACTIVE) {
+      throw new BadRequestException(
+        `Snapshot ${source.name} is in state ${source.state}. Only active snapshots can be cloned.`,
+      )
+    }
+
+    if (source.sandboxClass === SandboxClass.WINDOWS) {
+      throw new BadRequestException(
+        'Windows snapshots cannot be cloned via this endpoint; they are produced by snapshot-from-sandbox flows.',
+      )
+    }
+
+    const sourceRegionId = source.snapshotRegions?.[0]?.regionId
+    const region = sourceRegionId ? await this.regionRepository.findOne({ where: { id: sourceRegionId } }) : null
+    if (!region) {
+      throw new NotFoundException(`Region for snapshot ${source.name} not found`)
+    }
+
+    const cpu = cloneSnapshotDto.cpu ?? source.cpu
+    const memory = cloneSnapshotDto.memory ?? source.mem
+    const disk = cloneSnapshotDto.disk ?? source.disk
+
+    // The snapshot disk can only be increased, matching sandbox resize semantics
+    // and ensuring the clone's storage is never smaller than the underlying image.
+    if (disk < source.disk) {
+      throw new BadRequestException('Snapshot disk size can only be increased')
+    }
+
+    await this.assertHasSchedulableRunner(region, source.sandboxClass)
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    let pendingSnapshotCountIncrement: number | undefined
+
+    try {
+      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        region,
+        source.sandboxClass,
+        1,
+        cpu,
+        memory,
+        disk,
+        source.gpu,
+      )
+
+      if (pendingSnapshotCountIncremented) {
+        pendingSnapshotCountIncrement = 1
+      }
+
+      const snapshotId = uuidv4()
+
+      let ref = source.ref
+      if (!ref && source.buildInfo) {
+        const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(region.id)
+        if (!internalRegistry) {
+          throw new Error('No internal registry found for snapshot')
+        }
+        ref = `${internalRegistry.url.replace(/^(https?:\/\/)/, '')}/${internalRegistry.project || 'cogbox'}/${source.buildInfo.snapshotRef}`
+      }
+
+      if (!ref) {
+        throw new BadRequestException(`Snapshot ${source.name} has no image reference and cannot be cloned`)
+      }
+
+      const snapshot = this.snapshotRepository.create({
+        id: snapshotId,
+        organizationId: organization.id,
+        name: cloneSnapshotDto.name,
+        imageName: source.imageName,
+        entrypoint: source.entrypoint,
+        cpu,
+        mem: memory, // Map memory to mem
+        disk,
+        gpu: source.gpu,
+        gpuType: source.gpuType ?? null,
+        sandboxClass: source.sandboxClass,
+        buildInfo: source.buildInfo,
+        state: SnapshotState.PENDING,
+        snapshotRegions: [{ snapshotId, regionId: region.id }],
+      })
+
+      // Reuse the already-propagated image when possible so the clone does not trigger
+      // a fresh pull/build. Mirrors the fast path in createFromBuildInfo.
+      const exists = await this.readySnapshotRunnerExists(ref, region.id)
+
+      if (exists) {
+        const existingSnapshot = await this.snapshotRepository.findOne({
+          where: { ref, size: Not(IsNull()) },
+          select: ['id', 'size'],
+        })
+
+        if (existingSnapshot?.size != null) {
+          if (existingSnapshot.size > organization.maxSnapshotSize) {
+            throw new BadRequestException(
+              `Snapshot size (${existingSnapshot.size.toFixed(2)}GB) exceeds maximum allowed size of ${organization.maxSnapshotSize}GB`,
+            )
+          }
+          snapshot.size = existingSnapshot.size
+          snapshot.state = SnapshotState.ACTIVE
+          snapshot.lastUsedAt = new Date()
+        }
+      }
+
+      if (snapshot.state === SnapshotState.ACTIVE || source.buildInfo) {
+        // Build snapshots keep the precomputed ref while BUILDING resolves the image (same as createFromBuildInfo).
+        // Pull snapshots without a ready runner stay without a ref so the standard PULLING flow re-derives it.
+        snapshot.ref = ref
+      }
+
+      try {
+        const insertedSnapshot = await this.snapshotRepository.insert(snapshot)
+
+        this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(insertedSnapshot))
+
+        return insertedSnapshot
+      } catch (error) {
+        if (error.code === '23505') {
+          // PostgreSQL unique violation error code
+          throw new ConflictException(
+            `Snapshot with name "${cloneSnapshotDto.name}" already exists for this organization`,
           )
         }
         throw error

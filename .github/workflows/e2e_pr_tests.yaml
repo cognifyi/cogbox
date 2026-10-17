@@ -236,6 +236,10 @@ jobs:
         if: steps.affected.outputs.sdk_ts_affected == 'true'
         run: npx --yes playwright@1.48 install --with-deps chromium
 
+      - name: Pin npm@12 for runtime compatibility tests
+        if: steps.affected.outputs.sdk_ts_affected == 'true'
+        run: npm install -g npm@12
+
       - name: Run TypeScript SDK runtime compatibility tests
         if: steps.affected.outputs.sdk_ts_affected == 'true'
         env:

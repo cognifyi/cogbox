@@ -38,6 +38,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
+import { CloneSnapshotDto } from '../dto/clone-snapshot.dto'
 import { SnapshotDto } from '../dto/snapshot.dto'
 import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
@@ -132,6 +133,59 @@ export class SnapshotController {
     const snapshot = createSnapshotDto.buildInfo
       ? await this.snapshotService.createFromBuildInfo(authContext.organization, createSnapshotDto)
       : await this.snapshotService.createFromPull(authContext.organization, createSnapshotDto)
+    return SnapshotDto.fromSnapshot(snapshot)
+  }
+
+  @Post(':id/clone')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Clone a snapshot',
+    operationId: 'cloneSnapshot',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Snapshot ID or name',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The snapshot has been successfully cloned.',
+    type: SnapshotDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Bad request - Source snapshot is not active, requested disk size is smaller than the source, or snapshot cannot be cloned',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Snapshot not found',
+  })
+  @UseGuards(SnapshotAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromResult: (result: SnapshotDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CloneSnapshotDto>) => ({
+        clonedFrom: req.params?.id,
+        name: req.body?.name,
+        cpu: req.body?.cpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+      }),
+    },
+  })
+  async cloneSnapshot(
+    @Param('id') snapshotIdOrName: string,
+    @Body() cloneSnapshotDto: CloneSnapshotDto,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+  ): Promise<SnapshotDto> {
+    const snapshot = await this.snapshotService.cloneSnapshot(
+      authContext.organization,
+      snapshotIdOrName,
+      cloneSnapshotDto,
+    )
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
