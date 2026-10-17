@@ -18,3 +18,8 @@ export const imageNameSchema = z
     'Image must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)',
   )
   .refine((name) => !name.endsWith(':latest'), 'Images with tag ":latest" are not allowed')
+
+export const snapshotNameSchema = z
+  .string()
+  .min(1, 'Snapshot name is required')
+  .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')

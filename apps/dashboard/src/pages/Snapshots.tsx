@@ -5,6 +5,7 @@
  */
 
 import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
+import { CloneSnapshotSheet } from '@/components/snapshots/CloneSnapshotSheet'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotSheet, type SnapshotSheetRef } from '@/components/snapshots/SnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
@@ -99,6 +100,7 @@ const Snapshots: React.FC = () => {
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [snapshotToClone, setSnapshotToClone] = useState<SnapshotDto | null>(null)
   const [orderedSnapshotItems, setOrderedSnapshotItems] = useState<SnapshotDto[] | null>(null)
   const [viewParams, setViewParams] = useQueryStates(snapshotViewSearchParams)
   const [snapshotIdParam, setSnapshotIdParam] = useQueryState('snapshotId', parseAsString)
@@ -492,6 +494,10 @@ const Snapshots: React.FC = () => {
     [snapshotItems, snapshotIdParam],
   )
 
+  const handleClone = (snapshot: SnapshotDto) => {
+    setSnapshotToClone(snapshot)
+  }
+
   const handleSnapshotRowClick = (snapshot: SnapshotDto, orderedSnapshots: SnapshotDto[]) => {
     seedSnapshotDetail(snapshot)
     setOrderedSnapshotItems(orderedSnapshots)
@@ -545,6 +551,7 @@ const Snapshots: React.FC = () => {
           onBulkActivate={handleBulkActivate}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
+          onClone={handleClone}
           onCreateSnapshot={handleCreateSnapshot}
           onRowClick={handleSnapshotRowClick}
           activeSnapshotId={snapshotIdParam ?? undefined}
@@ -576,10 +583,22 @@ const Snapshots: React.FC = () => {
           deletePermitted={deletePermitted}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
+          onClone={handleClone}
           onDelete={(snapshot) => {
             setSnapshotToDelete(snapshot)
             setShowDeleteDialog(true)
           }}
+        />
+
+        <CloneSnapshotSheet
+          open={!!snapshotToClone}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              setSnapshotToClone(null)
+            }
+          }}
+          snapshot={snapshotToClone}
+          onSnapshotCloned={handleSnapshotCreated}
         />
 
         {snapshotToDelete && (

@@ -29,7 +29,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { GPU_TYPE_LABELS } from '@/lib/gpu-types'
 import { EMPTY_REGIONS } from '@/lib/regions'
-import { imageNameSchema } from '@/lib/schema'
+import { imageNameSchema, snapshotNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import type { SnapshotDto } from '@cogbox/api-client'
 import { GpuType, SandboxClass } from '@cogbox/api-client'
@@ -38,13 +38,6 @@ import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useS
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { ScrollArea } from '../ui/scroll-area'
-
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
-
-const snapshotNameSchema = z
-  .string()
-  .min(1, 'Snapshot name is required')
-  .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')
 
 const SANDBOX_CLASS_OPTIONS: { value: SandboxClass; label: string }[] = [
   { value: SandboxClass.CONTAINER, label: 'Container' },

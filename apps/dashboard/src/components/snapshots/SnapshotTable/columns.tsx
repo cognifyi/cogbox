@@ -32,6 +32,7 @@ type SnapshotTableMeta = {
   getRegionName: (regionId: string) => string | undefined
   onActivate?: (snapshot: SnapshotDto) => void
   onDeactivate?: (snapshot: SnapshotDto) => void
+  onClone?: (snapshot: SnapshotDto) => void
   onDelete: (snapshot: SnapshotDto) => void
   loading: boolean
   selectableCount: number
@@ -345,16 +346,19 @@ const columns: ColumnDef<SnapshotDto>[] = [
     minSize: 48,
     maxSize: 48,
     cell: ({ row, table }) => {
-      const { writePermitted, deletePermitted, loadingSnapshots, onActivate, onDeactivate, onDelete } = getMeta(table)
+      const { writePermitted, deletePermitted, loadingSnapshots, onActivate, onDeactivate, onClone, onDelete } =
+        getMeta(table)
 
       if ((!writePermitted && !deletePermitted) || row.original.general) {
         return null
       }
 
+      const showClone = writePermitted && onClone && row.original.state === SnapshotState.ACTIVE
       const showActivate = writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE
       const showDeactivate = writePermitted && onDeactivate && row.original.state === SnapshotState.ACTIVE
       const showDelete = deletePermitted
 
+      const showCloneSeparator = showClone && (showActivate || showDeactivate || showDelete)
       const showSeparator = (showActivate || showDeactivate) && showDelete
 
       return (
@@ -366,6 +370,12 @@ const columns: ColumnDef<SnapshotDto>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {showClone && (
+                <DropdownMenuItem onClick={() => onClone(row.original)} disabled={loadingSnapshots[row.original.id]}>
+                  Clone
+                </DropdownMenuItem>
+              )}
+              {showCloneSeparator && <DropdownMenuSeparator />}
               {showActivate && (
                 <DropdownMenuItem onClick={() => onActivate(row.original)} disabled={loadingSnapshots[row.original.id]}>
                   Activate
