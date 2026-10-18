@@ -118,6 +118,15 @@ runner:
     dockerSock:
       enabled: true
       path: /var/run/docker.sock
+    # Persist the runner's OWN dind data root (/var/lib/docker) so sandbox
+    # containers survive runner pod restarts/rollouts. Only relevant when
+    # dockerSock.enabled=false (internal dind). Without this, every runner
+    # restart wipes the container store while the control plane still tracks
+    # the sandboxes -> STOP/START jobs fail with "No such container".
+    # node-local: survives pod restarts, NOT node replacement.
+    varLibDocker:
+      enabled: false
+      path: /var/lib/cogbox-docker
 
 sshGateway:
   repository: cogbox-ssh-gateway

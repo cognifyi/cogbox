@@ -93,6 +93,10 @@ spec:
             - name: docker-sock
               mountPath: /var/run/docker.sock
             {{- end }}
+            {{- if and .Values.runner.hostPaths.varLibDocker .Values.runner.hostPaths.varLibDocker.enabled }}
+            - name: docker-data
+              mountPath: /var/lib/docker
+            {{- end }}
           resources:
             {{- toYaml .Values.runner.resources | nindent 12 }}
       volumes:
@@ -110,6 +114,12 @@ spec:
           hostPath:
             path: {{ .Values.runner.hostPaths.dockerSock.path }}
             type: Socket
+        {{- end }}
+        {{- if and .Values.runner.hostPaths.varLibDocker .Values.runner.hostPaths.varLibDocker.enabled }}
+        - name: docker-data
+          hostPath:
+            path: {{ .Values.runner.hostPaths.varLibDocker.path }}
+            type: DirectoryOrCreate
         {{- end }}
 ---
 apiVersion: v1
