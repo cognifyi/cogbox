@@ -30,6 +30,24 @@ snapshotManager:
     storageClass: standard
 
 runner:
+  # One token/control-plane Runner per ordinal (token-0..4), provisioned by
+  # scripts/25-runner-tokens.sh. Never scale with a shared RUNNER_TOKEN.
+  mode: statefulset
+  replicas: 1
+  autoscaler:
+    enabled: true
+    maxReplicas: 5
+  nodeSelector:
+    cogbox.io/region: shared
+    cogbox.io/pool: runner
+  # Path B: use the runner image's internal dockerd and persist its data root.
+  # GKE COS has no host dockerd, so the runtime-installer init container is
+  # disabled by turning off the host socket.
+  hostPaths:
+    dockerSock:
+      enabled: false
+    varLibDocker:
+      enabled: true
   env:
     AWS_REGION: auto
     AWS_ENDPOINT_URL: https://storage.googleapis.com

@@ -10,5 +10,6 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 need gcloud
 gcloud config set project "$PROJECT"
 gcloud services enable container.googleapis.com compute.googleapis.com \
-  --project="$PROJECT"
+  iam.googleapis.com secretmanager.googleapis.com \
+  artifactregistry.googleapis.com --project="$PROJECT"
 echo "OK: project $PROJECT ready"
