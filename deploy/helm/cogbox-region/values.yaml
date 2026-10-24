@@ -12,8 +12,9 @@ imagePullPolicy: IfNotPresent
 regionName: shared-us
 controlPlaneApiUrl: https://cogbox.example.com/api
 
-# Runner nodes are tainted cogbox.io/runner=NoSchedule and labeled per region.
-# The DaemonSet tolerates the taint; nothing else schedules there.
+# Application nodes are labeled pool=standard. Runner nodes are labeled
+# pool=runner and tainted cogbox.io/runner=NoSchedule; only the runner
+# workload tolerates the taint. runner.nodeSelector overrides nodeSelector.
 nodeSelector:
   cogbox.io/region: shared-us
   cogbox.io/pool: standard
@@ -85,15 +86,48 @@ snapshotManager:
 runner:
   repository: cogbox-runner
   apiPort: 3003
+  # daemonset = one runner per runner-pool node (default; pilot only: every
+  # pod shares RUNNER_TOKEN, so use a single runner node or statefulset for
+  # multiple nodes). deployment = single-replica pilot. statefulset = scalable
+  # replica set with stable ordinals; required for per-replica runner tokens
+  # and runner.autoscaler. hostPort keeps at most one runner pod per node in
+  # every mode.
+  mode: daemonset
+  # Initial replicas for deployment/statefulset mode. Ignored when
+  # runner.autoscaler.enabled: the chart then omits spec.replicas so Helm
+  # upgrades do not reset the count owned by the autoscaler/park scripts.
+  replicas: 1
+  # runner.nodeSelector defaults to the top-level nodeSelector. GCP overlays
+  # set it to cogbox.io/pool=runner to keep runners off the app pool.
   # Advertised runner hostname (validated as hostname|ip — region IDs with
   # underscores are NOT valid here). Leave empty to omit; runners self-report
   # via healthcheck. Set to a real node/hostname only if your topology needs it.
   domain: ""
-  # Pool token for pilot. Scaled pattern: per-node tokens issued via admin API
-  # and distributed by your runner provisioner; rotate regularly.
+  # Per-replica credentials for statefulset mode. token-N is mounted as
+  # /tokens/token-N and selected by the pod ordinal. Provision one control
+  # plane Runner per token (scripts/25-runner-tokens.sh); never share one
+  # token across replicas, or every pod reports as the same Runner.
+  tokens:
+    # Pre-created Secret with keys token-0..token-(maxReplicas-1).
+    # Empty = chart-managed <fullname>-runner-tokens.
+    existingSecret: ""
   resources:
     requests: { cpu: 1000m, memory: 2Gi }
     limits: { cpu: 4000m, memory: 8Gi }
+  # Scale the runner workload up when allocated sandbox CPU approaches the
+  # current pool's usable capacity. Scale-up only: scale-down is a deliberate
+  # drain operation (park or kubectl scale) so a busy runner is never deleted.
+  # statefulset mode uses one token per ordinal, so maxReplicas also determines
+  # how many runner tokens/records must exist.
+  autoscaler:
+    enabled: false
+    schedule: "* * * * *"
+    # Keep within one minor version of the cluster API server.
+    image: alpine/k8s:1.36.5
+    maxReplicas: 5
+    # Usable sandbox CPU per 4 vCPU runner node after system + runner overhead.
+    cpuPerRunner: 3
+    targetUtilization: "0.8"
   env:
     ENVIRONMENT: production
     # OCI runtime for sandbox containers. Empty = Docker default (runc).
@@ -137,8 +171,13 @@ sshGateway:
 
 # --- Secrets ---
 # Same three modes as cogbox-control. Keys are per-REGION (from registration):
-# PROXY_API_KEY, SSH_API_KEY, SNAP_USER, SNAP_PASS, RUNNER_TOKEN,
-# SSH_PRIVATE_KEY, SSH_HOST_KEY, SSH_PUBLIC_KEY (runner pool copy).
+# PROXY_API_KEY, SSH_API_KEY, SNAP_USER, SNAP_PASS, SSH_PRIVATE_KEY,
+# SSH_HOST_KEY, SSH_PUBLIC_KEY (runner pool copy).
+# daemonset/deployment mode also needs RUNNER_TOKEN; statefulset mode instead
+# uses one Secret Manager entry per replica named <release>-runner-token-N
+# (mapped to token-N by the chart's ExternalSecret). With
+# secrets.createFromValues, set RUNNER_TOKEN_0..RUNNER_TOKEN_(N-1), where N =
+# runner.autoscaler.maxReplicas.
 secrets:
   useExternalSecrets: false
   externalSecretsStore: secretstore-gcp
@@ -150,3 +189,5 @@ secrets:
     # SNAP_USER: ...
     # SNAP_PASS: ...
     # RUNNER_TOKEN: ...
+    # RUNNER_TOKEN_0: ...  # statefulset mode, one per replica
+    # RUNNER_TOKEN_1: ...

@@ -29,3 +29,18 @@ cogbox.io/region: {{ .Values.regionName | quote }}
 {{- printf "%s-creds" (include "cogbox-region.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Secret holding one runner API key per StatefulSet ordinal:
+token-0, token-1, ... token-(maxReplicas-1). Each runner replica must have
+its own control-plane Runner record; a shared token makes every pod report
+as the same runner and overwrite its domain/metrics.
+*/}}
+{{- define "cogbox-region.runnerTokensSecretName" -}}
+{{- $existing := dig "tokens" "existingSecret" "" .Values.runner -}}
+{{- if $existing -}}
+{{- $existing -}}
+{{- else -}}
+{{- printf "%s-runner-tokens" (include "cogbox-region.fullname" .) -}}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,164 @@
+{{- $mode := .Values.runner.mode | default "daemonset" -}}
+{{- if .Values.runner.autoscaler.enabled }}
+{{- if ne $mode "statefulset" }}
+{{- fail "runner.autoscaler requires runner.mode=statefulset (one token per ordinal)" }}
+{{- end }}
+{{- $fullname := include "cogbox-region.fullname" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $fullname }}-runner-autoscaler
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: runner-autoscaler
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $fullname }}-runner-autoscaler
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: runner-autoscaler
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets/scale"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $fullname }}-runner-autoscaler
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: runner-autoscaler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $fullname }}-runner-autoscaler
+subjects:
+  - kind: ServiceAccount
+    name: {{ $fullname }}-runner-autoscaler
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $fullname }}-runner-autoscaler
+  labels:
+    {{- include "cogbox-region.labels" . | nindent 4 }}
+    app.kubernetes.io/component: runner-autoscaler
+spec:
+  schedule: {{ .Values.runner.autoscaler.schedule | quote }}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 30
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            {{- include "cogbox-region.labels" . | nindent 12 }}
+            app.kubernetes.io/component: runner-autoscaler
+        spec:
+          serviceAccountName: {{ $fullname }}-runner-autoscaler
+          restartPolicy: OnFailure
+          containers:
+            - name: autoscaler
+              image: {{ .Values.runner.autoscaler.image | quote }}
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: NAMESPACE
+                  valueFrom:
+                    fieldRef: { fieldPath: metadata.namespace }
+                - name: TARGET
+                  value: {{ printf "%s-runner" $fullname | quote }}
+                - name: TARGET_KIND
+                  value: statefulset
+                - name: RELEASE
+                  value: {{ .Release.Name | quote }}
+                - name: API_PORT
+                  value: {{ .Values.runner.apiPort | quote }}
+                - name: TOKEN_DIR
+                  value: /tokens
+                - name: MAX_REPLICAS
+                  value: {{ .Values.runner.autoscaler.maxReplicas | quote }}
+                - name: CPU_PER_RUNNER
+                  value: {{ .Values.runner.autoscaler.cpuPerRunner | quote }}
+                - name: TARGET_UTILIZATION
+                  value: {{ .Values.runner.autoscaler.targetUtilization | quote }}
+              volumeMounts:
+                - name: runner-tokens
+                  mountPath: /tokens
+                  readOnly: true
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  current="$(kubectl -n "$NAMESPACE" get "$TARGET_KIND" "$TARGET" -o jsonpath='{.spec.replicas}')"
+                  [ -n "$current" ] || exit 0
+                  # Never wake a parked pool: autoscaling only grows an already
+                  # running workload. Scale-down is a deliberate drain.
+                  [ "$current" -gt 0 ] || exit 0
+                  [ "$current" -lt "$MAX_REPLICAS" ] || exit 0
+
+                  pods="$(kubectl -n "$NAMESPACE" get pods \
+                    -l "app.kubernetes.io/instance=$RELEASE,app.kubernetes.io/component=runner" \
+                    --field-selector=status.phase=Running \
+                    -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}')"
+                  total="0"
+                  ok=0
+                  while read -r pod ip; do
+                    [ -n "$pod" ] || continue
+                    [ -n "$ip" ] || continue
+                    ordinal="${pod##*-}"
+                    token_file="$TOKEN_DIR/token-$ordinal"
+                    if [ ! -f "$token_file" ]; then
+                      echo "WARN: missing $token_file for pod $pod" >&2
+                      continue
+                    fi
+                    token="$(cat "$token_file")"
+                    if body="$(curl -fsS --max-time 3 -H "Authorization: Bearer $token" \
+                        "http://$ip:$API_PORT/info")"; then
+                      if alloc="$(printf '%s' "$body" | jq -er '.metrics.currentAllocatedCpu // 0')"; then
+                        total="$(awk -v a="$total" -v b="$alloc" 'BEGIN { print a + b }')"
+                        ok=$((ok + 1))
+                      else
+                        echo "WARN: invalid /info response from pod $pod ($ip)" >&2
+                      fi
+                    else
+                      echo "WARN: /info failed for pod $pod ($ip)" >&2
+                    fi
+                  done <<EOF
+                  $pods
+                  EOF
+
+                  if [ "$ok" -eq 0 ]; then
+                    echo "ERROR: no runner /info endpoint responded" >&2
+                    exit 1
+                  fi
+
+                  threshold="$(awk -v c="$current" -v cpu="$CPU_PER_RUNNER" -v t="$TARGET_UTILIZATION" \
+                    'BEGIN { printf "%.2f", c * cpu * t }')"
+                  if awk -v total="$total" -v threshold="$threshold" \
+                    'BEGIN { exit !(total >= threshold) }'; then
+                    echo "allocated=$total threshold=$threshold current=$current: scaling up"
+                    kubectl -n "$NAMESPACE" scale "$TARGET_KIND" "$TARGET" --replicas="$((current + 1))"
+                  else
+                    echo "allocated=$total threshold=$threshold current=$current: no change"
+                  fi
+              resources:
+                requests: { cpu: 10m, memory: 32Mi }
+                limits: { cpu: 200m, memory: 128Mi }
+          volumes:
+            - name: runner-tokens
+              secret:
+                secretName: {{ include "cogbox-region.runnerTokensSecretName" . }}
+{{- end }}

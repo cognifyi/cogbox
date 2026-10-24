@@ -4,11 +4,12 @@
 deploy/
   gcp/
     README.md                 this runbook
-    scripts/                  runnable steps (lib.sh + 00/10/20/30/31/40)
+    scripts/                  runnable steps (lib.sh + 00/10/20/25/30/31/40)
       00-project.sh           select project + enable APIs
-      10-cluster-create.sh    Standard zonal cluster, Spot pool, autoscale 0-5, 40G pd-standard boot disks
+      10-cluster-create.sh    Standard zonal cluster, two Spot pools (app + runner), 40G pd-standard boot disks
       20-get-credentials.sh   kubeconfig for kubectl/helm
-      30-park.sh / 31-wake.sh scale pool to 0 / back to 1
+      25-runner-tokens.sh     one control-plane runner token per replica (statefulset mode)
+      30-park.sh / 31-wake.sh scale both pools to 0 / back to 1
       40-dns.sh               Cloudflare A records (DNS-only) for cogbox + wildcards
     values-control-pazity.yaml  control overlay (fill REPLACE_ME: Cloud SQL, Memorystore, GCS, registry)
     values-region-pazity.yaml   shared-region overlay (proxy hosts, 30Gi standard storage)
@@ -19,27 +20,55 @@ deploy/
 ```bash
 gcloud auth login
 gcloud config set project PROJECT_ID
-gcloud services enable container.googleapis.com compute.googleapis.com
+gcloud services enable container.googleapis.com compute.googleapis.com \
+  iam.googleapis.com secretmanager.googleapis.com \
+  artifactregistry.googleapis.com
 ```
 
 Needed IAM on the operator: **Kubernetes Engine Admin** + **Compute Admin**
-(+ **Service Account User** if cluster uses a custom service account).
+(+ **Service Account User** if cluster uses a custom service account, and
+**Secret Manager Admin** to create runner/vendor secrets).
 
-## 1. Create the Standard cluster (single Spot pool, autoscale 0–5)
+## 1. Create the Standard cluster (two Spot pools)
 
 Runnable: `scripts/10-cluster-create.sh` (after `scripts/00-project.sh`).
-Equivalent manual command (boot disks 40G pd-standard — system disk only;
+It creates an **app pool** (GKE's `default-pool`, labeled
+`cogbox.io/pool=standard`, autoscale 1–2) and a **runner pool**
+(`runner-pool`, labeled `cogbox.io/pool=runner`, tainted
+`cogbox.io/runner=NoSchedule`, autoscale 0–5). Both use Spot VMs. It also
+creates a Cloud Router/NAT for private-node egress (image pulls, external
+APIs). The script is idempotent: an existing cluster is kept and a missing
+runner pool or NAT is added.
+
+Equivalent manual commands (boot disks 40G pd-standard — system disk only;
 app storage is claimed later at service init, section 3):
 
 ```bash
 gcloud container clusters create cogbox-prod \
   --zone us-west4-b \
-  --machine-type e2-standard-2 \
+  --machine-type e2-standard-4 \
   --spot \
+  --node-labels cogbox.io/region=shared,cogbox.io/pool=standard \
+  --num-nodes 1 \
+  --enable-autoscaling --min-nodes 1 --max-nodes 2 \
+  --disk-size 40 --disk-type pd-standard \
+  --quiet
+
+gcloud container node-pools create runner-pool \
+  --cluster cogbox-prod --zone us-west4-b \
+  --machine-type e2-standard-4 \
+  --spot \
+  --node-labels cogbox.io/region=shared,cogbox.io/pool=runner \
+  --node-taints cogbox.io/runner=NoSchedule:NoSchedule \
   --num-nodes 1 \
   --enable-autoscaling --min-nodes 0 --max-nodes 5 \
   --disk-size 40 --disk-type pd-standard \
   --quiet
+
+# Private nodes need NAT for Docker Hub / other non-Google egress.
+gcloud compute routers create cogbox-router --network default --region us-west4
+gcloud compute routers nats create cogbox-nat --router cogbox-router \
+  --region us-west4 --auto-allocate-nat-external-ips --nat-all-subnet-ip-ranges
 
 gcloud container clusters get-credentials cogbox-prod --zone us-west4-b
 ```
@@ -47,24 +76,42 @@ gcloud container clusters get-credentials cogbox-prod --zone us-west4-b
 Notes:
 
 - `--spot` = Spot VMs (up to ~60-90% cheaper; 30s preemption notice, max 24h
-  lifetime). Fine for a test pool and for runner pools; production splits a
-  small regular system pool + Spot runner pools.
-- `--min-nodes 0` lets the autoscaler drain to (near) zero when idle. Nodes
-  hosting kube-system pods may linger — see parking below for true zero.
-- Boot disks are 100G `pd-standard` (cheapest disk type).
+  lifetime). Both pools are Spot; the taint keeps application pods off the
+  runner pool, so a runner preemption cannot take the API down with it.
+- `e2-standard-4` gives 4 vCPU / 16 GiB per node. A runner reserves
+  `1c/2Gi`, leaving room for roughly three 1c/1Gi sandboxes per runner node.
+  Use `APP_MACHINE` / `RUNNER_MACHINE` to override.
+- Node labels are set at pool creation (`--node-labels`), not by hand, so
+  autoscaler-created nodes inherit them. The region overlay selects
+  `cogbox.io/pool=runner` for the runner workload.
+- `--min-nodes 1` keeps the control plane available; the runner pool can
+  drain to 0. Nodes hosting kube-system pods may linger — see parking below
+  for true zero.
 
 ## 2. Park to zero when idle / wake on demand
 
-Runnable: `scripts/30-park.sh` / `scripts/31-wake.sh`. Manual equivalents:
+Runnable: `scripts/30-park.sh` / `scripts/31-wake.sh`. The scripts scale
+workloads first, then set both pools to max 0 and resize to 0. Wake restores
+app 1–2 / runner 0–5 and brings one node of each pool up. Manual equivalents:
 
 ```bash
-# Park: everything to 0 (system pods go Pending; harmless while idle)
-gcloud container clusters resize cogbox-prod \
-  --node-pool default-pool --num-nodes 0 --zone us-west4-b --quiet
+# Park: both pools to 0 (system pods go Pending; harmless while idle)
+for pool in default-pool runner-pool; do
+  gcloud container node-pools update "$pool" --cluster cogbox-prod \
+    --zone us-west4-b --enable-autoscaling --min-nodes 0 --max-nodes 0 --quiet
+  gcloud container clusters resize cogbox-prod \
+    --node-pool "$pool" --num-nodes 0 --zone us-west4-b --quiet
+done
 
-# Wake: back to 1, autoscaler takes it from there (1–5)
+# Wake: app 1-2, runner 0-5; bring one node of each pool up
+gcloud container node-pools update default-pool --cluster cogbox-prod \
+  --zone us-west4-b --enable-autoscaling --min-nodes 1 --max-nodes 2 --quiet
+gcloud container node-pools update runner-pool --cluster cogbox-prod \
+  --zone us-west4-b --enable-autoscaling --min-nodes 0 --max-nodes 5 --quiet
 gcloud container clusters resize cogbox-prod \
   --node-pool default-pool --num-nodes 1 --zone us-west4-b --quiet
+gcloud container clusters resize cogbox-prod \
+  --node-pool runner-pool --num-nodes 1 --zone us-west4-b --quiet
 ```
 
 ## 3. Persistent storage (claimed at service init, not cluster init)
@@ -169,54 +216,108 @@ Notes:
   from `docker-compose`, docs, and default values; nothing reports to
   Daytona anymore.
 
-## 6. Known gaps (not yet implemented)
+## 6. Known gaps and operational notes
 
 ### 6.1 Runner sandbox persistence ("No such container" on start)
 
-Symptom: after a runner pod restarts, the sandboxes it hosts can no longer
-be started — `STOP`/`START` jobs fail with `cannot kill container ... No
-such container`. The control plane still tracks the sandbox, so it surfaces
-as `error` instead of being recreated.
+Symptom (before this change): after a runner pod restarted, the sandboxes it
+hosted could no longer be started — `STOP`/`START` jobs failed with `cannot
+kill container ... No such container`. The control plane still tracked the
+sandbox, so it surfaced as `error` instead of being recreated.
 
 Cause: sandbox containers live in the runner's Docker data root
-(`/var/lib/docker`), and nothing persists it:
+(`/var/lib/docker`), and nothing persisted it. The region chart defaulted to
+host-Docker mode (`runner.hostPaths.dockerSock.enabled: true`), but the
+`runtime-installer` init container is a placeholder and GKE's default
+Container-Optimized OS (`cos_containerd`) has no package manager or `dockerd`.
 
-- The region chart (`values-region-pazity.yaml` -> `runner-daemonset.yaml`)
-  defaults to host-Docker mode (`runner.hostPaths.dockerSock.enabled: true`),
-  but the `runtime-installer` init container runs `install-runtime.sh`, which
-  is currently a **placeholder stub** — no Docker is installed on the nodes.
-- GKE nodes use the default **Container-Optimized OS (`cos_containerd`)**,
-  which has no package manager and no `dockerd`; GKE ships no Debian image.
-  The upstream (Daytona) installer is apt/yum-based and therefore **cannot
-  run on COS**.
-- The only runner that runs today is the TEST `manifests/runner-shared.yaml`
-  (internal dind, `emptyDir` for `/var/lib/cogbox`, no `/var/lib/docker`) —
-  same bug on pod restart.
+GCP production now uses **Path B** in `values-region-pazity.yaml`:
 
-Dev/k3s fix (implemented in this branch): the region chart now supports
-`runner.hostPaths.varLibDocker`, a node-local `hostPath` mounted at
-`/var/lib/docker`, enabled in `deploy/dev/k3s/values-region-dev.yaml`. It
-makes sandbox containers survive runner **pod** restarts/rollouts. It is
-node-local: it does **not** survive **node** replacement (Spot preemption,
-park/wake resize, autoscaler scale-in).
+```yaml
+runner:
+  hostPaths:
+    dockerSock:
+      enabled: false
+    varLibDocker:
+      enabled: true
+```
 
-Options for cloud (deferred):
+The runner image already starts its own `dockerd`; the chart skips the
+runtime-installer init container when the host socket is disabled, and mounts
+a node-local `hostPath` at `/var/lib/docker`. Sandbox containers therefore
+survive a runner **container/pod restart on the same node** (for example, a
+pod deleted and recreated while the node keeps its `hostPath`). It is
+node-local: it does **not** survive a rollout/reschedule to another node, a
+node drain, or node replacement (Spot preemption, park/wake resize,
+autoscaler scale-in). Surviving node loss needs object-storage backups plus a
+control-plane restore path (application code, out of scope here).
 
-- **Path A (upstream/Daytona model).** Give runners a dedicated
-  `UBUNTU_CONTAINERD` Spot node pool (GKE's only apt-based image — see the
-  pool-split note in §1) and implement `install-runtime.sh` for real: install
-  Docker, create a host-local XFS loopback for `/var/lib/docker` with project
-  quotas (`prjquota`), write `{"icc": false, "live-restore": true}`, and
-  refuse migration when `/var/lib/docker/containers` is non-empty. The XFS
-  file must fit the 40G boot disk. Enables Sysbox isolation later.
-- **Path B (quick, stays on COS).** Set `dockerSock.enabled: false` and
-  `varLibDocker.enabled: true` in the GCP region overlay — same as k3s. No
-  installer, no XFS, no Sysbox; per-sandbox disk quota is not enforced.
+The StatefulSet uses `updateStrategy: OnDelete`, so an image upgrade does not
+silently move a busy runner to another node. Drain/stop sandboxes, delete the
+runner pod, then let it be recreated.
 
-Either way, surviving **node** loss additionally needs object-storage backups
-plus a control-plane restore path (application code, out of scope here).
+Path A (host Docker on an Ubuntu node pool, XFS project quotas, Sysbox) is
+still the option for per-sandbox disk quota and stronger isolation; it
+requires a real `install-runtime.sh` and a non-COS node image.
 
-### 6.2 Object storage (GCS) not usable yet
+### 6.2 Runner capacity autoscaling
+
+The region overlay sets `runner.mode: statefulset` and
+`runner.autoscaler.enabled: true` (max 5 replicas). StatefulSet pods have
+stable ordinals and each ordinal gets its **own** control-plane Runner:
+
+- `token-0..token-4` live in the `<release>-runner-tokens` Secret.
+- Pod ordinal N reads `token-N` via the `token-selector` init container.
+- The control plane keys a Runner by API key, so replicas must never share a
+  token: they would overwrite the same `domain`/`apiUrl`/metrics and jobs
+  could run on the wrong node.
+
+Provision the tokens after the control plane is up and the shared region is
+registered, before installing the region chart:
+
+```bash
+PROJECT=<gcp-project> \
+REGION_ID=<shared-region-uuid> \
+ADMIN_API_KEY=<system-admin-api-key> \
+./scripts/25-runner-tokens.sh
+```
+
+The script calls `POST /api/admin/runners` once per replica (`runner-0..4`),
+stores the returned key in Secret Manager as
+`<release>-runner-token-N`, and is safe to re-run (existing secrets are
+skipped). `RUNNER_COUNT` must match `runner.autoscaler.maxReplicas` (5).
+The chart's ExternalSecret maps those to `token-0..4`; wait for it to be
+`Ready` before the StatefulSet starts.
+
+The runner StatefulSet uses `hostPort` 3003/2220, so Kubernetes schedules at
+most one runner per node; pending runner pods make Cluster Autoscaler grow
+`runner-pool` (0–5 nodes).
+
+A CronJob (`region-shared-runner-autoscaler`, every minute) queries each
+runner's **authenticated** `/info` endpoint (`Authorization: Bearer token-N`),
+sums `currentAllocatedCpu`, and scales the StatefulSet up by one when
+allocated CPU reaches `currentReplicas * cpuPerRunner * targetUtilization`
+(default `3 * 0.8`). The CronJob mounts the token Secret, so it needs no
+control-plane admin key and no `secrets` RBAC. The `alpine/k8s` image ships
+kubectl/curl/jq; keep its minor version within one of the cluster API server.
+It never scales from zero (park stays parked) and never scales down: deleting
+a runner pod can kill a runner that is hosting sandboxes. To shrink,
+drain/stop sandboxes first, then
+`kubectl scale statefulset region-shared-runner --replicas=N` (or use
+`30-park.sh`).
+
+When `runner.autoscaler.enabled=true`, the chart omits `spec.replicas` so a
+`helm upgrade` does not reset the count owned by the autoscaler/park scripts;
+the StatefulSet defaults to 1 on first install. `30-park.sh` suspends the
+CronJob and scales to 0; `31-wake.sh` scales back to 1 and resumes it.
+
+Token rotation: create a new Runner with a new token, update the
+`<release>-runner-token-N` secret, delete the pod (it re-registers with the
+new key), then delete the old Runner record. Switching an existing release
+from `deployment` to `statefulset` requires deleting the old Deployment first
+(the resource kind cannot be changed in place).
+
+### 6.3 Object storage (GCS) not usable yet
 
 - The prod overlays still carry placeholders: `values-control-pazity.yaml`
   (`s3.defaultBucket: REPLACE_ME_GCS_BUCKET`, `registry.*:
@@ -228,10 +329,20 @@ plus a control-plane restore path (application code, out of scope here).
   checksum header are rejected by GCS with `InvalidArgument`, so the API
   fails at boot in `VolumeManager.testConnection()` (see the note in
   `manifests/infra.yaml`). Fixing this is a **code** change (SDK checksum
-  config / middleware), not chart-only.
+  config / middleware), not chart-only. Tracked separately in the
+  `fix/gcs-s3-compat` branch; this deploy branch keeps the placeholders until
+  it lands.
 - rustfs cannot front GCS: it has no GCS backend (its gateway/tier features
   are tiering + site replication, and it stores to its own disks), so it is a
   self-hosted object store, not a GCS proxy.
 - In TEST, rustfs backs runner volumes (`manifests/runner-shared.yaml`) but
   its data is `emptyDir` -> ephemeral. Deploy-only mitigation: give rustfs a
   `standard` PVC (RWO) instead of `emptyDir`.
+
+**Decision:** this is a blocker only if the control/region overlays keep
+pointing at `https://storage.googleapis.com`. With the current
+`values-control-pazity.yaml` / `values-region-pazity.yaml`, yes — the API
+will fail at boot in `VolumeManager.testConnection()`, so GCS must be fixed
+before install. If production instead uses in-cluster rustfs (or another
+S3-compatible endpoint) and the overlays are changed accordingly, no GCS code
+change is required for this deployment.
