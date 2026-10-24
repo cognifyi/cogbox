@@ -48,4 +48,10 @@ export class StorageAccessDto {
     example: false,
   })
   disableXId?: boolean
+
+  @ApiPropertyOptional({
+    description: 'Whether the S3 client should only calculate checksums when an operation requires them',
+    example: false,
+  })
+  disableChecksums?: boolean
 }

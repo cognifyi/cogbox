@@ -327,11 +327,18 @@ from `deployment` to `statefulset` requires deleting the old Deployment first
   `s3.disableXId: true` (mapped to `S3_DISABLE_X_ID`) strips it; AWS S3 keeps
   the default (`false`). The GCP control overlays enable it, and the API
   returns the flag to the TypeScript/Go SDKs via the push-access response.
-- Remaining GCS gaps: the checksum header may still need separate handling,
-  and push-access credentials still use AWS STS `AssumeRole`, which GCS does
-  not implement. The API's own S3 client uses static HMAC keys, so x-id no
-  longer blocks `VolumeManager.testConnection()`, but SDK snapshot uploads
-  through push access need a different credential path.
+- GCS rejects the SDK-default request checksums. `s3.disableChecksums: true`
+  (mapped to `S3_DISABLE_CHECKSUMS`) sets both SDKs to `WHEN_REQUIRED`, and
+  runner `mount-s3` adds `--upload-checksums off` for `storage.googleapis.com`.
+- GCS has no AWS STS `AssumeRole` API. `s3.credentialMode: static`
+  (`S3_CREDENTIAL_MODE`) makes the API return the configured HMAC keys
+  directly to SDK push-access clients; the GCP overlays enable it. This is a
+  deliberate trade-off: GCS HMAC keys are long-lived, so treat them as a
+  high-value secret and scope them to the bucket. AWS/MinIO/RustFS keep
+  `credentialMode: sts` and short-lived credentials.
+- Bucket tags are written with lowercase keys/values because GCS maps the S3
+  `?tagging` API to bucket labels, whose keys must start with a lowercase
+  letter and contain only lowercase letters, digits, underscores, and dashes.
 - rustfs cannot front GCS: it has no GCS backend (its gateway/tier features
   are tiering + site replication, and it stores to its own disks), so it is a
   self-hosted object store, not a GCS proxy.
@@ -339,8 +346,8 @@ from `deployment` to `statefulset` requires deleting the old Deployment first
   its data is `emptyDir` -> ephemeral. Deploy-only mitigation: give rustfs a
   `standard` PVC (RWO) instead of `emptyDir`.
 
-**Decision:** x-id is fixed, but GCS is not fully usable for SDK push access
-until credential issuance (and any checksum differences) are addressed. If
-production instead uses in-cluster rustfs (or another S3-compatible endpoint)
-and the overlays are changed accordingly, no GCS code change is required for
-this deployment.
+**Decision:** GCS is now wired for volume operations and SDK push access via
+static HMAC credentials plus checksum/x-id compatibility flags. AWS and
+RustFS continue to use STS. If production instead uses in-cluster rustfs (or
+another S3-compatible endpoint), set `credentialMode: sts` and leave the GCS
+compatibility flags off.

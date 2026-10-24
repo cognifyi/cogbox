@@ -113,6 +113,21 @@ describe('ObjectStorage', () => {
     })
   })
 
+  it('omits the session token when static credentials do not have one', async () => {
+    const { ObjectStorage } = await import('../ObjectStorage')
+    const storage = new ObjectStorage({
+      endpointUrl: 'https://storage.googleapis.com',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+    })
+
+    const client = storage as unknown as { s3Client: MockS3Client }
+    expect(client.s3Client.config.credentials).toEqual({
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+    })
+  })
+
   it('falls back to the default region when the endpoint does not encode one', async () => {
     const storage = await makeStorage('https://storage.example.com')
 
@@ -145,6 +160,22 @@ describe('ObjectStorage', () => {
 
     expect(args.request.query).toEqual({ versionId: 'v1' })
     expect(next).toHaveBeenCalledWith(args)
+  })
+
+  it('only calculates checksums when required when disableChecksums is enabled', async () => {
+    const { ObjectStorage } = await import('../ObjectStorage')
+    const storage = new ObjectStorage({
+      endpointUrl: 'https://storage.googleapis.com',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+      disableChecksums: true,
+    })
+
+    const client = storage as unknown as { s3Client: MockS3Client }
+    expect(client.s3Client.config).toMatchObject({
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
+    })
   })
 
   it('throws when uploading a missing path', async () => {

@@ -63,6 +63,12 @@ export class VolumeManager
         secretAccessKey,
       },
       forcePathStyle: true,
+      ...(this.configService.get('s3.disableChecksums')
+        ? {
+            requestChecksumCalculation: 'WHEN_REQUIRED' as const,
+            responseChecksumValidation: 'WHEN_REQUIRED' as const,
+          }
+        : {}),
     })
 
     if (this.configService.get('s3.disableXId')) {
@@ -210,16 +216,16 @@ export class VolumeManager
           Tagging: {
             TagSet: [
               {
-                Key: 'VolumeId',
-                Value: volume.id,
+                Key: 'volume-id',
+                Value: volume.id.toLowerCase(),
               },
               {
-                Key: 'OrganizationId',
-                Value: volume.organizationId,
+                Key: 'organization-id',
+                Value: volume.organizationId.toLowerCase(),
               },
               {
-                Key: 'Environment',
-                Value: this.configService.get('environment'),
+                Key: 'environment',
+                Value: (this.configService.get('environment') || 'production').toLowerCase(),
               },
             ],
           },

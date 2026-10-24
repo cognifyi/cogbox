@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -194,12 +195,13 @@ func TestStatPathExistent(t *testing.T) {
 
 func TestPushAccessCredentialsStruct(t *testing.T) {
 	creds := PushAccessCredentials{
-		StorageURL:     "https://s3.us-east-1.amazonaws.com",
-		AccessKey:      "AKID",
-		Secret:         "SECRET",
-		SessionToken:   "TOKEN",
-		Bucket:         "my-bucket",
-		OrganizationID: "org-1",
+		StorageURL:       "https://s3.us-east-1.amazonaws.com",
+		AccessKey:        "AKID",
+		Secret:           "SECRET",
+		SessionToken:     "TOKEN",
+		Bucket:           "my-bucket",
+		OrganizationID:   "org-1",
+		DisableChecksums: true,
 	}
 
 	assert.Equal(t, "https://s3.us-east-1.amazonaws.com", creds.StorageURL)
@@ -208,6 +210,21 @@ func TestPushAccessCredentialsStruct(t *testing.T) {
 	assert.Equal(t, "TOKEN", creds.SessionToken)
 	assert.Equal(t, "my-bucket", creds.Bucket)
 	assert.Equal(t, "org-1", creds.OrganizationID)
+	assert.True(t, creds.DisableChecksums)
+}
+
+func TestObjectStorageDisableChecksums(t *testing.T) {
+	objStorage := NewObjectStorage(objectStorageConfig{
+		EndpointURL:      "https://storage.googleapis.com",
+		AccessKeyID:      "AKID",
+		SecretAccessKey:  "SECRET",
+		BucketName:       "my-bucket",
+		DisableChecksums: true,
+	})
+
+	options := objStorage.client.Options()
+	assert.Equal(t, aws.RequestChecksumCalculationWhenRequired, options.RequestChecksumCalculation)
+	assert.Equal(t, aws.ResponseChecksumValidationWhenRequired, options.ResponseChecksumValidation)
 }
 
 func TestObjectStorageUploadValidations(t *testing.T) {

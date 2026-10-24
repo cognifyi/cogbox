@@ -149,10 +149,10 @@ spec:
   selector: { app: registry }
 ---
 # S3-compatible object storage for TEST. NOTE: GCS XML interop rejects the
-# AWS SDK v3 synthetic `x-id` query parameter. Production GCS overlays set
-# `s3.disableXId: true` (`S3_DISABLE_X_ID`) to strip it. GCS still needs a
-# non-STS credential path for SDK push access. Production S3 = real S3 API,
-# GCS with those caveats, or rustfs/Harbor.
+# AWS SDK v3 synthetic `x-id` query parameter and default checksum metadata.
+# Production GCS overlays set `s3.disableXId` and `s3.disableChecksums`, and
+# use `s3.credentialMode: static` because GCS has no AWS STS AssumeRole API.
+# Production S3 = real S3 API, GCS with those settings, or rustfs/Harbor.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

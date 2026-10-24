@@ -19,16 +19,19 @@ interface S3Config {
   secretKey: string
   bucket: string
   region: string
-  accountId?: string
-  roleName?: string
+  accountId: string
+  roleName: string
   organizationId: string
   policy: any
+  credentialMode: 'sts' | 'static'
   disableXId: boolean
+  disableChecksums: boolean
 }
 
 @Injectable()
 export class ObjectStorageService {
   private readonly logger = new Logger(ObjectStorageService.name)
+  private staticCredentialWarningLogged = false
 
   constructor(private readonly configService: TypedConfigService) {}
 
@@ -39,17 +42,21 @@ export class ObjectStorageService {
 
     try {
       const bucket = this.configService.getOrThrow('s3.defaultBucket')
+      const credentialMode = this.configService.get('s3.credentialMode') ?? 'sts'
+      const endpoint = this.configService.getOrThrow('s3.endpoint')
       const s3Config: S3Config = {
-        endpoint: this.configService.getOrThrow('s3.endpoint'),
-        stsEndpoint: this.configService.getOrThrow('s3.stsEndpoint'),
+        endpoint,
+        stsEndpoint: this.configService.get('s3.stsEndpoint') ?? endpoint,
         accessKey: this.configService.getOrThrow('s3.accessKey'),
         secretKey: this.configService.getOrThrow('s3.secretKey'),
         bucket,
         region: this.configService.getOrThrow('s3.region'),
-        accountId: this.configService.getOrThrow('s3.accountId'),
-        roleName: this.configService.getOrThrow('s3.roleName'),
+        accountId: this.configService.get('s3.accountId') ?? '',
+        roleName: this.configService.get('s3.roleName') ?? '',
         organizationId,
-        disableXId: this.configService.get('s3.disableXId'),
+        credentialMode,
+        disableXId: this.configService.get('s3.disableXId') ?? false,
+        disableChecksums: this.configService.get('s3.disableChecksums') ?? false,
         policy: {
           Version: '2012-10-17',
           Statement: [
@@ -76,7 +83,15 @@ export class ObjectStorageService {
         },
       }
 
-      const isMinioServer = s3Config.endpoint.includes('minio')
+      if (s3Config.credentialMode === 'static') {
+        return this.getStaticCredentials(s3Config)
+      }
+
+      s3Config.stsEndpoint = this.configService.getOrThrow('s3.stsEndpoint')
+      s3Config.accountId = this.configService.getOrThrow('s3.accountId')
+      s3Config.roleName = this.configService.getOrThrow('s3.roleName')
+
+      const isMinioServer = s3Config.endpoint.toLowerCase().includes('minio')
 
       if (isMinioServer) {
         return this.getMinioCredentials(s3Config)
@@ -86,6 +101,27 @@ export class ObjectStorageService {
     } catch (error) {
       this.logger.error('Storage push access error:', error.response?.data || error.message)
       throw new BadRequestException(`Failed to get temporary credentials: ${error.message}`)
+    }
+  }
+
+  private getStaticCredentials(config: S3Config): StorageAccessDto {
+    if (!this.staticCredentialWarningLogged) {
+      this.logger.warn(
+        'S3_CREDENTIAL_MODE=static: returning long-lived object storage credentials to SDK clients. ' +
+          'Use only for providers without an AWS STS-compatible AssumeRole API (e.g. GCS).',
+      )
+      this.staticCredentialWarningLogged = true
+    }
+
+    return {
+      accessKey: config.accessKey,
+      secret: config.secretKey,
+      sessionToken: '',
+      storageUrl: config.endpoint,
+      organizationId: config.organizationId,
+      bucket: config.bucket,
+      disableXId: config.disableXId,
+      disableChecksums: config.disableChecksums,
     }
   }
 
@@ -134,6 +170,7 @@ export class ObjectStorageService {
       organizationId: config.organizationId,
       bucket: config.bucket,
       disableXId: config.disableXId,
+      disableChecksums: config.disableChecksums,
     }
   }
 
@@ -171,6 +208,7 @@ export class ObjectStorageService {
           organizationId: config.organizationId,
           bucket: config.bucket,
           disableXId: config.disableXId,
+          disableChecksums: config.disableChecksums,
         }
       } catch (error: any) {
         throw new BadRequestException(`Failed to assume role: ${error.message || 'Unknown AWS error'}`)

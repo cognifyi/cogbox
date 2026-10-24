@@ -895,17 +895,16 @@ func (c *Client) getPushAccessCredentials(ctx context.Context) (*PushAccessCrede
 		return nil, c.handleAPIError(err, httpResp)
 	}
 
-	disableXId, _ := creds.AdditionalProperties["disableXId"].(bool)
-
 	// Map API response to internal structure
 	result := &PushAccessCredentials{
-		StorageURL:     creds.GetStorageUrl(),
-		AccessKey:      creds.GetAccessKey(),
-		Secret:         creds.GetSecret(),
-		SessionToken:   creds.GetSessionToken(),
-		Bucket:         creds.GetBucket(),
-		OrganizationID: creds.GetOrganizationId(),
-		DisableXId:     disableXId,
+		StorageURL:       creds.GetStorageUrl(),
+		AccessKey:        creds.GetAccessKey(),
+		Secret:           creds.GetSecret(),
+		SessionToken:     creds.GetSessionToken(),
+		Bucket:           creds.GetBucket(),
+		OrganizationID:   creds.GetOrganizationId(),
+		DisableXId:       creds.GetDisableXId(),
+		DisableChecksums: creds.GetDisableChecksums(),
 	}
 
 	return result, nil
@@ -926,12 +925,13 @@ func (c *Client) processImageContext(ctx context.Context, image *DockerImage) ([
 
 	// Create object storage client
 	objStorage := NewObjectStorage(objectStorageConfig{
-		EndpointURL:     creds.StorageURL,
-		AccessKeyID:     creds.AccessKey,
-		SecretAccessKey: creds.Secret,
-		SessionToken:    &creds.SessionToken,
-		BucketName:      creds.Bucket,
-		DisableXId:      creds.DisableXId,
+		EndpointURL:      creds.StorageURL,
+		AccessKeyID:      creds.AccessKey,
+		SecretAccessKey:  creds.Secret,
+		SessionToken:     &creds.SessionToken,
+		BucketName:       creds.Bucket,
+		DisableXId:       creds.DisableXId,
+		DisableChecksums: creds.DisableChecksums,
 	})
 
 	// Upload each context

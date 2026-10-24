@@ -26,12 +26,13 @@ import (
 
 // objectStorageConfig holds configuration for S3-compatible object storage.
 type objectStorageConfig struct {
-	EndpointURL     string
-	AccessKeyID     string
-	SecretAccessKey string
-	SessionToken    *string
-	BucketName      string
-	DisableXId      bool
+	EndpointURL      string
+	AccessKeyID      string
+	SecretAccessKey  string
+	SessionToken     *string
+	BucketName       string
+	DisableXId       bool
+	DisableChecksums bool
 }
 
 // objectStorage handles S3-compatible object storage operations for uploading
@@ -120,13 +121,18 @@ func NewObjectStorage(config objectStorageConfig) *objectStorage {
 	}
 
 	// Create S3 client
-	client := s3.New(s3.Options{
+	options := s3.Options{
 		Region:       region,
 		Credentials:  creds,
 		BaseEndpoint: aws.String(config.EndpointURL),
 		UsePathStyle: true,
 		APIOptions:   apiOptions,
-	})
+	}
+	if config.DisableChecksums {
+		options.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+		options.ResponseChecksumValidation = aws.ResponseChecksumValidationWhenRequired
+	}
+	client := s3.New(options)
 
 	return &objectStorage{
 		client:     client,
@@ -379,11 +385,12 @@ func (objStorage *objectStorage) uploadAsTar(ctx context.Context, s3Key, sourceP
 // These credentials are obtained from the API and used for uploading build contexts
 // when creating snapshots with custom [DockerImage] definitions.
 type PushAccessCredentials struct {
-	StorageURL     string `json:"storageUrl"`
-	AccessKey      string `json:"accessKey"`
-	Secret         string `json:"secret"`
-	SessionToken   string `json:"sessionToken"`
-	Bucket         string `json:"bucket"`
-	OrganizationID string `json:"organizationId"`
-	DisableXId     bool   `json:"disableXId"`
+	StorageURL       string `json:"storageUrl"`
+	AccessKey        string `json:"accessKey"`
+	Secret           string `json:"secret"`
+	SessionToken     string `json:"sessionToken"`
+	Bucket           string `json:"bucket"`
+	OrganizationID   string `json:"organizationId"`
+	DisableXId       bool   `json:"disableXId"`
+	DisableChecksums bool   `json:"disableChecksums"`
 }
