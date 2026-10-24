@@ -23,6 +23,7 @@ interface S3Config {
   roleName?: string
   organizationId: string
   policy: any
+  disableXId: boolean
 }
 
 @Injectable()
@@ -48,6 +49,7 @@ export class ObjectStorageService {
         accountId: this.configService.getOrThrow('s3.accountId'),
         roleName: this.configService.getOrThrow('s3.roleName'),
         organizationId,
+        disableXId: this.configService.get('s3.disableXId'),
         policy: {
           Version: '2012-10-17',
           Statement: [
@@ -131,6 +133,7 @@ export class ObjectStorageService {
       storageUrl: config.endpoint,
       organizationId: config.organizationId,
       bucket: config.bucket,
+      disableXId: config.disableXId,
     }
   }
 
@@ -167,6 +170,7 @@ export class ObjectStorageService {
           storageUrl: config.endpoint,
           organizationId: config.organizationId,
           bucket: config.bucket,
+          disableXId: config.disableXId,
         }
       } catch (error: any) {
         throw new BadRequestException(`Failed to assume role: ${error.message || 'Unknown AWS error'}`)

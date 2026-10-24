@@ -895,6 +895,8 @@ func (c *Client) getPushAccessCredentials(ctx context.Context) (*PushAccessCrede
 		return nil, c.handleAPIError(err, httpResp)
 	}
 
+	disableXId, _ := creds.AdditionalProperties["disableXId"].(bool)
+
 	// Map API response to internal structure
 	result := &PushAccessCredentials{
 		StorageURL:     creds.GetStorageUrl(),
@@ -903,6 +905,7 @@ func (c *Client) getPushAccessCredentials(ctx context.Context) (*PushAccessCrede
 		SessionToken:   creds.GetSessionToken(),
 		Bucket:         creds.GetBucket(),
 		OrganizationID: creds.GetOrganizationId(),
+		DisableXId:     disableXId,
 	}
 
 	return result, nil
@@ -928,6 +931,7 @@ func (c *Client) processImageContext(ctx context.Context, image *DockerImage) ([
 		SecretAccessKey: creds.Secret,
 		SessionToken:    &creds.SessionToken,
 		BucketName:      creds.Bucket,
+		DisableXId:      creds.DisableXId,
 	})
 
 	// Upload each context

@@ -16,6 +16,7 @@ import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { deleteS3Bucket } from '../../common/utils/delete-s3-bucket'
+import { disableS3XId } from '../../common/utils/s3-x-id'
 
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
@@ -63,6 +64,10 @@ export class VolumeManager
       },
       forcePathStyle: true,
     })
+
+    if (this.configService.get('s3.disableXId')) {
+      disableS3XId(this.s3Client)
+    }
   }
 
   async onModuleInit() {

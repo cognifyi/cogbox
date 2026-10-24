@@ -316,6 +316,7 @@ func (s *SnapshotService) processImageContext(ctx context.Context, image *Docker
 		SecretAccessKey: creds.Secret,
 		SessionToken:    &creds.SessionToken,
 		BucketName:      creds.Bucket,
+		DisableXId:      creds.DisableXId,
 	})
 
 	// Upload each context

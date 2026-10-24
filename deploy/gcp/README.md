@@ -317,21 +317,21 @@ new key), then delete the old Runner record. Switching an existing release
 from `deployment` to `statefulset` requires deleting the old Deployment first
 (the resource kind cannot be changed in place).
 
-### 6.3 Object storage (GCS) not usable yet
+### 6.3 Object storage (GCS) status
 
 - The prod overlays still carry placeholders: `values-control-pazity.yaml`
   (`s3.defaultBucket: REPLACE_ME_GCS_BUCKET`, `registry.*:
   REPLACE_ME_ARTIFACT_REGISTRY_*`) and `values-region-pazity.yaml`
   (`AWS_DEFAULT_BUCKET: REPLACE_ME_GCS_REGION_BUCKET`).
-- Even once filled, **GCS XML interop is incompatible with the API's AWS SDK
-  v3 client** (`apps/api/src/sandbox/managers/volume.manager.ts` — a
-  `forcePathStyle` `S3Client`): SDK v3's default `x-id` query parameter and
-  checksum header are rejected by GCS with `InvalidArgument`, so the API
-  fails at boot in `VolumeManager.testConnection()` (see the note in
-  `manifests/infra.yaml`). Fixing this is a **code** change (SDK checksum
-  config / middleware), not chart-only. Tracked separately in the
-  `fix/gcs-s3-compat` branch; this deploy branch keeps the placeholders until
-  it lands.
+- GCS XML interop rejects the AWS SDK v3 synthetic `x-id` query parameter.
+  `s3.disableXId: true` (mapped to `S3_DISABLE_X_ID`) strips it; AWS S3 keeps
+  the default (`false`). The GCP control overlays enable it, and the API
+  returns the flag to the TypeScript/Go SDKs via the push-access response.
+- Remaining GCS gaps: the checksum header may still need separate handling,
+  and push-access credentials still use AWS STS `AssumeRole`, which GCS does
+  not implement. The API's own S3 client uses static HMAC keys, so x-id no
+  longer blocks `VolumeManager.testConnection()`, but SDK snapshot uploads
+  through push access need a different credential path.
 - rustfs cannot front GCS: it has no GCS backend (its gateway/tier features
   are tiering + site replication, and it stores to its own disks), so it is a
   self-hosted object store, not a GCS proxy.
@@ -339,10 +339,8 @@ from `deployment` to `statefulset` requires deleting the old Deployment first
   its data is `emptyDir` -> ephemeral. Deploy-only mitigation: give rustfs a
   `standard` PVC (RWO) instead of `emptyDir`.
 
-**Decision:** this is a blocker only if the control/region overlays keep
-pointing at `https://storage.googleapis.com`. With the current
-`values-control-pazity.yaml` / `values-region-pazity.yaml`, yes — the API
-will fail at boot in `VolumeManager.testConnection()`, so GCS must be fixed
-before install. If production instead uses in-cluster rustfs (or another
-S3-compatible endpoint) and the overlays are changed accordingly, no GCS code
-change is required for this deployment.
+**Decision:** x-id is fixed, but GCS is not fully usable for SDK push access
+until credential issuance (and any checksum differences) are addressed. If
+production instead uses in-cluster rustfs (or another S3-compatible endpoint)
+and the overlays are changed accordingly, no GCS code change is required for
+this deployment.

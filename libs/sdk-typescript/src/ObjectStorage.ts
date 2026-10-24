@@ -11,6 +11,7 @@ import * as pathe from 'pathe'
 import { CogboxNotFoundError } from './errors/CogboxError'
 import { dynamicImport } from './utils/Import'
 import { WithInstrumentation } from './utils/otel.decorator'
+import { disableS3XId } from './utils/s3-x-id'
 
 /**
  * Configuration for the ObjectStorage class.
@@ -21,6 +22,7 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @property {string} secretAccessKey - The secret access key for the object storage service.
  * @property {string} [sessionToken] - The session token for the object storage service. Used for temporary credentials.
  * @property {string} [bucketName] - The name of the bucket to use.
+ * @property {boolean} [disableXId] - Omit the AWS SDK's synthetic `x-id` query parameter.
  */
 export interface ObjectStorageConfig {
   endpointUrl: string
@@ -28,6 +30,7 @@ export interface ObjectStorageConfig {
   secretAccessKey: string
   sessionToken?: string
   bucketName?: string
+  disableXId?: boolean
 }
 
 /**
@@ -52,6 +55,10 @@ export class ObjectStorage {
       },
       forcePathStyle: true,
     })
+
+    if (config.disableXId) {
+      disableS3XId(this.s3Client)
+    }
   }
 
   /**

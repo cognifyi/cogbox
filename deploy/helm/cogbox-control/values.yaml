@@ -75,6 +75,9 @@ s3:
   stsEndpoint: https://storage.googleapis.com
   region: auto
   defaultBucket: cogbox-platform
+  # Omit the AWS SDK's synthetic x-id query parameter. Enable for S3-compatible
+  # services that reject it (e.g. GCS XML interoperability).
+  disableXId: false
 
 dashboard:
   # Served by the API itself (DONT_SERVE_DASHBOARD=false); no separate workload.

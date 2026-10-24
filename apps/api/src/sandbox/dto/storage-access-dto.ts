@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class StorageAccessDto {
   @ApiProperty({
@@ -42,4 +42,10 @@ export class StorageAccessDto {
     example: 'cogbox',
   })
   bucket: string
+
+  @ApiPropertyOptional({
+    description: 'Whether the S3 client should omit the x-id query parameter',
+    example: false,
+  })
+  disableXId?: boolean
 }

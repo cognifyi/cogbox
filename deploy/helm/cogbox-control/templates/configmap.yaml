@@ -37,6 +37,7 @@ data:
   S3_DEFAULT_BUCKET: {{ .Values.s3.defaultBucket | quote }}
   S3_ACCOUNT_ID: /
   S3_ROLE_NAME: /
+  S3_DISABLE_X_ID: {{ .Values.s3.disableXId | default false | quote }}
   DASHBOARD_URL: {{ .Values.dashboard.url | quote }}
   DASHBOARD_BASE_API_URL: {{ .Values.dashboard.baseApiUrl | quote }}
   ENVIRONMENT: production

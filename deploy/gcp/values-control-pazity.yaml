@@ -38,6 +38,8 @@ s3:
   stsEndpoint: https://storage.googleapis.com
   region: auto
   defaultBucket: REPLACE_ME_GCS_BUCKET
+  # GCS XML interoperability rejects the AWS SDK's synthetic x-id query parameter.
+  disableXId: true
 
 dashboard:
   url: https://cogbox.pazity.com/dashboard

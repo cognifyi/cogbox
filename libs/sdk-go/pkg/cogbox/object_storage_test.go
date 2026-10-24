@@ -253,3 +253,23 @@ func TestObjectStorageUploadAsTarInvalidPath(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "Failed to stat path")
 }
+
+func TestWithoutS3XId(t *testing.T) {
+	tests := []struct {
+		name     string
+		rawQuery string
+		expected string
+	}{
+		{name: "empty", rawQuery: "", expected: ""},
+		{name: "only x-id", rawQuery: "x-id=ListBuckets", expected: ""},
+		{name: "preserves other parameters", rawQuery: "x-id=GetObject&versionId=v1", expected: "versionId=v1"},
+		{name: "removes x-id in any position", rawQuery: "versionId=v1&x-id=GetObject&partNumber=2", expected: "versionId=v1&partNumber=2"},
+		{name: "does not remove similar keys", rawQuery: "x-id-extra=value&x-id=PutObject", expected: "x-id-extra=value"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, withoutS3XId(tt.rawQuery))
+		})
+	}
+}
