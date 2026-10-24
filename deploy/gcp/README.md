@@ -317,21 +317,28 @@ new key), then delete the old Runner record. Switching an existing release
 from `deployment` to `statefulset` requires deleting the old Deployment first
 (the resource kind cannot be changed in place).
 
-### 6.3 Object storage (GCS) not usable yet
+### 6.3 Object storage (GCS) status
 
 - The prod overlays still carry placeholders: `values-control-pazity.yaml`
   (`s3.defaultBucket: REPLACE_ME_GCS_BUCKET`, `registry.*:
   REPLACE_ME_ARTIFACT_REGISTRY_*`) and `values-region-pazity.yaml`
   (`AWS_DEFAULT_BUCKET: REPLACE_ME_GCS_REGION_BUCKET`).
-- Even once filled, **GCS XML interop is incompatible with the API's AWS SDK
-  v3 client** (`apps/api/src/sandbox/managers/volume.manager.ts` — a
-  `forcePathStyle` `S3Client`): SDK v3's default `x-id` query parameter and
-  checksum header are rejected by GCS with `InvalidArgument`, so the API
-  fails at boot in `VolumeManager.testConnection()` (see the note in
-  `manifests/infra.yaml`). Fixing this is a **code** change (SDK checksum
-  config / middleware), not chart-only. Tracked separately in the
-  `fix/gcs-s3-compat` branch; this deploy branch keeps the placeholders until
-  it lands.
+- GCS XML interop rejects the AWS SDK v3 synthetic `x-id` query parameter.
+  `s3.disableXId: true` (mapped to `S3_DISABLE_X_ID`) strips it; AWS S3 keeps
+  the default (`false`). The GCP control overlays enable it, and the API
+  returns the flag to the TypeScript/Go SDKs via the push-access response.
+- GCS rejects the SDK-default request checksums. `s3.disableChecksums: true`
+  (mapped to `S3_DISABLE_CHECKSUMS`) sets both SDKs to `WHEN_REQUIRED`, and
+  runner `mount-s3` adds `--upload-checksums off` for `storage.googleapis.com`.
+- GCS has no AWS STS `AssumeRole` API. `s3.credentialMode: static`
+  (`S3_CREDENTIAL_MODE`) makes the API return the configured HMAC keys
+  directly to SDK push-access clients; the GCP overlays enable it. This is a
+  deliberate trade-off: GCS HMAC keys are long-lived, so treat them as a
+  high-value secret and scope them to the bucket. AWS/MinIO/RustFS keep
+  `credentialMode: sts` and short-lived credentials.
+- Bucket tags are written with lowercase keys/values because GCS maps the S3
+  `?tagging` API to bucket labels, whose keys must start with a lowercase
+  letter and contain only lowercase letters, digits, underscores, and dashes.
 - rustfs cannot front GCS: it has no GCS backend (its gateway/tier features
   are tiering + site replication, and it stores to its own disks), so it is a
   self-hosted object store, not a GCS proxy.
@@ -339,10 +346,8 @@ from `deployment` to `statefulset` requires deleting the old Deployment first
   its data is `emptyDir` -> ephemeral. Deploy-only mitigation: give rustfs a
   `standard` PVC (RWO) instead of `emptyDir`.
 
-**Decision:** this is a blocker only if the control/region overlays keep
-pointing at `https://storage.googleapis.com`. With the current
-`values-control-pazity.yaml` / `values-region-pazity.yaml`, yes — the API
-will fail at boot in `VolumeManager.testConnection()`, so GCS must be fixed
-before install. If production instead uses in-cluster rustfs (or another
-S3-compatible endpoint) and the overlays are changed accordingly, no GCS code
-change is required for this deployment.
+**Decision:** GCS is now wired for volume operations and SDK push access via
+static HMAC credentials plus checksum/x-id compatibility flags. AWS and
+RustFS continue to use STS. If production instead uses in-cluster rustfs (or
+another S3-compatible endpoint), set `credentialMode: sts` and leave the GCS
+compatibility flags off.

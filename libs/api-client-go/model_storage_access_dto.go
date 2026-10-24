@@ -33,6 +33,10 @@ type StorageAccessDto struct {
 	OrganizationId string `json:"organizationId"`
 	// S3 bucket name
 	Bucket string `json:"bucket"`
+	// Whether the S3 client should omit the x-id query parameter
+	DisableXId *bool `json:"disableXId,omitempty"`
+	// Whether the S3 client should only calculate checksums when an operation requires them
+	DisableChecksums     *bool `json:"disableChecksums,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -205,8 +209,72 @@ func (o *StorageAccessDto) SetBucket(v string) {
 	o.Bucket = v
 }
 
+// GetDisableXId returns the DisableXId field value if set, zero value otherwise.
+func (o *StorageAccessDto) GetDisableXId() bool {
+	if o == nil || o.DisableXId == nil {
+		var ret bool
+		return ret
+	}
+	return *o.DisableXId
+}
+
+// GetDisableXIdOk returns a tuple with the DisableXId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageAccessDto) GetDisableXIdOk() (*bool, bool) {
+	if o == nil || o.DisableXId == nil {
+		return nil, false
+	}
+	return o.DisableXId, true
+}
+
+// HasDisableXId returns a boolean if a field has been set.
+func (o *StorageAccessDto) HasDisableXId() bool {
+	if o != nil && o.DisableXId != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetDisableXId gets a reference to the given bool and assigns it to the DisableXId field.
+func (o *StorageAccessDto) SetDisableXId(v bool) {
+	o.DisableXId = &v
+}
+
+// GetDisableChecksums returns the DisableChecksums field value if set, zero value otherwise.
+func (o *StorageAccessDto) GetDisableChecksums() bool {
+	if o == nil || o.DisableChecksums == nil {
+		var ret bool
+		return ret
+	}
+	return *o.DisableChecksums
+}
+
+// GetDisableChecksumsOk returns a tuple with the DisableChecksums field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageAccessDto) GetDisableChecksumsOk() (*bool, bool) {
+	if o == nil || o.DisableChecksums == nil {
+		return nil, false
+	}
+	return o.DisableChecksums, true
+}
+
+// HasDisableChecksums returns a boolean if a field has been set.
+func (o *StorageAccessDto) HasDisableChecksums() bool {
+	if o != nil && o.DisableChecksums != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetDisableChecksums gets a reference to the given bool and assigns it to the DisableChecksums field.
+func (o *StorageAccessDto) SetDisableChecksums(v bool) {
+	o.DisableChecksums = &v
+}
+
 func (o StorageAccessDto) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -221,6 +289,12 @@ func (o StorageAccessDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["storageUrl"] = o.StorageUrl
 	toSerialize["organizationId"] = o.OrganizationId
 	toSerialize["bucket"] = o.Bucket
+	if o.DisableXId != nil {
+		toSerialize["disableXId"] = o.DisableXId
+	}
+	if o.DisableChecksums != nil {
+		toSerialize["disableChecksums"] = o.DisableChecksums
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -247,10 +321,10 @@ func (o *StorageAccessDto) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -275,6 +349,8 @@ func (o *StorageAccessDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "storageUrl")
 		delete(additionalProperties, "organizationId")
 		delete(additionalProperties, "bucket")
+		delete(additionalProperties, "disableXId")
+		delete(additionalProperties, "disableChecksums")
 		o.AdditionalProperties = additionalProperties
 	}
 
@@ -316,5 +392,3 @@ func (v *NullableStorageAccessDto) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

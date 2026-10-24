@@ -75,6 +75,21 @@ s3:
   stsEndpoint: https://storage.googleapis.com
   region: auto
   defaultBucket: cogbox-platform
+  # AWS account ID and role used by the API to mint short-lived push credentials.
+  # Required when credentialMode=sts. "/" matches the RustFS test setup; set
+  # real values for AWS STS. Ignored when credentialMode=static.
+  accountId: "/"
+  roleName: "/"
+  # sts: exchange the static HMAC keys for temporary credentials via STS AssumeRole.
+  # static: return the configured HMAC keys directly (for providers without STS,
+  # e.g. GCS XML interoperability).
+  credentialMode: sts
+  # Omit the AWS SDK's synthetic x-id query parameter. Enable for S3-compatible
+  # services that reject it (e.g. GCS XML interoperability).
+  disableXId: false
+  # Only calculate checksums when an operation requires them. Enable for
+  # S3-compatible services that reject SDK-default checksums (e.g. GCS).
+  disableChecksums: false
 
 dashboard:
   # Served by the API itself (DONT_SERVE_DASHBOARD=false); no separate workload.

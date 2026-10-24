@@ -23,6 +23,13 @@ import (
 
 const volumeMountPrefix = "cogbox-volume-"
 
+// isGCSCompatibleEndpoint reports whether mount-s3 is talking to GCS XML
+// interoperability, which rejects the checksum metadata that mount-s3 uploads
+// by default.
+func isGCSCompatibleEndpoint(endpoint string) bool {
+	return strings.Contains(strings.ToLower(endpoint), "storage.googleapis.com")
+}
+
 // volumeId becomes part of the host mount path and the S3 bucket name, so require
 // the canonical lowercase UUID form (rejects braced/URN/dashless/uppercase variants,
 // which uuid.Parse would otherwise accept).
@@ -228,6 +235,9 @@ func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error
 
 func (d *DockerClient) getMountCmd(ctx context.Context, volume string, path string) *exec.Cmd {
 	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
+	if isGCSCompatibleEndpoint(d.awsEndpointUrl) {
+		args = append(args, "--upload-checksums", "off")
+	}
 	args = append(args, volume, path)
 
 	var envVars []string

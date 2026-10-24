@@ -311,11 +311,13 @@ func (s *SnapshotService) processImageContext(ctx context.Context, image *Docker
 
 	// Create object storage client
 	objStorage := NewObjectStorage(objectStorageConfig{
-		EndpointURL:     creds.StorageURL,
-		AccessKeyID:     creds.AccessKey,
-		SecretAccessKey: creds.Secret,
-		SessionToken:    &creds.SessionToken,
-		BucketName:      creds.Bucket,
+		EndpointURL:      creds.StorageURL,
+		AccessKeyID:      creds.AccessKey,
+		SecretAccessKey:  creds.Secret,
+		SessionToken:     &creds.SessionToken,
+		BucketName:       creds.Bucket,
+		DisableXId:       creds.DisableXId,
+		DisableChecksums: creds.DisableChecksums,
 	})
 
 	// Upload each context

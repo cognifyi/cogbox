@@ -14,6 +14,7 @@ const mockDynamicImport = jest.fn()
 
 class MockS3Client {
   public readonly config: Record<string, unknown>
+  public readonly middlewareStack = { add: jest.fn() }
 
   constructor(config: Record<string, unknown>) {
     this.config = config
@@ -60,7 +61,7 @@ describe('ObjectStorage', () => {
   const originalStream = require('stream') as typeof import('stream')
   let tempDir = ''
 
-  const makeStorage = async (endpointUrl = 'https://s3.eu-central-1.amazonaws.com') => {
+  const makeStorage = async (endpointUrl = 'https://s3.eu-central-1.amazonaws.com', disableXId?: boolean) => {
     const { ObjectStorage } = await import('../ObjectStorage')
     return new ObjectStorage({
       endpointUrl,
@@ -68,6 +69,7 @@ describe('ObjectStorage', () => {
       secretAccessKey: 'secret',
       sessionToken: 'session',
       bucketName: 'custom-bucket',
+      disableXId,
     })
   }
 
@@ -111,11 +113,69 @@ describe('ObjectStorage', () => {
     })
   })
 
+  it('omits the session token when static credentials do not have one', async () => {
+    const { ObjectStorage } = await import('../ObjectStorage')
+    const storage = new ObjectStorage({
+      endpointUrl: 'https://storage.googleapis.com',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+    })
+
+    const client = storage as unknown as { s3Client: MockS3Client }
+    expect(client.s3Client.config.credentials).toEqual({
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+    })
+  })
+
   it('falls back to the default region when the endpoint does not encode one', async () => {
     const storage = await makeStorage('https://storage.example.com')
 
     const client = storage as unknown as { s3Client: MockS3Client }
     expect(client.s3Client.config.region).toBe('us-east-1')
+  })
+
+  it('does not install the x-id middleware by default', async () => {
+    const storage = await makeStorage()
+
+    const client = storage as unknown as { s3Client: MockS3Client }
+    expect(client.s3Client.middlewareStack.add).not.toHaveBeenCalled()
+  })
+
+  it('removes only the x-id query parameter when disableXId is enabled', async () => {
+    const storage = await makeStorage('https://storage.googleapis.com', true)
+
+    const client = storage as unknown as { s3Client: MockS3Client }
+    expect(client.s3Client.middlewareStack.add).toHaveBeenCalledWith(expect.any(Function), {
+      step: 'build',
+      name: 'disableS3XIdQueryParam',
+      override: true,
+    })
+
+    const middleware = client.s3Client.middlewareStack.add.mock.calls[0][0]
+    const next = jest.fn().mockResolvedValue({ output: {}, response: {} })
+    const args = { request: { query: { 'x-id': 'ListBuckets', versionId: 'v1' } } }
+
+    await middleware(next)(args)
+
+    expect(args.request.query).toEqual({ versionId: 'v1' })
+    expect(next).toHaveBeenCalledWith(args)
+  })
+
+  it('only calculates checksums when required when disableChecksums is enabled', async () => {
+    const { ObjectStorage } = await import('../ObjectStorage')
+    const storage = new ObjectStorage({
+      endpointUrl: 'https://storage.googleapis.com',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+      disableChecksums: true,
+    })
+
+    const client = storage as unknown as { s3Client: MockS3Client }
+    expect(client.s3Client.config).toMatchObject({
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
+    })
   })
 
   it('throws when uploading a missing path', async () => {

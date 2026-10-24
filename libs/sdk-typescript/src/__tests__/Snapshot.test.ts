@@ -142,6 +142,8 @@ describe('SnapshotService', () => {
         sessionToken: 'session',
         bucket: 'bucket',
         organizationId: 'org-1',
+        disableXId: true,
+        disableChecksums: true,
       }),
     )
     mockDynamicImport.mockResolvedValue({ ObjectStorage })
@@ -153,6 +155,13 @@ describe('SnapshotService', () => {
 
     await expect(SnapshotService.processImageContext(objectStorageApi as never, image)).resolves.toEqual(['ctx-hash'])
     expect(objectStorageApi.getPushAccess).toHaveBeenCalledTimes(1)
+    expect(ObjectStorage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpointUrl: 'https://s3.us-east-1.amazonaws.com',
+        disableXId: true,
+        disableChecksums: true,
+      }),
+    )
     expect(upload).toHaveBeenCalledWith('/tmp/context', 'org-1', '.')
   })
 

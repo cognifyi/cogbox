@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -194,12 +195,13 @@ func TestStatPathExistent(t *testing.T) {
 
 func TestPushAccessCredentialsStruct(t *testing.T) {
 	creds := PushAccessCredentials{
-		StorageURL:     "https://s3.us-east-1.amazonaws.com",
-		AccessKey:      "AKID",
-		Secret:         "SECRET",
-		SessionToken:   "TOKEN",
-		Bucket:         "my-bucket",
-		OrganizationID: "org-1",
+		StorageURL:       "https://s3.us-east-1.amazonaws.com",
+		AccessKey:        "AKID",
+		Secret:           "SECRET",
+		SessionToken:     "TOKEN",
+		Bucket:           "my-bucket",
+		OrganizationID:   "org-1",
+		DisableChecksums: true,
 	}
 
 	assert.Equal(t, "https://s3.us-east-1.amazonaws.com", creds.StorageURL)
@@ -208,6 +210,21 @@ func TestPushAccessCredentialsStruct(t *testing.T) {
 	assert.Equal(t, "TOKEN", creds.SessionToken)
 	assert.Equal(t, "my-bucket", creds.Bucket)
 	assert.Equal(t, "org-1", creds.OrganizationID)
+	assert.True(t, creds.DisableChecksums)
+}
+
+func TestObjectStorageDisableChecksums(t *testing.T) {
+	objStorage := NewObjectStorage(objectStorageConfig{
+		EndpointURL:      "https://storage.googleapis.com",
+		AccessKeyID:      "AKID",
+		SecretAccessKey:  "SECRET",
+		BucketName:       "my-bucket",
+		DisableChecksums: true,
+	})
+
+	options := objStorage.client.Options()
+	assert.Equal(t, aws.RequestChecksumCalculationWhenRequired, options.RequestChecksumCalculation)
+	assert.Equal(t, aws.ResponseChecksumValidationWhenRequired, options.ResponseChecksumValidation)
 }
 
 func TestObjectStorageUploadValidations(t *testing.T) {
@@ -252,4 +269,24 @@ func TestObjectStorageUploadAsTarInvalidPath(t *testing.T) {
 	err := objStorage.uploadAsTar(context.Background(), "key.tar", "/missing/file", "archive-base")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "Failed to stat path")
+}
+
+func TestWithoutS3XId(t *testing.T) {
+	tests := []struct {
+		name     string
+		rawQuery string
+		expected string
+	}{
+		{name: "empty", rawQuery: "", expected: ""},
+		{name: "only x-id", rawQuery: "x-id=ListBuckets", expected: ""},
+		{name: "preserves other parameters", rawQuery: "x-id=GetObject&versionId=v1", expected: "versionId=v1"},
+		{name: "removes x-id in any position", rawQuery: "versionId=v1&x-id=GetObject&partNumber=2", expected: "versionId=v1&partNumber=2"},
+		{name: "does not remove similar keys", rawQuery: "x-id-extra=value&x-id=PutObject", expected: "x-id-extra=value"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, withoutS3XId(tt.rawQuery))
+		})
+	}
 }

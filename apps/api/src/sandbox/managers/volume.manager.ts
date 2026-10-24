@@ -16,6 +16,7 @@ import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { deleteS3Bucket } from '../../common/utils/delete-s3-bucket'
+import { disableS3XId } from '../../common/utils/s3-x-id'
 
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
@@ -62,7 +63,17 @@ export class VolumeManager
         secretAccessKey,
       },
       forcePathStyle: true,
+      ...(this.configService.get('s3.disableChecksums')
+        ? {
+            requestChecksumCalculation: 'WHEN_REQUIRED' as const,
+            responseChecksumValidation: 'WHEN_REQUIRED' as const,
+          }
+        : {}),
     })
+
+    if (this.configService.get('s3.disableXId')) {
+      disableS3XId(this.s3Client)
+    }
   }
 
   async onModuleInit() {
@@ -205,16 +216,16 @@ export class VolumeManager
           Tagging: {
             TagSet: [
               {
-                Key: 'VolumeId',
-                Value: volume.id,
+                Key: 'volume-id',
+                Value: volume.id.toLowerCase(),
               },
               {
-                Key: 'OrganizationId',
-                Value: volume.organizationId,
+                Key: 'organization-id',
+                Value: volume.organizationId.toLowerCase(),
               },
               {
-                Key: 'Environment',
-                Value: this.configService.get('environment'),
+                Key: 'environment',
+                Value: (this.configService.get('environment') || 'production').toLowerCase(),
               },
             ],
           },
