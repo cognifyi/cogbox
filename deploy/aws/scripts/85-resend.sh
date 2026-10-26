@@ -8,12 +8,13 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 need kubectl python3
 load_state
 : "${DOMAIN:?run 20-cluster.sh first}"
+: "${REPO_ROOT:?}"
+: "${WORK_DIR:?}"
 
 if [ -z "${RESEND_API_KEY:-}" ]; then
   echo "==> RESEND_API_KEY not set in env; prompting or using existing secret"
 fi
 
-WORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.work"
 mkdir -p "$WORK_DIR"
 
 if [ -n "${RESEND_API_KEY:-}" ]; then
@@ -26,7 +27,7 @@ else
   chmod 600 "$WORK_DIR/resend-api-key.txt"
 fi
 
-[ -z "$RESEND_KEY" ] && { echo "missing Resend key" >&2; exit 1; }
+[ -z "${RESEND_KEY:-}" ] && { echo "missing Resend key" >&2; exit 1; }
 
 MAIL_FROM="${MAIL_FROM:-noreply@$DOMAIN}"
 
@@ -40,15 +41,16 @@ kube -n control create secret generic keycloak-smtp \
   --dry-run=client -o yaml | kube apply -f - >/dev/null
 
 echo "==> update Keycloak realm SMTP settings"
-python3 <<PY
-import json, os, subprocess, sys
+DOMAIN="$DOMAIN" MAIL_FROM="$MAIL_FROM" RESEND_KEY="$RESEND_KEY" WORK_DIR="$WORK_DIR" REPO_ROOT="$REPO_ROOT" python3 <<'PY'
+import json, os, subprocess
 domain = os.environ['DOMAIN']
 mail_from = os.environ['MAIL_FROM']
 resend_key = os.environ['RESEND_KEY']
-realm_path = f"{os.environ['WORK_DIR']}/keycloak-realm.json"
+work_dir = os.environ['WORK_DIR']
+repo_root = os.environ['REPO_ROOT']
+realm_path = f"{work_dir}/keycloak-realm.json"
 if not os.path.exists(realm_path):
-    # regenerate from dev template
-    src = f"{os.environ['REPO_ROOT']}/deploy/dev/k3s/keycloak-realm-dev.json"
+    src = f"{repo_root}/deploy/dev/k3s/keycloak-realm-dev.json"
     old = "cogboxdev.pazity.com"
     def walk(o):
         if isinstance(o, str): return o.replace("https://" + old, "https://" + domain).replace(old, domain)
@@ -68,19 +70,21 @@ realm['smtpServer']['user'] = 'resend'
 realm['smtpServer']['password'] = resend_key
 realm['smtpServer']['ssl'] = 'false'
 json.dump(realm, open(realm_path,'w'), indent=2)
-# update configmap
 subprocess.run(['kubectl','-n','control','create','configmap','keycloak-realm','--from-file=cogbox-realm.json='+realm_path,'--dry-run=client','-o','yaml'],stdout=open('/tmp/kc-realm.yaml','w'))
 subprocess.run(['kubectl','apply','-f','/tmp/kc-realm.yaml'],check=False)
 PY
+
 echo "==> restart Keycloak to pick up SMTP config"
 kube -n control rollout restart deploy/keycloak >/dev/null || true
 wait_pod_ready control app=keycloak 900
 
-echo "==> test email (optional) - use Resend API directly"
-curl -sS https://api.resend.com/emails \
-  -H "Authorization: Bearer $RESEND_KEY" \
-  -H "Content-Type: application/json" \
-  -d "{\"from\":\"$MAIL_FROM\",\"to\":[\"delivered@resend.dev\"],\"subject\":\"Cogbox test\",\"html\":\"<p>test</p>\"}" 2>&1 | head -c 200; echo
+if [ "${TEST_EMAIL:-0}" = "1" ] && [ -n "${TEST_TO:-}" ]; then
+  echo "==> test email via Resend API"
+  curl -sS https://api.resend.com/emails \
+    -H "Authorization: Bearer $RESEND_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{\"from\":\"$MAIL_FROM\",\"to\":[\"$TEST_TO\"],\"subject\":\"Cogbox test\",\"html\":\"<p>test</p>\"}" 2>&1 | head -c 200; echo
+fi
 
 echo
 echo "OK: Resend configured"
