@@ -283,11 +283,13 @@ PY
       echo "    $asg: instance refresh started (launch template changed)"
     fi
   else
+    asg_subnets="$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" "Name=availability-zone,Values=us-east-2c" --query 'Subnets[].SubnetId' --output text | tr '\t' ',')"
+    [ -n "$asg_subnets" ] && [ "$asg_subnets" != "None" ] || asg_subnets="$SUBNET_IDS"
     aws autoscaling create-auto-scaling-group \
       --auto-scaling-group-name "$asg" \
       --launch-template "LaunchTemplateName=$lt,Version=\$Latest" \
       --min-size 1 --max-size 1 --desired-capacity 1 \
-      --vpc-zone-identifier "$SUBNET_IDS" \
+      --vpc-zone-identifier "$asg_subnets" \
       --tags \
         "Key=Name,Value=$asg,PropagateAtLaunch=true" \
         "Key=kubernetes.io/cluster/$CLUSTER,Value=owned,PropagateAtLaunch=true" \

@@ -61,9 +61,11 @@ echo "==> default VPC"
 VPC_ID="${VPC_ID:-$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true \
   --query 'Vpcs[0].VpcId' --output text)}"
 [ -n "$VPC_ID" ] && [ "$VPC_ID" != "None" ] || { echo "no default VPC found; set VPC_ID" >&2; exit 1; }
-SUBNET_IDS="$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" \
+SUBNET_IDS="$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" "Name=availability-zone,Values=us-east-2c" \
   --query 'Subnets[].SubnetId' --output text | tr '\t' ',')"
-echo "    vpc=$VPC_ID subnets=$SUBNET_IDS"
+[ -n "$SUBNET_IDS" ] && [ "$SUBNET_IDS" != "None" ] || SUBNET_IDS="$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" \
+  --query 'Subnets[].SubnetId' --output text | tr '\t' ',')"
+echo "    vpc=$VPC_ID subnets=$SUBNET_IDS (preferring us-east-2c)"
 aws ec2 describe-vpc-attribute --vpc-id "$VPC_ID" --attribute enableDnsHostnames \
   --query 'EnableDnsHostnames.Value' --output text | grep -qx True \
   || { echo "DNS hostnames must be enabled on $VPC_ID" >&2; exit 1; }
