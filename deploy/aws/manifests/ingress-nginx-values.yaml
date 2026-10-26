@@ -1,0 +1,30 @@
+# Copyright 2026 Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# Minimal ingress-nginx for the EKS validation track.
+# No cloud LoadBalancer: the controller binds host ports 80/443 on the small
+# system node and we address it via <system-node-private-ip>.nip.io. This keeps
+# the bill at zero extra LB cost while still giving real host-based routing
+# (including the *.proxy wildcard) inside the VPC.
+# TLS/cert-manager is intentionally out of scope for this validation.
+controller:
+  kind: Deployment
+  replicaCount: 1
+  hostPort:
+    enabled: true
+  service:
+    type: ClusterIP
+  nodeSelector:
+    cogbox.io/role: system
+  tolerations: []
+  admissionWebhooks:
+    enabled: false
+  metrics:
+    enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+  config:
+    use-forwarded-headers: "true"
+    proxy-body-size: "0"
+defaultBackend:
+  enabled: false

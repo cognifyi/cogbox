@@ -1,0 +1,183 @@
+# Copyright 2026 Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# In-cluster data services for the AWS EKS validation deployment.
+# Object storage is REAL S3 (no rustfs): this track exists partly to prove the
+# registry/API S3 paths against the real AWS S3 API.
+#
+# Storage is hostPath on the system node on purpose: it keeps the cluster
+# footprint/cost minimal (no EBS CSI add-on, no PVCs) and is acceptable for a
+# validation environment. Production: replace with EBS gp3 PVCs or RDS.
+#
+# TEST/VALIDATION ONLY. Passwords come from the `cogbox-infra` Secret.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: control
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: control
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: postgres
+          image: postgres:18
+          ports: [{ containerPort: 5432 }]
+          env:
+            - { name: POSTGRES_USER, value: cogbox }
+            - { name: POSTGRES_DB, value: cogbox }
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: cogbox-infra, key: postgres-password }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U cogbox"]
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 150m, memory: 256Mi }
+            limits: { cpu: 1000m, memory: 1Gi }
+      volumes:
+        - name: data
+          hostPath: { path: /var/lib/cogbox/postgres, type: DirectoryOrCreate }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: control
+spec:
+  ports: [{ port: 5432 }]
+  selector: { app: postgres }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: redis }
+  template:
+    metadata:
+      labels: { app: redis }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args: ["--appendonly", "yes", "--requirepass", "$(REDIS_PASSWORD)"]
+          ports: [{ containerPort: 6379 }]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: cogbox-infra, key: redis-password }
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "redis-cli -a $REDIS_PASSWORD ping | grep -q PONG"]
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: control
+spec:
+  ports: [{ port: 6379 }]
+  selector: { app: redis }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: registry }
+  template:
+    metadata:
+      labels: { app: registry }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: registry
+          image: registry:2.8.2
+          env:
+            - { name: REGISTRY_HTTP_ADDR, value: 0.0.0.0:6000 }
+            - { name: REGISTRY_STORAGE_DELETE_ENABLED, value: "true" }
+          ports: [{ containerPort: 6000 }]
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/registry }
+          readinessProbe:
+            httpGet: { path: /v2/, port: 6000 }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+      volumes:
+        - name: data
+          hostPath: { path: /var/lib/cogbox/registry, type: DirectoryOrCreate }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: control
+spec:
+  ports: [{ port: 6000 }]
+  selector: { app: registry }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: maildev }
+  template:
+    metadata:
+      labels: { app: maildev }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: maildev
+          image: maildev/maildev:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 1025 }, { containerPort: 1080 }]
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  ports:
+    - { name: smtp, port: 1025 }
+    - { name: web, port: 1080 }
+  selector: { app: maildev }

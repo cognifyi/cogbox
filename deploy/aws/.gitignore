@@ -1,0 +1,2 @@
+# Local state (secrets, rendered values, logs). Never commit.
+.work/

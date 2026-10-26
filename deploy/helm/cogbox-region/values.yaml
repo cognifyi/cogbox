@@ -85,6 +85,10 @@ snapshotManager:
 runner:
   repository: cogbox-runner
   apiPort: 3003
+  # Optional container entrypoint override. Used by the AWS overlay to put
+  # dockerd's data root on a pquota-enabled XFS loopback (sandbox disk quotas).
+  command: []
+  args: []
   # Advertised runner hostname (validated as hostname|ip — region IDs with
   # underscores are NOT valid here). Leave empty to omit; runners self-report
   # via healthcheck. Set to a real node/hostname only if your topology needs it.

@@ -1,0 +1,142 @@
+# Copyright 2026 Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# AWS EKS overlay for cogbox-control.
+# Domain/hostnames match deploy/gcp (cogbox.pazity.com): the GCP and AWS
+# clusters are mutually exclusive, so they share the pazity.com DNS records.
+# Tuned for a single small system node: one API replica, no HPA/PDB, real S3.
+# __DOMAIN_ZONE__ / __DOMAIN__ / __BUCKET__ are rendered by 40-control.sh.
+domain: __DOMAIN_ZONE__
+
+imageRegistry: cognifyi
+imageTag: "v0.190.3"
+imagePullPolicy: IfNotPresent
+
+api:
+  replicaCount: 1
+  pdb:
+    enabled: false
+  hpa:
+    enabled: false
+  ingress:
+    enabled: true
+    className: nginx
+    host: __DOMAIN__
+    annotations:
+      cert-manager.io/cluster-issuer: public-http01
+    tlsSecret: cogbox-api-tls
+  resources:
+    requests: { cpu: 200m, memory: 512Mi }
+    limits: { cpu: 1000m, memory: 2Gi }
+
+migration:
+  enabled: true
+  backoffLimit: 3
+
+db:
+  host: postgres
+  port: 5432
+  database: cogbox
+  username: cogbox
+  tlsEnabled: false
+  tlsRejectUnauthorized: false
+
+redis:
+  host: redis
+  port: 6379
+
+oidc:
+  clientId: cogbox
+  issuerBaseUrl: https://keycloak.__DOMAIN__/realms/cogbox
+  publicDomain: https://keycloak.__DOMAIN__/realms/cogbox
+  audience: cogbox
+
+# Real AWS S3. This is the core of the EKS validation: the GCS XML-interop
+# endpoint rejected the AWS SDK v3 serializer; S3 accepts it as-is.
+s3:
+  endpoint: https://s3.us-east-2.amazonaws.com
+  stsEndpoint: https://sts.us-east-2.amazonaws.com
+  region: us-east-2
+  defaultBucket: __BUCKET__
+
+dashboard:
+  url: https://__DOMAIN__/dashboard
+  baseApiUrl: https://__DOMAIN__
+
+proxyDefaults:
+  protocol: https
+  domain: proxy.__DOMAIN__
+
+defaultSnapshot: cognifyi/sandbox:latest-slim
+
+# Cluster-local FQDN so the region namespace can resolve the registry too.
+registry:
+  transient:
+    url: http://registry.control.svc.cluster.local:6000
+    admin: admin
+    projectId: cogbox
+  internal:
+    url: http://registry.control.svc.cluster.local:6000
+    admin: admin
+    projectId: cogbox
+
+quotas:
+  defaultRegionId: shared
+  defaultRegionName: shared
+  enforceQuotas: false
+  totalCpuQuota: 100
+  totalMemoryQuota: 256
+  totalDiskQuota: 1000
+  maxCpuPerSandbox: 4
+  maxMemoryPerSandbox: 8
+  maxDiskPerSandbox: 50
+  snapshotQuota: 30
+  maxSnapshotSize: 20
+  volumeQuota: 100
+  admin:
+    totalCpuQuota: 100
+    totalMemoryQuota: 256
+    totalDiskQuota: 1000
+    maxCpuPerSandbox: 4
+    maxMemoryPerSandbox: 8
+    maxDiskPerSandbox: 50
+    snapshotQuota: 30
+    maxSnapshotSize: 20
+    volumeQuota: 100
+
+rateLimit:
+  anonymousTtl: 60
+  anonymousLimit: 100
+  authenticatedTtl: 60
+  authenticatedLimit: 1000
+  sandboxCreateTtl: 60
+  sandboxCreateLimit: 100
+  sandboxLifecycleTtl: 60
+  sandboxLifecycleLimit: 200
+  failedAuthTtl: 300
+  failedAuthLimit: 20
+
+smtp:
+  host: maildev
+  port: 1025
+  secure: ""
+  emailFrom: "Cogbox Team <no-reply@example.com>"
+
+otel:
+  enabled: false
+  collectorUrl: ""
+  exporterEndpoint: ""
+  collectorEndpointUrl: ""
+
+posthog:
+  apiKey: ""
+  host: ""
+  environment: validation
+
+featureFlags:
+  forceEnabled: organization_infrastructure
+
+secrets:
+  useExternalSecrets: false
+  existingSecret: cogbox-eks-secrets
+  createFromValues: false
+  values: {}
