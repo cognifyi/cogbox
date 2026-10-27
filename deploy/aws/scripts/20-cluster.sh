@@ -69,32 +69,11 @@ for port in 443 80; do
 done
 echo "    sg=$SG_ID cidr=$VPC_CIDR ports=443,80"
 
-echo "==> OIDC provider (IRSA for EBS CSI / ESO)"
-OIDC_ISSUER="$(aws eks describe-cluster --name "$CLUSTER" --query 'cluster.identity.oidc.issuer' --output text)"
-OIDC_HOST="${OIDC_ISSUER#https://}"
-OIDC_ARN="$(aws iam list-open-id-connect-providers \
-  --query "OpenIDConnectProviderList[?contains(Arn, '${OIDC_HOST}')].Arn" --output text 2>/dev/null || true)"
-if [ -z "$OIDC_ARN" ] || [ "$OIDC_ARN" = "None" ]; then
-  OIDC_ARN="$(aws iam create-open-id-connect-provider \
-    --url "$OIDC_ISSUER" --client-id-list sts.amazonaws.com \
-    --query 'OpenIDConnectProviderArn' --output text)"
-  echo "    created $OIDC_ARN"
-else
-  echo "    exists $OIDC_ARN"
-fi
-
-# EBS CSI controller needs its own IRSA role; the node role cannot create volumes.
-EBS_ROLE_NAME="${CLUSTER}-ebs-csi"
-EBS_TRUST="$(python3 -c "import json,sys; print(json.dumps({'Version':'2012-10-17','Statement':[{'Effect':'Allow','Principal':{'Federated':sys.argv[1]},'Action':'sts:AssumeRoleWithWebIdentity','Condition':{'StringEquals':{sys.argv[2]+':sub':'system:serviceaccount:kube-system:ebs-csi-controller-sa',sys.argv[2]+':aud':'sts.amazonaws.com'}}}]}))" "$OIDC_ARN" "$OIDC_HOST")"
-if aws iam get-role --role-name "$EBS_ROLE_NAME" >/dev/null 2>&1; then
-  aws iam update-assume-role-policy --role-name "$EBS_ROLE_NAME" --policy-document "$EBS_TRUST" >/dev/null
-else
-  aws iam create-role --role-name "$EBS_ROLE_NAME" --assume-role-policy-document "$EBS_TRUST" >/dev/null
-fi
-aws iam attach-role-policy --role-name "$EBS_ROLE_NAME" \
+echo "==> node role policies (SCP blocks OIDC; use the node instance profile)"
+NODE_ROLE_NAME="${NODE_ROLE_ARN##*/}"
+aws iam attach-role-policy --role-name "$NODE_ROLE_NAME" \
   --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy >/dev/null 2>&1 || true
-EBS_ROLE_ARN="$(aws iam get-role --role-name "$EBS_ROLE_NAME" --query 'Role.Arn' --output text)"
-echo "    ebs csi role: $EBS_ROLE_ARN"
+echo "    $NODE_ROLE_NAME: AmazonEBSCSIDriverPolicy"
 
 echo "==> core add-ons"
 addon_status() {
@@ -127,11 +106,11 @@ done
 
 if [ "$(addon_status aws-ebs-csi-driver)" = "MISSING" ]; then
   aws eks create-addon --cluster-name "$CLUSTER" --addon-name aws-ebs-csi-driver \
-    --service-account-role-arn "$EBS_ROLE_ARN" --resolve-conflicts OVERWRITE >/dev/null
+    --resolve-conflicts OVERWRITE >/dev/null
   echo "    aws-ebs-csi-driver: creating"
 else
   aws eks update-addon --cluster-name "$CLUSTER" --addon-name aws-ebs-csi-driver \
-    --service-account-role-arn "$EBS_ROLE_ARN" --resolve-conflicts OVERWRITE >/dev/null 2>&1 || true
+    --resolve-conflicts OVERWRITE >/dev/null 2>&1 || true
   echo "    aws-ebs-csi-driver: $(addon_status aws-ebs-csi-driver)"
 fi
 for _ in $(seq 1 60); do
