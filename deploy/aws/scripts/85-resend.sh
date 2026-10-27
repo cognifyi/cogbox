@@ -5,7 +5,7 @@
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 
-need kubectl python3
+need kubectl python3 aws
 load_state
 : "${DOMAIN:?run 20-cluster.sh first}"
 : "${REPO_ROOT:?}"
@@ -73,6 +73,23 @@ json.dump(realm, open(realm_path,'w'), indent=2)
 subprocess.run(['kubectl','-n','control','create','configmap','keycloak-realm','--from-file=cogbox-realm.json='+realm_path,'--dry-run=client','-o','yaml'],stdout=open('/tmp/kc-realm.yaml','w'))
 subprocess.run(['kubectl','apply','-f','/tmp/kc-realm.yaml'],check=False)
 PY
+
+# If ESO already owns keycloak-smtp, update the source of truth too.
+if aws secretsmanager describe-secret --region "${AWS_REGION:-us-east-2}" \
+    --secret-id "cogbox/${CLUSTER:-cogbox-eks}/control/keycloak-smtp" >/dev/null 2>&1; then
+  payload="$(mktemp)"
+  python3 - "$payload" "$MAIL_FROM" "$RESEND_KEY" <<'PY'
+import json, sys
+json.dump({"host": "smtp.resend.com", "port": "587", "from": sys.argv[2],
+           "user": "resend", "password": sys.argv[3]}, open(sys.argv[1], "w"))
+PY
+  aws secretsmanager put-secret-value --region "${AWS_REGION:-us-east-2}" \
+    --secret-id "cogbox/${CLUSTER:-cogbox-eks}/control/keycloak-smtp" \
+    --secret-string "file://$payload" >/dev/null
+  rm -f "$payload"
+  kube -n control annotate externalsecret keycloak-smtp \
+    force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+fi
 
 echo "==> restart Keycloak to pick up SMTP config"
 kube -n control rollout restart deploy/keycloak >/dev/null || true

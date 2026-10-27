@@ -221,6 +221,11 @@ save_state \
   "SNAP_USER=$SNAP_USER" \
   "SSH_NODE_PORT=$SSH_NODE_PORT"
 
+if [ "${SKIP_ESO:-0}" != "1" ]; then
+  echo "==> secrets -> AWS Secrets Manager (ESO)"
+  "$AWS_DIR/scripts/28-secrets.sh"
+fi
+
 echo
 echo "OK: region '$REGION_ID' installed"
 echo "    proxy     : $PROXY_URL"
