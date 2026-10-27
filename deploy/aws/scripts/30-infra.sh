@@ -26,6 +26,9 @@ kube create ns control --dry-run=client -o yaml | kube apply -f - >/dev/null
 
 ensure_secret() { kube -n control get secret "$1" >/dev/null 2>&1 || kube -n control create secret generic "$1" >/dev/null; }
 ensure_secret cogbox-infra
+ensure_secret cogbox-s3
+[ -n "$(getkey cogbox-s3 AWS_ACCESS_KEY_ID)" ] || setkey cogbox-s3 AWS_ACCESS_KEY_ID "$S3_ACCESS_KEY_ID"
+[ -n "$(getkey cogbox-s3 AWS_SECRET_ACCESS_KEY)" ] || setkey cogbox-s3 AWS_SECRET_ACCESS_KEY "$S3_SECRET_ACCESS_KEY"
 setkey() { # <secret> <key> <value>
   local v; v=$(printf '%s' "$3" | base64 -w0)
   kube -n control patch secret "$1" --type=merge \
