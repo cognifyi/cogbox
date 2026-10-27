@@ -325,7 +325,7 @@ echo "==> node groups (self-managed)"
 create_nodegroup "system" "$SYSTEM_INSTANCE_TYPE" 40 \
   "cogbox.io/pool=standard,cogbox.io/role=system" "-"
 create_nodegroup "runner" "$RUNNER_INSTANCE_TYPE" 60 \
-  "cogbox.io/pool=runner,cogbox.io/role=runner" \
+  "cogbox.io/pool=runner,cogbox.io/role=runner,cogbox.io/region=shared-us" \
   "cogbox.io/runner=true:NoSchedule"
 
 for ng in system runner; do
