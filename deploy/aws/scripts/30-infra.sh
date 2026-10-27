@@ -49,6 +49,15 @@ if [ -z "$(getkey keycloak-admin password)" ]; then
   echo "    keycloak admin password written to .work/keycloak-admin-password.txt"
 fi
 
+ensure_secret keycloak-dashboard
+[ -n "$(getkey keycloak-dashboard username)" ] || setkey keycloak-dashboard username "admin@$DOMAIN"
+[ -n "$(getkey keycloak-dashboard email)" ] || setkey keycloak-dashboard email "admin@$DOMAIN"
+DASH_PASS="$(getkey keycloak-dashboard password)"
+if ! [[ "$DASH_PASS" =~ [A-Z] && "$DASH_PASS" =~ [a-z] && "$DASH_PASS" =~ [0-9] ]]; then
+  DASH_PASS="A1a$(openssl rand -base64 24 | tr -d '/+=\n')"
+  setkey keycloak-dashboard password "$DASH_PASS"
+fi
+
 kube -n control create secret generic keycloak-smtp \
   --from-literal=host=maildev --from-literal=port=1025 \
   --from-literal=from="noreply@$DOMAIN" --from-literal=user= --from-literal=password= \
@@ -104,6 +113,30 @@ if [ -n "$CLIENT_ID" ] && [ "$CLIENT_ID" != "id" ]; then
   echo "    updated client cogbox for https://$DOMAIN"
 else
   echo "    WARN: client cogbox not found (realm import may still be running)" >&2
+fi
+
+echo "==> keycloak dashboard user"
+DASH_USER="$(getkey keycloak-dashboard username)"
+DASH_EMAIL="$(getkey keycloak-dashboard email)"
+DASH_PASS="$(getkey keycloak-dashboard password)"
+DASH_ID="$(kcadm get users -r cogbox -q "username=$DASH_USER" --fields id --format csv --noquotes | head -n1 | tr -d '\r')"
+if [ -z "$DASH_ID" ] || [ "$DASH_ID" = "id" ]; then
+  kcadm create users -r cogbox \
+    -s "username=$DASH_USER" -s "email=$DASH_EMAIL" \
+    -s enabled=true -s emailVerified=true \
+    -s firstName=Cogbox -s lastName=Admin >/dev/null
+  DASH_ID="$(kcadm get users -r cogbox -q "username=$DASH_USER" --fields id --format csv --noquotes | head -n1 | tr -d '\r')"
+  echo "    created $DASH_USER"
+else
+  kcadm update "users/$DASH_ID" -r cogbox \
+    -s "email=$DASH_EMAIL" -s enabled=true -s emailVerified=true >/dev/null
+  echo "    updated $DASH_USER"
+fi
+kcadm set-password --userid "$DASH_ID" -r cogbox --new-password "$DASH_PASS" >/dev/null
+DASH_ACTUAL="$(kcadm get users -r cogbox -q "username=$DASH_USER" --fields username --format csv --noquotes | head -n1 | tr -d '\r')"
+if [ -n "$DASH_ACTUAL" ] && [ "$DASH_ACTUAL" != "$DASH_USER" ]; then
+  setkey keycloak-dashboard username "$DASH_ACTUAL"
+  echo "    dashboard login: $DASH_ACTUAL"
 fi
 
 echo "==> discovery check"

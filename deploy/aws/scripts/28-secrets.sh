@@ -55,6 +55,7 @@ for ref in \
   control/cogbox-infra \
   control/cogbox-s3 \
   control/keycloak-admin \
+  control/keycloak-dashboard \
   control/keycloak-smtp \
   control/cogbox-eks-secrets \
   region-shared/region-shared-creds; do
