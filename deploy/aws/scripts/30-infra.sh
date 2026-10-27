@@ -70,7 +70,14 @@ kube -n control create configmap keycloak-realm \
   --dry-run=client -o yaml | kube apply -f - >/dev/null
 
 echo "==> data services"
-kube apply -f "$AWS_DIR/manifests/infra.yaml" >/dev/null
+"$AWS_DIR/scripts/29-storage.sh" >/dev/null 2>&1 || true
+AWS_REGION="$AWS_REGION" BUCKET="$BUCKET" python3 - "$AWS_DIR/manifests/infra.yaml" "$WORK_DIR/infra.yaml" <<'PY'
+import sys,os
+s=open(sys.argv[1]).read()
+s=s.replace("__AWS_REGION__", os.environ["AWS_REGION"]).replace("__BUCKET__", os.environ["BUCKET"])
+open(sys.argv[2],"w").write(s)
+PY
+kube apply -f "$WORK_DIR/infra.yaml" >/dev/null
 wait_pod_ready control app=postgres 300
 wait_pod_ready control app=redis 300
 wait_pod_ready control app=registry 300
