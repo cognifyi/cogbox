@@ -36,7 +36,7 @@ helm_ upgrade --install external-secrets external-secrets/external-secrets \
 kubectl -n external-secrets rollout status deploy/external-secrets --timeout=300s >/dev/null
 
 cat > "$WORK_DIR/eso-secretstore.yaml" <<YAML
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
   name: $SECRETSTORE
@@ -82,7 +82,7 @@ json.dump(out, sys.stdout)
   rm -f "$payload"
   cat >> "$ESO_MANIFESTS" <<YAML
 ---
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: $name
