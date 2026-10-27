@@ -1,18 +1,24 @@
 # Copyright 2026 Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 # In-cluster data services for the AWS EKS validation deployment.
-# Object storage is REAL S3 (no rustfs): this track exists partly to prove the
-# registry/API S3 paths against the real AWS S3 API.
-#
-# Storage is hostPath on the system node on purpose: it keeps the cluster
-# footprint/cost minimal (no EBS CSI add-on, no PVCs) and is acceptable for a
-# validation environment. Production: replace with EBS gp3 PVCs or RDS.
-#
-# TEST/VALIDATION ONLY. Passwords come from the `cogbox-infra` Secret.
+# registry uses S3 backend; postgres uses EBS PVC via gp3 StorageClass.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: control
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: control
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3
+  resources:
+    requests:
+      storage: 50Gi
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -52,7 +58,8 @@ spec:
             limits: { cpu: 1000m, memory: 1Gi }
       volumes:
         - name: data
-          hostPath: { path: /var/lib/cogbox/postgres, type: DirectoryOrCreate }
+          persistentVolumeClaim:
+            claimName: postgres-data
 ---
 apiVersion: v1
 kind: Service
@@ -87,6 +94,8 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef: { name: cogbox-infra, key: redis-password }
+          volumeMounts:
+            - { name: data, mountPath: /data }
           readinessProbe:
             exec:
               command: ["sh", "-c", "redis-cli -a $REDIS_PASSWORD ping | grep -q PONG"]
@@ -94,6 +103,9 @@ spec:
           resources:
             requests: { cpu: 25m, memory: 32Mi }
             limits: { cpu: 250m, memory: 256Mi }
+      volumes:
+        - name: data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -125,18 +137,25 @@ spec:
           env:
             - { name: REGISTRY_HTTP_ADDR, value: 0.0.0.0:6000 }
             - { name: REGISTRY_STORAGE_DELETE_ENABLED, value: "true" }
+            - { name: REGISTRY_STORAGE, value: s3 }
+            - { name: REGISTRY_STORAGE_S3_REGION, value: __AWS_REGION__ }
+            - { name: REGISTRY_STORAGE_S3_BUCKET, value: __BUCKET__ }
+            - { name: REGISTRY_STORAGE_S3_ROOTDIRECTORY, value: registry }
+            - { name: REGISTRY_STORAGE_S3_ENCRYPT, value: "false" }
+            - { name: REGISTRY_STORAGE_S3_SECURE, value: "true" }
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef: { name: cogbox-s3, key: AWS_ACCESS_KEY_ID }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef: { name: cogbox-s3, key: AWS_SECRET_ACCESS_KEY }
           ports: [{ containerPort: 6000 }]
-          volumeMounts:
-            - { name: data, mountPath: /var/lib/registry }
           readinessProbe:
             httpGet: { path: /v2/, port: 6000 }
             periodSeconds: 10
           resources:
             requests: { cpu: 50m, memory: 128Mi }
             limits: { cpu: 500m, memory: 512Mi }
-      volumes:
-        - name: data
-          hostPath: { path: /var/lib/cogbox/registry, type: DirectoryOrCreate }
 ---
 apiVersion: v1
 kind: Service

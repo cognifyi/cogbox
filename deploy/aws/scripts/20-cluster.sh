@@ -74,7 +74,7 @@ addon_status() {
   aws eks describe-addon --cluster-name "$CLUSTER" --addon-name "$1" \
     --query 'addon.status' --output text 2>/dev/null || echo MISSING
 }
-for addon in vpc-cni kube-proxy coredns; do
+for addon in vpc-cni kube-proxy coredns aws-ebs-csi-driver; do
   if [ "$(addon_status "$addon")" = "MISSING" ]; then
     aws eks create-addon --cluster-name "$CLUSTER" --addon-name "$addon" \
       --resolve-conflicts OVERWRITE >/dev/null
