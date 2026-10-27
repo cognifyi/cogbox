@@ -355,6 +355,12 @@ for _ in $(seq 1 90); do
 done
 kube get nodes -L cogbox.io/pool
 
+# 50-region's runner DaemonSet selects on the region label.
+if kube get nodes -l cogbox.io/role=runner -o name 2>/dev/null | grep -q node/; then
+  kube label node -l cogbox.io/role=runner cogbox.io/region=shared-us --overwrite >/dev/null
+  echo "    runner node labeled cogbox.io/region=shared-us"
+fi
+
 echo "==> add-on health"
 for addon in vpc-cni kube-proxy coredns; do
   for _ in $(seq 1 60); do
