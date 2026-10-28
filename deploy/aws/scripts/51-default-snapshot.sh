@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
 # Copyright 2026 Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 # 51: ensure default system snapshot exists (cognifyi/sandbox:0.6.2-slim)

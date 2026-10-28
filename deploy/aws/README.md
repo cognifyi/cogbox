@@ -70,7 +70,7 @@ These shaped the design and will bite anyone re-running this on a FREE plan:
 |---|---|
 | SCP denies `ec2:CreateFleet` | **EKS managed node groups cannot be used** — they stall in `CREATING`. The script uses self-managed Auto Scaling groups (`RunInstances`), with AL2023 `nodeadm` user data and an `aws-auth` mapping. |
 | SCP denies Spot (`DenySpotMarketType`) | `capacityType=ON_DEMAND`. |
-| Free plan allows only Free-Tier-eligible instance types | `t3.large`/`t3.xlarge` are rejected with *"instance type is not eligible for Free Tier"*. Eligible in `us-east-2`: `t3.micro/small`, `t4g.micro/small`, `t8i.micro/small`, `c7i-flex.large` (2c/4g), **`m7i-flex.large` (2c/8g)**. |
+| Free plan allows only Free-Tier-eligible instance types | `t3.large`/`t3.xlarge` are rejected with _"instance type is not eligible for Free Tier"_. Eligible in `us-east-2`: `t3.micro/small`, `t4g.micro/small`, `t8i.micro/small`, `c7i-flex.large` (2c/4g), **`m7i-flex.large` (2c/8g)**. |
 | No 4-vCPU eligible type | The runner pool gets its own `m7i-flex.large`; the runner pod limit is 1.9 CPU / 7 Gi (enough for dockerd + one 1 CPU sandbox). |
 | 8 vCPU standard quota | 2 nodes × 2 vCPU = 4, leaving headroom for the operator box. |
 | **ELB creation is denied account-wide** | `CreateLoadBalancer` returns `OperationNotPermitted` even though the NLB quota is 50. The public entry is a **system-node Elastic IP** (`25-entry.sh`), with ingress-nginx on hostPorts 80/443. `25-nlb.sh` is retained for accounts that later allow ELB. |

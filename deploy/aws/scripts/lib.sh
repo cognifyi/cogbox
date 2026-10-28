@@ -1,3 +1,4 @@
+# Copyright 2026 Daytona Platforms Inc.
 # Copyright 2026 Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 # Common helpers for deploy/aws/scripts (EKS validation track).

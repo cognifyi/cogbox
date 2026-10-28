@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
 # Copyright 2026 Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 # 25: stable public entry via an Elastic IP on the system node.

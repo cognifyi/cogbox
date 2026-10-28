@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
 # Copyright 2026 Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 # 25: internet-facing NLB in front of ingress-nginx (hostPort 80/443) and the

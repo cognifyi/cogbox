@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright 2026 Daytona Platforms Inc.
 # Copyright 2026 Cognifyi
 # SPDX-License-Identifier: AGPL-3.0
 # 40: control-plane charts (API + migrations) against real S3.
