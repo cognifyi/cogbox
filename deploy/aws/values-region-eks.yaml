@@ -96,7 +96,7 @@ runner:
       mkdir -p /var/lib/docker
       if ! grep -q ' /var/lib/docker xfs .*prjquota' /proc/mounts; then
         if [ ! -s "$IMG" ]; then
-          truncate -s 30G "$IMG"
+          truncate -s 45G "$IMG"
           mkfs.xfs -f "$IMG" >/dev/null
         fi
         mount -o loop,prjquota "$IMG" /var/lib/docker
