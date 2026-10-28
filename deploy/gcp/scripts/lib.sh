@@ -13,8 +13,14 @@ KUBECTL_BIN="${KUBECTL_BIN:-kubectl}"
 PROJECT="${PROJECT:?set PROJECT to your GCP project id (never commit real project ids)}"
 ZONE="${ZONE:-us-west4-b}"
 CLUSTER="${CLUSTER:-cogbox-prod}"
-POOL="${POOL:-default-pool}"
-MACHINE="${MACHINE:-e2-standard-2}"
+# Two Spot pools: application/control-plane nodes and tainted runner nodes.
+# The cluster-created pool keeps GKE's default name; runner-pool is added below.
+APP_POOL="${APP_POOL:-default-pool}"
+RUNNER_POOL="${RUNNER_POOL:-runner-pool}"
+POOL="${POOL:-$APP_POOL}"
+APP_MACHINE="${APP_MACHINE:-${MACHINE:-e2-standard-4}}"
+RUNNER_MACHINE="${RUNNER_MACHINE:-e2-standard-4}"
+NODE_REGION_LABEL="${NODE_REGION_LABEL:-shared}"
 DOMAIN_ZONE="${DOMAIN_ZONE:-pazity.com}"
 
 need() {

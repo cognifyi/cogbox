@@ -24,7 +24,12 @@ helm upgrade --install control ./deploy/helm/cogbox-control \
   -n control --create-namespace -f deploy/helm/cogbox-control/values-gcp.yaml
 
 # register the region at the control plane, store returned keys in Secret Manager
-./scripts/register-region.sh shared-us   # (see docs §6.6 curl flow)
+# (curl flow: apps/docs/src/content/docs/en/multitenant-production.mdx §6.6)
+
+# statefulset runner autoscaling: one control-plane Runner token per replica
+PROJECT=<gcp-project> REGION_ID=<shared-region-uuid> \
+ADMIN_API_KEY=<admin-api-key> RELEASE=region-shared-us \
+./deploy/gcp/scripts/25-runner-tokens.sh
 
 helm upgrade --install region-shared-us ./deploy/helm/cogbox-region \
   -n region-shared-us --create-namespace -f deploy/helm/cogbox-region/values-gcp-shared.yaml
@@ -97,9 +102,15 @@ Per region (`<release>/*` in Secret Manager, from `POST /regions` + keygen):
 | `PROXY_API_KEY` | Proxy → API (also secures preview cookies) | Region registration response |
 | `SSH_API_KEY` | SSH gateway → API | Region registration / regenerate endpoint |
 | `SNAP_USER` / `SNAP_PASS` | Snapshot-manager basic auth | Region registration response |
-| `RUNNER_TOKEN` | Runner pool → API | Admin API (shared) / `POST /runners` (custom) |
+| `RUNNER_TOKEN` | Single runner → API (daemonset/pilot) | Admin API (shared) / `POST /runners` (custom) |
+| `<release>-runner-token-N` | Runner replica N → API (statefulset) | Admin API, one per replica (`25-runner-tokens.sh`); separate Secret Manager name, not under `<release>/` |
 | `SSH_PRIVATE_KEY` / `SSH_HOST_KEY` / `SSH_PUBLIC_KEY` | Gateway + runner pool | Generated keypair per region |
 | `SNAP_S3_ACCESS_KEY` / `SNAP_S3_SECRET_KEY` | Snapshot-manager → bucket | Region bucket HMAC keys (only for `s3` driver) |
+
+StatefulSet runner tokens are separate Secret Manager secrets named
+`<release>-runner-token-N`; the chart maps them to `token-N` in the
+`<release>-runner-tokens` Kubernetes Secret. `25-runner-tokens.sh` creates
+them and is idempotent.
 
 ## Auth options (Auth0 is NOT required)
 
