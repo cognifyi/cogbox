@@ -148,11 +148,11 @@ spec:
   ports: [{ port: 6000 }]
   selector: { app: registry }
 ---
-# S3-compatible object storage for TEST. NOTE: GCS XML interop is NOT
-# compatible with the AWS SDK v3 default serializer (it sends an `x-id`
-# query parameter that GCS rejects with InvalidArgument — fails at API
-# boot in VolumeManager.testConnection). GCS support needs SDK middleware
-# work; tracked separately. Production S3 = real S3 API or rustfs/Harbor.
+# S3-compatible object storage for TEST. NOTE: GCS XML interop rejects the
+# AWS SDK v3 synthetic `x-id` query parameter and default checksum metadata.
+# Production GCS overlays set `s3.disableXId` and `s3.disableChecksums`, and
+# use `s3.credentialMode: static` because GCS has no AWS STS AssumeRole API.
+# Production S3 = real S3 API, GCS with those settings, or rustfs/Harbor.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

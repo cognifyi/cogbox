@@ -19,16 +19,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go/middleware"
+	smithyhttp "github.com/aws/smithy-go/transport/http"
 	"github.com/cognifyi/cogbox/libs/sdk-go/pkg/errors"
 )
 
 // objectStorageConfig holds configuration for S3-compatible object storage.
 type objectStorageConfig struct {
-	EndpointURL     string
-	AccessKeyID     string
-	SecretAccessKey string
-	SessionToken    *string
-	BucketName      string
+	EndpointURL      string
+	AccessKeyID      string
+	SecretAccessKey  string
+	SessionToken     *string
+	BucketName       string
+	DisableXId       bool
+	DisableChecksums bool
 }
 
 // objectStorage handles S3-compatible object storage operations for uploading
@@ -36,6 +40,46 @@ type objectStorageConfig struct {
 type objectStorage struct {
 	client     *s3.Client
 	bucketName string
+}
+
+// disableS3XId removes the synthetic x-id query parameter that AWS SDK v2 adds
+// to S3 requests. Some S3-compatible services (notably GCS XML interoperability)
+// reject requests containing it.
+func disableS3XId(stack *middleware.Stack) error {
+	return stack.Build.Add(
+		middleware.BuildMiddlewareFunc(
+			"DisableS3XIdQueryParam",
+			func(ctx context.Context, in middleware.BuildInput, next middleware.BuildHandler) (
+				middleware.BuildOutput, middleware.Metadata, error,
+			) {
+				if req, ok := in.Request.(*smithyhttp.Request); ok && req.URL != nil {
+					req.URL.RawQuery = withoutS3XId(req.URL.RawQuery)
+				}
+				return next.HandleBuild(ctx, in)
+			},
+		),
+		middleware.After,
+	)
+}
+
+func withoutS3XId(rawQuery string) string {
+	if rawQuery == "" {
+		return ""
+	}
+
+	parts := strings.Split(rawQuery, "&")
+	filtered := parts[:0]
+	for _, part := range parts {
+		key := part
+		if i := strings.IndexByte(key, '='); i >= 0 {
+			key = key[:i]
+		}
+		if key == "x-id" {
+			continue
+		}
+		filtered = append(filtered, part)
+	}
+	return strings.Join(filtered, "&")
 }
 
 // NewObjectStorage creates a new objectStorage instance.
@@ -71,13 +115,24 @@ func NewObjectStorage(config objectStorageConfig) *objectStorage {
 		aws.ToString(sessionToken),
 	)
 
+	var apiOptions []func(*middleware.Stack) error
+	if config.DisableXId {
+		apiOptions = append(apiOptions, disableS3XId)
+	}
+
 	// Create S3 client
-	client := s3.New(s3.Options{
+	options := s3.Options{
 		Region:       region,
 		Credentials:  creds,
 		BaseEndpoint: aws.String(config.EndpointURL),
 		UsePathStyle: true,
-	})
+		APIOptions:   apiOptions,
+	}
+	if config.DisableChecksums {
+		options.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+		options.ResponseChecksumValidation = aws.ResponseChecksumValidationWhenRequired
+	}
+	client := s3.New(options)
 
 	return &objectStorage{
 		client:     client,
@@ -330,10 +385,12 @@ func (objStorage *objectStorage) uploadAsTar(ctx context.Context, s3Key, sourceP
 // These credentials are obtained from the API and used for uploading build contexts
 // when creating snapshots with custom [DockerImage] definitions.
 type PushAccessCredentials struct {
-	StorageURL     string `json:"storageUrl"`
-	AccessKey      string `json:"accessKey"`
-	Secret         string `json:"secret"`
-	SessionToken   string `json:"sessionToken"`
-	Bucket         string `json:"bucket"`
-	OrganizationID string `json:"organizationId"`
+	StorageURL       string `json:"storageUrl"`
+	AccessKey        string `json:"accessKey"`
+	Secret           string `json:"secret"`
+	SessionToken     string `json:"sessionToken"`
+	Bucket           string `json:"bucket"`
+	OrganizationID   string `json:"organizationId"`
+	DisableXId       bool   `json:"disableXId"`
+	DisableChecksums bool   `json:"disableChecksums"`
 }

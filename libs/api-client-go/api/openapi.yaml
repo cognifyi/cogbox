@@ -15249,6 +15249,15 @@ components:
           description: S3 bucket name
           example: cogbox
           type: string
+        disableXId:
+          description: Whether the S3 client should omit the x-id query parameter
+          example: false
+          type: boolean
+        disableChecksums:
+          description: Whether the S3 client should only calculate checksums when an operation
+            requires them
+          example: false
+          type: boolean
       required:
       - accessKey
       - bucket

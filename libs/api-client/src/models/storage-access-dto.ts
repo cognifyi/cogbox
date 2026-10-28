@@ -39,5 +39,13 @@ export interface StorageAccessDto {
      * S3 bucket name
      */
     'bucket': string;
+    /**
+     * Whether the S3 client should omit the x-id query parameter
+     */
+    'disableXId'?: boolean;
+    /**
+     * Whether the S3 client should only calculate checksums when an operation requires them
+     */
+    'disableChecksums'?: boolean;
 }
 

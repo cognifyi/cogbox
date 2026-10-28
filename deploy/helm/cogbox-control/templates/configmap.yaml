@@ -35,8 +35,11 @@ data:
   S3_STS_ENDPOINT: {{ .Values.s3.stsEndpoint | quote }}
   S3_REGION: {{ .Values.s3.region | quote }}
   S3_DEFAULT_BUCKET: {{ .Values.s3.defaultBucket | quote }}
-  S3_ACCOUNT_ID: /
-  S3_ROLE_NAME: /
+  S3_ACCOUNT_ID: {{ .Values.s3.accountId | default "/" | quote }}
+  S3_ROLE_NAME: {{ .Values.s3.roleName | default "/" | quote }}
+  S3_CREDENTIAL_MODE: {{ .Values.s3.credentialMode | default "sts" | quote }}
+  S3_DISABLE_X_ID: {{ .Values.s3.disableXId | default false | quote }}
+  S3_DISABLE_CHECKSUMS: {{ .Values.s3.disableChecksums | default false | quote }}
   DASHBOARD_URL: {{ .Values.dashboard.url | quote }}
   DASHBOARD_BASE_API_URL: {{ .Values.dashboard.baseApiUrl | quote }}
   ENVIRONMENT: production

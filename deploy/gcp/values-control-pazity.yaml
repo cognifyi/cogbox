@@ -38,6 +38,12 @@ s3:
   stsEndpoint: https://storage.googleapis.com
   region: auto
   defaultBucket: REPLACE_ME_GCS_BUCKET
+  # GCS has no AWS STS AssumeRole API; return the configured HMAC keys instead.
+  credentialMode: static
+  # GCS XML interoperability rejects the AWS SDK's synthetic x-id query parameter.
+  disableXId: true
+  # GCS rejects the SDK's default checksum metadata.
+  disableChecksums: true
 
 dashboard:
   url: https://cogbox.pazity.com/dashboard
