@@ -137,6 +137,12 @@ spec:
         - name: runner
           image: {{ include "cogbox-region.image" (dict "repository" .Values.runner.repository "Values" .Values) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          {{- with .Values.runner.command }}
+          command: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.runner.args }}
+          args: {{ toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             privileged: true
           {{- if eq $mode "statefulset" }}

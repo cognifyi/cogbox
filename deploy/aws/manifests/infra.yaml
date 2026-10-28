@@ -1,0 +1,202 @@
+# Copyright 2026 Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# In-cluster data services for the AWS EKS validation deployment.
+# registry uses S3 backend; postgres uses EBS PVC via gp3 StorageClass.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: control
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: control
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: control
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: postgres
+          image: postgres:18
+          ports: [{ containerPort: 5432 }]
+          env:
+            - { name: POSTGRES_USER, value: cogbox }
+            - { name: POSTGRES_DB, value: cogbox }
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: cogbox-infra, key: postgres-password }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U cogbox"]
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 150m, memory: 256Mi }
+            limits: { cpu: 1000m, memory: 1Gi }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: control
+spec:
+  ports: [{ port: 5432 }]
+  selector: { app: postgres }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: redis }
+  template:
+    metadata:
+      labels: { app: redis }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args: ["--appendonly", "yes", "--requirepass", "$(REDIS_PASSWORD)"]
+          ports: [{ containerPort: 6379 }]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: cogbox-infra, key: redis-password }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "redis-cli -a $REDIS_PASSWORD ping | grep -q PONG"]
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: control
+spec:
+  ports: [{ port: 6379 }]
+  selector: { app: redis }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: registry }
+  template:
+    metadata:
+      labels: { app: registry }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: registry
+          image: registry:2.8.2
+          env:
+            - { name: REGISTRY_HTTP_ADDR, value: 0.0.0.0:6000 }
+            - { name: REGISTRY_STORAGE_DELETE_ENABLED, value: "true" }
+            - { name: REGISTRY_STORAGE, value: s3 }
+            - { name: REGISTRY_STORAGE_S3_REGION, value: __AWS_REGION__ }
+            - { name: REGISTRY_STORAGE_S3_BUCKET, value: __BUCKET__ }
+            - { name: REGISTRY_STORAGE_S3_ROOTDIRECTORY, value: registry }
+            - { name: REGISTRY_STORAGE_S3_ENCRYPT, value: "false" }
+            - { name: REGISTRY_STORAGE_S3_SECURE, value: "true" }
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef: { name: cogbox-s3, key: AWS_ACCESS_KEY_ID }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef: { name: cogbox-s3, key: AWS_SECRET_ACCESS_KEY }
+          ports: [{ containerPort: 6000 }]
+          readinessProbe:
+            httpGet: { path: /v2/, port: 6000 }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: control
+spec:
+  ports: [{ port: 6000 }]
+  selector: { app: registry }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: maildev }
+  template:
+    metadata:
+      labels: { app: maildev }
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: maildev
+          image: maildev/maildev:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 1025 }, { containerPort: 1080 }]
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: control
+spec:
+  ports:
+    - { name: smtp, port: 1025 }
+    - { name: web, port: 1080 }
+  selector: { app: maildev }

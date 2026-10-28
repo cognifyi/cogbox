@@ -1,0 +1,40 @@
+# Copyright 2026 Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# TCP entry on :2222 for the SSH gateway. With no ELB available, a hostPort
+# socat sidecar on the system node (which owns the Elastic IP) provides the
+# same public contract as the GCP track: ssh://ssh.cogbox.<zone>:2222.
+# The Kubernetes NodePort (30222) remains available as a fallback.
+# TEST/VALIDATION ONLY.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: region-shared-ssh-entry
+  namespace: region-shared
+  labels:
+    app: region-shared-ssh-entry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: region-shared-ssh-entry
+  template:
+    metadata:
+      labels:
+        app: region-shared-ssh-entry
+    spec:
+      nodeSelector:
+        cogbox.io/role: system
+      containers:
+        - name: socat
+          image: alpine/socat:1.8.1.3
+          imagePullPolicy: IfNotPresent
+          args:
+            - TCP-LISTEN:2222,fork,reuseaddr
+            - TCP:region-shared-ssh-gateway.region-shared.svc.cluster.local:2222
+          ports:
+            - name: ssh
+              containerPort: 2222
+              hostPort: 2222
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { cpu: 100m, memory: 64Mi }

@@ -1,0 +1,136 @@
+# Copyright 2026 Cognifyi
+# SPDX-License-Identifier: AGPL-3.0
+# AWS EKS overlay for the shared region.
+# Domain/hostnames match deploy/gcp; TLS is issued by cert-manager (see
+# manifests/cluster-issuers.yaml and scripts/27-tls.sh).
+# __DOMAIN__ / __REGION_ID__ / __BUCKET__ are rendered by 50-region.sh.
+# The runner is the only workload that gets a large slice (it hosts dind +
+# sandboxes); everything else is deliberately small.
+imageRegistry: cognifyi
+imageTag: "v0.190.3"
+imagePullPolicy: IfNotPresent
+
+regionName: __REGION_ID__
+controlPlaneApiUrl: http://control-control-api.control.svc.cluster.local/api
+
+nodeSelector:
+  cogbox.io/pool: runner
+tolerations:
+  - key: cogbox.io/runner
+    operator: Exists
+    effect: NoSchedule
+
+proxy:
+  replicaCount: 1
+  port: 4000
+  protocol: https
+  host: proxy.__DOMAIN__
+  cookieDomain: __DOMAIN__
+  ingress:
+    className: nginx
+    clusterIssuer: wildcard-dns01
+    tlsSecret: proxy-wildcard-tls
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  hpa:
+    enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+  toolboxOnlyMode: false
+  previewWarningEnabled: false
+  shutdownTimeoutSec: 3600
+
+snapshotManager:
+  enabled: true
+  replicaCount: 1
+  port: 5000
+  host: snapshots.__DOMAIN__
+  ingress:
+    className: nginx
+    clusterIssuer: public-http01
+    tlsSecret: snapshots-tls
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  storage:
+    # Real S3 driver (NOT filesystem): validates multipart + metadata
+    # semantics against AWS. Snapshots land under s3://<bucket>/snapshots.
+    driver: s3
+    size: 1Gi
+    storageClass: ""
+    deleteEnabled: true
+    s3:
+      region: us-east-2
+      bucket: __BUCKET__
+      endpoint: https://s3.us-east-2.amazonaws.com
+      encrypt: false
+      secure: true
+      rootDirectory: snapshots
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+runner:
+  repository: cogbox-runner
+  apiPort: 3003
+  # Stable in-cluster address for the DaemonSet pod (Service created by
+  # 50-region.sh). The control plane dials this for exec/preview proxying.
+  domain: region-shared-runner.region-shared.svc.cluster.local
+  resources:
+    # The runner hosts dockerd (dind) + sandbox containers in its cgroup, so
+    # it is the one workload that needs real memory. Node is 2C/8G
+    # (m7i-flex.large — the largest Free-Tier-eligible type), so the limit
+    # leaves just enough for the co-located proxy/snapshot/ssh-gateway pods.
+    requests: { cpu: 300m, memory: 1Gi }
+    limits: { cpu: 1900m, memory: 7Gi }
+  # AL2023 root is XFS with noquota, so overlay2 `--storage-opt size` is
+  # rejected. Put dockerd's data root on a pquota-enabled XFS loopback image
+  # (persisted under the hostPath) so sandbox disk quotas work.
+  command: ["sh", "-c"]
+  args:
+    - |
+      set -e
+      IMG=/var/lib/docker/docker.img
+      mkdir -p /var/lib/docker
+      if ! grep -q ' /var/lib/docker xfs .*prjquota' /proc/mounts; then
+        if [ ! -s "$IMG" ]; then
+          truncate -s 30G "$IMG"
+          mkfs.xfs -f "$IMG" >/dev/null
+        fi
+        mount -o loop,prjquota "$IMG" /var/lib/docker
+      fi
+      /usr/local/bin/dockerd-entrypoint.sh --storage-driver=overlay2 &
+      exec cogbox-runner
+  env:
+    ENVIRONMENT: production
+    CONTAINER_RUNTIME: ""
+    RESOURCE_LIMITS_DISABLED: "false"
+    INTER_SANDBOX_NETWORK_ENABLED: "false"
+    SSH_GATEWAY_ENABLE: "true"
+    SSH_GATEWAY_PORT: "2220"
+    BUILD_ENGINE: buildkit
+    AWS_REGION: us-east-2
+    AWS_ENDPOINT_URL: https://s3.us-east-2.amazonaws.com
+    AWS_DEFAULT_BUCKET: __BUCKET__
+  hostPaths:
+    varLibCogbox: /var/lib/cogbox
+    # No host Docker on EKS AL2023 nodes: run the internal dind daemon.
+    dockerSock:
+      enabled: false
+    # Node-local dind store so sandbox containers survive runner pod
+    # restarts. Does NOT survive node replacement (acceptable for validation).
+    varLibDocker:
+      enabled: true
+      path: /var/lib/cogbox-docker
+
+sshGateway:
+  replicaCount: 1
+  serviceType: ClusterIP
+
+secrets:
+  useExternalSecrets: false
+  existingSecret: region-shared-creds
+  createFromValues: false
+  values: {}
