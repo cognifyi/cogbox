@@ -1,5 +1,6 @@
 # Invoice
 
+
 ## Properties
 
 Name | Type | Description | Notes
@@ -8,9 +9,9 @@ Name | Type | Description | Notes
 **errorDetails** | [**Array&lt;InvoiceErrorDetail&gt;**](InvoiceErrorDetail.md) |  | [optional] [default to undefined]
 **fileUrl** | **string** |  | [optional] [default to undefined]
 **id** | **string** |  | [optional] [default to undefined]
-**issuingDate** | **string** |  | [optional] [default to undefined]
+**issuingDate** | **Date** |  | [optional] [default to undefined]
 **number** | **string** |  | [optional] [default to undefined]
-**paymentDueDate** | **string** |  | [optional] [default to undefined]
+**paymentDueDate** | **Date** |  | [optional] [default to undefined]
 **paymentOverdue** | **boolean** |  | [optional] [default to undefined]
 **paymentStatus** | [**InvoicePaymentStatus**](InvoicePaymentStatus.md) |  | [optional] [default to undefined]
 **sequentialId** | **number** |  | [optional] [default to undefined]

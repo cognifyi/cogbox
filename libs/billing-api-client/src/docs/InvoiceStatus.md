@@ -1,15 +1,16 @@
 # InvoiceStatus
 
+
 ## Enum
 
-* `InvoiceStatusDraft` (value: `'draft'`)
+* `DRAFT` (value: `'draft'`)
 
-* `InvoiceStatusFinalized` (value: `'finalized'`)
+* `FINALIZED` (value: `'finalized'`)
 
-* `InvoiceStatusFailed` (value: `'failed'`)
+* `FAILED` (value: `'failed'`)
 
-* `InvoiceStatusVoided` (value: `'voided'`)
+* `VOIDED` (value: `'voided'`)
 
-* `InvoiceStatusPending` (value: `'pending'`)
+* `PENDING` (value: `'pending'`)
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

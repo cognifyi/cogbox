@@ -1,11 +1,12 @@
 # InvoicePaymentStatus
 
+
 ## Enum
 
-* `InvoicePaymentStatusPending` (value: `'pending'`)
+* `PENDING` (value: `'pending'`)
 
-* `InvoicePaymentStatusSucceeded` (value: `'succeeded'`)
+* `SUCCEEDED` (value: `'succeeded'`)
 
-* `InvoicePaymentStatusFailed` (value: `'failed'`)
+* `FAILED` (value: `'failed'`)
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

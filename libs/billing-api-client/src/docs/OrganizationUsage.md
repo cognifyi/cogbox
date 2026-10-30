@@ -1,14 +1,15 @@
 # OrganizationUsage
 
+
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **amountCents** | **number** |  | [optional] [default to undefined]
-**from** | **string** |  | [optional] [default to undefined]
-**issuingDate** | **string** |  | [optional] [default to undefined]
+**from** | **Date** |  | [optional] [default to undefined]
+**issuingDate** | **Date** |  | [optional] [default to undefined]
 **taxesAmountCents** | **number** |  | [optional] [default to undefined]
-**to** | **string** |  | [optional] [default to undefined]
+**to** | **Date** |  | [optional] [default to undefined]
 **totalAmountCents** | **number** |  | [optional] [default to undefined]
 **usageCharges** | [**Array&lt;UsageCharge&gt;**](UsageCharge.md) |  | [optional] [default to undefined]
 

@@ -1,10 +1,11 @@
 # InvoiceErrorDetail
 
+
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**details** | **{ [key: string]: object; }** |  | [optional] [default to undefined]
+**details** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
 **errorCode** | **string** |  | [optional] [default to undefined]
 
 ## Example

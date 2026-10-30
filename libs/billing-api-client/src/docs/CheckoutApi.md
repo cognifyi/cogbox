@@ -1,30 +1,29 @@
-# CheckoutUrlApi
+# CheckoutApi
 
-All URIs are relative to _http://localhost:6100_
+All URIs are relative to *https://billing.pazity.com*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**getCheckoutUrl**](#getcheckouturl) | **GET** /organization/{organizationId}/checkout-url | Get organization checkout url|
-|[**getV2CheckoutURL**](#getv2checkouturl) | **GET** /v2/organization/{organizationId}/checkout-url | Get organization checkout url|
+|[**getCheckoutUrl**](#getcheckouturl) | **GET** /organization/{organizationId}/checkout-url | Get Stripe checkout URL (v1)|
+|[**getV2CheckoutURL**](#getv2checkouturl) | **GET** /v2/organization/{organizationId}/checkout-url | Get Stripe checkout URL (v2)|
 
 # **getCheckoutUrl**
->
 > string getCheckoutUrl()
 
-Get organization checkout url
+Returns a Stripe checkout URL for the organization.
 
 ### Example
 
 ```typescript
 import {
-    CheckoutUrlApi,
+    CheckoutApi,
     Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new CheckoutUrlApi(configuration);
+const apiInstance = new CheckoutApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
 
 const { status, data } = await apiInstance.getCheckoutUrl(
     organizationId
@@ -35,7 +34,8 @@ const { status, data } = await apiInstance.getCheckoutUrl(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -43,39 +43,38 @@ const { status, data } = await apiInstance.getCheckoutUrl(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: text/plain
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Checkout URL. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2CheckoutURL**
->
 > string getV2CheckoutURL()
 
-Get organization checkout url from v2 billing
+Returns a Stripe checkout URL for the organization.
 
 ### Example
 
 ```typescript
 import {
-    CheckoutUrlApi,
+    CheckoutApi,
     Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new CheckoutUrlApi(configuration);
+const apiInstance = new CheckoutApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
 
 const { status, data } = await apiInstance.getV2CheckoutURL(
     organizationId
@@ -86,7 +85,8 @@ const { status, data } = await apiInstance.getV2CheckoutURL(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -94,17 +94,18 @@ const { status, data } = await apiInstance.getV2CheckoutURL(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: text/plain
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Checkout URL. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+

@@ -1,20 +1,19 @@
 # InvoicesApi
 
-All URIs are relative to _http://localhost:6100_
+All URIs are relative to *https://billing.pazity.com*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**createPaymentUrl**](#createpaymenturl) | **POST** /organization/{organizationId}/invoices/{invoiceId}/payment-url | Create payment URL for invoice|
-|[**createV2PaymentURL**](#createv2paymenturl) | **POST** /v2/organization/{organizationId}/invoices/{invoiceId}/payment-url | Create payment URL for invoice|
-|[**listInvoices**](#listinvoices) | **GET** /organization/{organizationId}/invoices | Get organization invoices|
-|[**listV2Invoices**](#listv2invoices) | **GET** /v2/organization/{organizationId}/invoices | Get organization invoices|
-|[**voidInvoice**](#voidinvoice) | **POST** /organization/{organizationId}/invoices/{invoiceId}/void | Void an invoice|
+|[**createPaymentUrl**](#createpaymenturl) | **POST** /organization/{organizationId}/invoices/{invoiceId}/payment-url | Create invoice payment URL (v1)|
+|[**createV2PaymentURL**](#createv2paymenturl) | **POST** /v2/organization/{organizationId}/invoices/{invoiceId}/payment-url | Create invoice payment URL (v2)|
+|[**listInvoices**](#listinvoices) | **GET** /organization/{organizationId}/invoices | List invoices (v1)|
+|[**listV2Invoices**](#listv2invoices) | **GET** /v2/organization/{organizationId}/invoices | List invoices (v2)|
+|[**voidInvoice**](#voidinvoice) | **POST** /organization/{organizationId}/invoices/{invoiceId}/void | Void invoice|
 
 # **createPaymentUrl**
->
 > PaymentUrl createPaymentUrl()
 
-Create payment URL for invoice
+Creates a Stripe payment link for an outstanding invoice.
 
 ### Example
 
@@ -27,8 +26,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new InvoicesApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let invoiceId: string; //Invoice ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let invoiceId: string; //Invoice identifier. (default to undefined)
 
 const { status, data } = await apiInstance.createPaymentUrl(
     organizationId,
@@ -40,8 +39,9 @@ const { status, data } = await apiInstance.createPaymentUrl(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **invoiceId** | [**string**] | Invoice ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **invoiceId** | [**string**] | Invoice identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -49,26 +49,25 @@ const { status, data } = await apiInstance.createPaymentUrl(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Payment URL. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **createV2PaymentURL**
->
 > PaymentUrl createV2PaymentURL()
 
-Create payment URL for invoice using v2 billing
+Creates a Stripe payment link for an outstanding invoice.
 
 ### Example
 
@@ -81,8 +80,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new InvoicesApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let invoiceId: string; //Invoice ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let invoiceId: string; //Invoice identifier. (default to undefined)
 
 const { status, data } = await apiInstance.createV2PaymentURL(
     organizationId,
@@ -94,8 +93,9 @@ const { status, data } = await apiInstance.createV2PaymentURL(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **invoiceId** | [**string**] | Invoice ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **invoiceId** | [**string**] | Invoice identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -103,26 +103,25 @@ const { status, data } = await apiInstance.createV2PaymentURL(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Payment URL. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listInvoices**
->
 > PaginatedTInvoice listInvoices()
 
-Get organization invoices
+Returns a paginated invoice list.
 
 ### Example
 
@@ -135,9 +134,9 @@ import {
 const configuration = new Configuration();
 const apiInstance = new InvoicesApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let page: number; //Page number (optional) (default to undefined)
-let perPage: number; //Number of items per page (optional) (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let page: number; //Page number (1-based). (optional) (default to 1)
+let perPage: number; //Page size. (optional) (default to 20)
 
 const { status, data } = await apiInstance.listInvoices(
     organizationId,
@@ -150,9 +149,10 @@ const { status, data } = await apiInstance.listInvoices(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **page** | [**number**] | Page number | (optional) defaults to undefined|
-| **perPage** | [**number**] | Number of items per page | (optional) defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **page** | [**number**] | Page number (1-based). | (optional) defaults to 1|
+| **perPage** | [**number**] | Page size. | (optional) defaults to 20|
+
 
 ### Return type
 
@@ -160,26 +160,25 @@ const { status, data } = await apiInstance.listInvoices(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Paginated invoices. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listV2Invoices**
->
 > PaginatedTInvoice listV2Invoices()
 
-Get organization invoices from v2 billing
+Returns a paginated invoice list.
 
 ### Example
 
@@ -192,9 +191,9 @@ import {
 const configuration = new Configuration();
 const apiInstance = new InvoicesApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let page: number; //Page number (optional) (default to undefined)
-let perPage: number; //Number of items per page (optional) (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let page: number; //Page number (1-based). (optional) (default to 1)
+let perPage: number; //Page size. (optional) (default to 20)
 
 const { status, data } = await apiInstance.listV2Invoices(
     organizationId,
@@ -207,9 +206,10 @@ const { status, data } = await apiInstance.listV2Invoices(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **page** | [**number**] | Page number | (optional) defaults to undefined|
-| **perPage** | [**number**] | Number of items per page | (optional) defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **page** | [**number**] | Page number (1-based). | (optional) defaults to 1|
+| **perPage** | [**number**] | Page size. | (optional) defaults to 20|
+
 
 ### Return type
 
@@ -217,26 +217,25 @@ const { status, data } = await apiInstance.listV2Invoices(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Paginated invoices. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **voidInvoice**
->
 > voidInvoice()
 
-Void an invoice
+Voids an unpaid invoice.
 
 ### Example
 
@@ -249,8 +248,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new InvoicesApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let invoiceId: string; //Invoice ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let invoiceId: string; //Invoice identifier. (default to undefined)
 
 const { status, data } = await apiInstance.voidInvoice(
     organizationId,
@@ -262,8 +261,9 @@ const { status, data } = await apiInstance.voidInvoice(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **invoiceId** | [**string**] | Invoice ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **invoiceId** | [**string**] | Invoice identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -271,17 +271,18 @@ void (empty response body)
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: Not defined
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**204** | No Content |  -  |
+|**204** | Invoice voided. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
