@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxUsagePeriod } from './sandbox-usage-period.entity'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 import { GpuType } from '../../sandbox/enums/gpu-type.enum'
@@ -14,6 +14,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 // Used to archive usage periods and keep the original table lightweight
 // Will only contain closed usage periods
 @Entity('sandbox_usage_periods_archive')
+@Index('idx_sandbox_usage_periods_archive_org_start', ['organizationId', 'startAt'])
 export class SandboxUsagePeriodArchive {
   @PrimaryGeneratedColumn('uuid')
   id: string
