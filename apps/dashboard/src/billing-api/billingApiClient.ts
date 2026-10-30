@@ -65,7 +65,7 @@ export class BillingApiClient {
   }
 
   public async setAutomaticTopUp(organizationId: string, automaticTopUp?: AutomaticTopUp): Promise<void> {
-    await this.walletApi.setV2AutomaticTopUp(organizationId, automaticTopUp)
+    await this.walletApi.setV2AutomaticTopUp(organizationId, automaticTopUp ?? {})
   }
 
   public async getOrganizationBillingPortalUrl(organizationId: string): Promise<string> {

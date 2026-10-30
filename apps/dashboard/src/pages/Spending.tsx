@@ -269,16 +269,16 @@ function convertUsageToChartData(usage: OrganizationUsage): UsageChartData | nul
 
   for (const charge of usage.usageCharges ?? []) {
     switch (charge.billableMetric) {
-      case BillableMetricCode.RAM_USAGE_BILLABLE_METRIC_CODE:
+      case BillableMetricCode.RAM_USAGE:
         ramGB += Number(charge.amountCents) / 100
         break
-      case BillableMetricCode.CPU_USAGE_BILLABLE_METRIC_CODE:
+      case BillableMetricCode.CPU_USAGE:
         cpu += Number(charge.amountCents) / 100
         break
-      case BillableMetricCode.DISK_USAGE_BILLABLE_METRIC_CODE:
+      case BillableMetricCode.DISK_USAGE:
         diskGB += Number(charge.amountCents) / 100
         break
-      // case BillableMetricCode.GPU_USAGE_BILLABLE_METRIC_CODE:
+      // case BillableMetricCode.GPU_USAGE:
       //   gpu += Number(charge.amountCents) / 100
       //   break
     }

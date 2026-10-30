@@ -50,13 +50,13 @@ const getMeta = (table: Table<Invoice>) => {
   return table.options.meta?.invoices as InvoicesTableMeta
 }
 
-function parseTimestamp(value?: string | null): number | null {
+function parseTimestamp(value?: string | Date | null): number | null {
   if (!value) return null
   const time = new Date(value).getTime()
   return Number.isNaN(time) ? null : time
 }
 
-const DateCell: React.FC<{ value?: string | null }> = ({ value }) => {
+const DateCell: React.FC<{ value?: string | Date | null }> = ({ value }) => {
   const timestamp = parseTimestamp(value)
   return (
     <div className="w-full truncate">

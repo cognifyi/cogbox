@@ -54,6 +54,10 @@
     },
     "build": {
       "executor": "nx:run-commands",
+      // Not cacheable: the declared output dir overlaps the build-esm/build-cjs
+      // output dirs. A cached restore/skip here lets their raw tsc output
+      // overwrite post-build's flattened files and breaks downstream builds.
+      "cache": false,
       "inputs": ["default", "{projectRoot}/package.json", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{workspaceRoot}/dist/libs/sdk-typescript"],
       "options": {

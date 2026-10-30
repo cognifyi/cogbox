@@ -134,7 +134,7 @@ export function getColumns(): ColumnDef<Charge>[] {
   ]
 }
 
-function parseTimestamp(value?: string | null): number | null {
+function parseTimestamp(value?: string | Date | null): number | null {
   if (!value) return null
   const time = new Date(value).getTime()
   return Number.isNaN(time) ? null : time
