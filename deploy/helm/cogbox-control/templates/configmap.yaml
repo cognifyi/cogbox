@@ -92,6 +92,7 @@ data:
   OTEL_COLLECTOR_ENDPOINT_URL: {{ .Values.otel.collectorEndpointUrl | quote }}
   POSTHOG_HOST: {{ .Values.posthog.host | quote }}
   POSTHOG_ENVIRONMENT: {{ .Values.posthog.environment | quote }}
+  BILLING_API_URL: {{ .Values.billing.apiUrl | quote }}
   OPENFEATURE_FORCE_ENABLED_FLAGS: {{ .Values.featureFlags.forceEnabled | quote }}
   SKIP_USER_EMAIL_VERIFICATION: "false"
   MAINTENANCE_MODE: "false"

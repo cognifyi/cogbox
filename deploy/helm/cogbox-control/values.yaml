@@ -172,6 +172,11 @@ otel:
   # SANDBOX_OTEL_ENDPOINT_URL). Empty = unset.
   collectorEndpointUrl: ""
 
+# Billing service API. The API only wires organization billing when this is
+# set — deploy/helm/render-check.sh fails CI if it renders empty.
+billing:
+  apiUrl: https://billing.example.com
+
 # Product analytics (PostHog). Empty apiKey/host = disabled (no upload).
 # host is non-secret (e.g. https://us.i.posthog.com); apiKey lives in secrets.
 posthog:
