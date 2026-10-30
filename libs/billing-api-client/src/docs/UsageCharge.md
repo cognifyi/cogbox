@@ -1,5 +1,6 @@
 # UsageCharge
 
+
 ## Properties
 
 Name | Type | Description | Notes

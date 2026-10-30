@@ -172,6 +172,12 @@ otel:
   # SANDBOX_OTEL_ENDPOINT_URL). Empty = unset.
   collectorEndpointUrl: ""
 
+# Billing service API. The API only wires organization billing when this is
+# set, so the shipped default stays empty (billing disabled) and each real
+# environment supplies the endpoint via its overlay or --set billing.apiUrl=...
+billing:
+  apiUrl: ""
+
 # Product analytics (PostHog). Empty apiKey/host = disabled (no upload).
 # host is non-secret (e.g. https://us.i.posthog.com); apiKey lives in secrets.
 posthog:

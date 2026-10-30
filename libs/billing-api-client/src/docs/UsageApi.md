@@ -1,19 +1,19 @@
 # UsageApi
 
-All URIs are relative to _http://localhost:6100_
+All URIs are relative to *https://billing.pazity.com*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**getCurrentUsage**](#getcurrentusage) | **GET** /organization/{organizationId}/usage | Get organization usage|
-|[**getPastUsage**](#getpastusage) | **GET** /organization/{organizationId}/usage/past | Get organization usage|
-|[**getV2CurrentUsage**](#getv2currentusage) | **GET** /v2/organization/{organizationId}/usage | Get organization usage|
-|[**getV2PastUsage**](#getv2pastusage) | **GET** /v2/organization/{organizationId}/usage/past | Get organization usage|
+|[**getCurrentUsage**](#getcurrentusage) | **GET** /organization/{organizationId}/usage | Get current usage (v1)|
+|[**getPastUsage**](#getpastusage) | **GET** /organization/{organizationId}/usage/past | Get past usage (v1)|
+|[**getV2CurrentUsage**](#getv2currentusage) | **GET** /v2/organization/{organizationId}/usage | Get current usage (v2)|
+|[**getV2PastUsage**](#getv2pastusage) | **GET** /v2/organization/{organizationId}/usage/past | Get past usage (v2)|
+|[**ingestUsageEvents**](#ingestusageevents) | **POST** /v2/usage/events | Ingest usage events|
 
 # **getCurrentUsage**
->
 > OrganizationUsage getCurrentUsage()
 
-Get organization usage
+Returns the current billing period usage.
 
 ### Example
 
@@ -26,7 +26,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsageApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
 
 const { status, data } = await apiInstance.getCurrentUsage(
     organizationId
@@ -37,7 +37,8 @@ const { status, data } = await apiInstance.getCurrentUsage(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -45,26 +46,25 @@ const { status, data } = await apiInstance.getCurrentUsage(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Current usage. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getPastUsage**
->
 > OrganizationUsage getPastUsage()
 
-Get organization usage
+Returns recent closed billing periods.
 
 ### Example
 
@@ -77,8 +77,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsageApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let periods: number; //Periods (optional) (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let periods: number; //Number of closed periods to return. (optional) (default to 12)
 
 const { status, data } = await apiInstance.getPastUsage(
     organizationId,
@@ -90,8 +90,9 @@ const { status, data } = await apiInstance.getPastUsage(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **periods** | [**number**] | Periods | (optional) defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **periods** | [**number**] | Number of closed periods to return. | (optional) defaults to 12|
+
 
 ### Return type
 
@@ -99,26 +100,25 @@ const { status, data } = await apiInstance.getPastUsage(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Past usage. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2CurrentUsage**
->
 > OrganizationUsage getV2CurrentUsage()
 
-Get organization usage from v2 billing
+Returns the current billing period usage.
 
 ### Example
 
@@ -131,7 +131,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsageApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
 
 const { status, data } = await apiInstance.getV2CurrentUsage(
     organizationId
@@ -142,7 +142,8 @@ const { status, data } = await apiInstance.getV2CurrentUsage(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+
 
 ### Return type
 
@@ -150,26 +151,25 @@ const { status, data } = await apiInstance.getV2CurrentUsage(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Current usage. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2PastUsage**
->
 > Array<OrganizationUsage> getV2PastUsage()
 
-Get historical organization usage from v2 billing
+Returns recent closed billing periods.
 
 ### Example
 
@@ -182,8 +182,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new UsageApi(configuration);
 
-let organizationId: string; //Organization ID (default to undefined)
-let periods: number; //Periods (optional) (default to undefined)
+let organizationId: string; //Organization identifier. (default to undefined)
+let periods: number; //Number of closed periods to return. (optional) (default to 12)
 
 const { status, data } = await apiInstance.getV2PastUsage(
     organizationId,
@@ -195,8 +195,9 @@ const { status, data } = await apiInstance.getV2PastUsage(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **organizationId** | [**string**] | Organization ID | defaults to undefined|
-| **periods** | [**number**] | Periods | (optional) defaults to undefined|
+| **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
+| **periods** | [**number**] | Number of closed periods to return. | (optional) defaults to 12|
+
 
 ### Return type
 
@@ -204,17 +205,70 @@ const { status, data } = await apiInstance.getV2PastUsage(
 
 ### Authorization
 
-[JwtAuth](../README.md#JwtAuth)
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
-- **Accept**: application/json
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | OK |  -  |
+|**200** | Past usage. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **ingestUsageEvents**
+> UsageEventIngestResult ingestUsageEvents(usageEventBatch)
+
+Batch ingestion of normalized usage events. Events are idempotent on `event_id`; duplicates are reported but do not fail the request. 
+
+### Example
+
+```typescript
+import {
+    UsageApi,
+    Configuration,
+    UsageEventBatch
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new UsageApi(configuration);
+
+let usageEventBatch: UsageEventBatch; //
+
+const { status, data } = await apiInstance.ingestUsageEvents(
+    usageEventBatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **usageEventBatch** | **UsageEventBatch**|  | |
+
+
+### Return type
+
+**UsageEventIngestResult**
+
+### Authorization
+
+[adminKey](../README.md#adminKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**202** | Events accepted for processing. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+

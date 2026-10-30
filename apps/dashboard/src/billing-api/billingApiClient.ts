@@ -10,8 +10,9 @@ import {
   BillingInfoApi,
   ChargeList,
   Configuration,
+  CouponApi,
+  EmailApi,
   InvoicesApi,
-  OrganizationApi,
   OrganizationEmail,
   OrganizationTier,
   OrganizationUsage,
@@ -19,7 +20,7 @@ import {
   PaginatedTInvoice,
   PaymentMethod,
   PaymentUrl,
-  PortalUrlApi,
+  PortalApi,
   Tier,
   TierApi,
   UsageApi,
@@ -32,8 +33,9 @@ export class BillingApiClient {
   private usageApi: UsageApi
   private tierApi: TierApi
   private invoicesApi: InvoicesApi
-  private organizationApi: OrganizationApi
-  private portalUrlApi: PortalUrlApi
+  private emailApi: EmailApi
+  private couponApi: CouponApi
+  private portalApi: PortalApi
   private billingInfoApi: BillingInfoApi
 
   constructor(configuration: Configuration, axiosInstance: AxiosInstance) {
@@ -41,8 +43,9 @@ export class BillingApiClient {
     this.usageApi = new UsageApi(configuration, undefined, axiosInstance)
     this.tierApi = new TierApi(configuration, undefined, axiosInstance)
     this.invoicesApi = new InvoicesApi(configuration, undefined, axiosInstance)
-    this.organizationApi = new OrganizationApi(configuration, undefined, axiosInstance)
-    this.portalUrlApi = new PortalUrlApi(configuration, undefined, axiosInstance)
+    this.emailApi = new EmailApi(configuration, undefined, axiosInstance)
+    this.couponApi = new CouponApi(configuration, undefined, axiosInstance)
+    this.portalApi = new PortalApi(configuration, undefined, axiosInstance)
     this.billingInfoApi = new BillingInfoApi(configuration, undefined, axiosInstance)
   }
 
@@ -62,16 +65,16 @@ export class BillingApiClient {
   }
 
   public async setAutomaticTopUp(organizationId: string, automaticTopUp?: AutomaticTopUp): Promise<void> {
-    await this.walletApi.setV2AutomaticTopUp(organizationId, automaticTopUp)
+    await this.walletApi.setV2AutomaticTopUp(organizationId, automaticTopUp ?? {})
   }
 
   public async getOrganizationBillingPortalUrl(organizationId: string): Promise<string> {
-    const response = await this.portalUrlApi.getV2PortalURL(organizationId)
+    const response = await this.portalApi.getV2PortalURL(organizationId)
     return response.data
   }
 
   public async redeemCoupon(organizationId: string, couponCode: string): Promise<string> {
-    await this.organizationApi.redeemV2Coupon(couponCode, organizationId)
+    await this.couponApi.redeemV2Coupon(organizationId, couponCode)
     return 'Coupon redeemed successfully'
   }
 
@@ -93,16 +96,16 @@ export class BillingApiClient {
   // Tier + email endpoints have no v2 counterpart; they always call v1.
 
   public async getOrganizationTier(organizationId: string): Promise<OrganizationTier> {
-    const response = await this.organizationApi.getTier(organizationId)
+    const response = await this.tierApi.getTier(organizationId)
     return response.data
   }
 
   public async upgradeTier(organizationId: string, tier: number): Promise<void> {
-    await this.organizationApi.upgradeTier(organizationId, { tier })
+    await this.tierApi.upgradeTier(organizationId, { tier })
   }
 
   public async downgradeTier(organizationId: string, tier: number): Promise<void> {
-    await this.organizationApi.downgradeTier(organizationId, { tier })
+    await this.tierApi.downgradeTier(organizationId, { tier })
   }
 
   public async listTiers(): Promise<Tier[]> {
@@ -111,24 +114,24 @@ export class BillingApiClient {
   }
 
   public async listOrganizationEmails(organizationId: string): Promise<OrganizationEmail[]> {
-    const response = await this.organizationApi.listOrganizationEmails(organizationId)
+    const response = await this.emailApi.listOrganizationEmails(organizationId)
     return response.data
   }
 
   public async addOrganizationEmail(organizationId: string, email: string): Promise<void> {
-    await this.organizationApi.addOrganizationEmail(organizationId, { email })
+    await this.emailApi.addOrganizationEmail(organizationId, { email })
   }
 
   public async deleteOrganizationEmail(organizationId: string, email: string): Promise<void> {
-    await this.organizationApi.deleteOrganizationEmail(organizationId, { email })
+    await this.emailApi.deleteOrganizationEmail(organizationId, { email })
   }
 
   public async verifyOrganizationEmail(organizationId: string, email: string, token: string): Promise<void> {
-    await this.organizationApi.verifyEmail(organizationId, { email, token })
+    await this.emailApi.verifyEmail(organizationId, { email, token })
   }
 
   public async resendOrganizationEmailVerification(organizationId: string, email: string): Promise<void> {
-    await this.organizationApi.resendVerificationEmail(organizationId, { email })
+    await this.emailApi.resendVerificationEmail(organizationId, { email })
   }
 
   public async getBillingInfo(organizationId: string): Promise<BillingInfo> {

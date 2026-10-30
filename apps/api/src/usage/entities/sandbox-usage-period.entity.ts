@@ -11,6 +11,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 
 @Entity('sandbox_usage_periods')
 @Index('idx_sandbox_usage_periods_sandbox_end', ['sandboxId', 'endAt'])
+@Index('idx_sandbox_usage_periods_org_start', ['organizationId', 'startAt'])
 @Index('sandbox_usage_periods_one_open_period_per_sandbox_idx', ['sandboxId'], {
   unique: true,
   where: '"endAt" IS NULL',

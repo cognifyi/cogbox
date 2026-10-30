@@ -1,14 +1,15 @@
 # OrganizationTier
 
+
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**expiresAt** | **string** |  | [optional] [default to undefined]
+**expiresAt** | **Date** |  | [optional] [default to undefined]
 **hasVerifiedBusinessEmail** | **boolean** |  | [optional] [default to undefined]
 **largestSuccessfulPaymentCents** | **number** |  | [optional] [default to undefined]
-**largestSuccessfulPaymentDate** | **string** |  | [optional] [default to undefined]
-**radarEvaluatedAt** | **string** |  | [optional] [default to undefined]
+**largestSuccessfulPaymentDate** | **Date** |  | [optional] [default to undefined]
+**radarEvaluatedAt** | **Date** |  | [optional] [default to undefined]
 **radarVerified** | **boolean** |  | [optional] [default to undefined]
 **tier** | **number** |  | [optional] [default to undefined]
 

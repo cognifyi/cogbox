@@ -208,7 +208,7 @@ const Wallet = () => {
     [selectedOrganization],
   )
 
-  const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
+  const isPostPaid = wallet?.billingType === BillingType.POST_PAID
   const showCreditCardBonusPrompt = Boolean(
     hasNoPaymentMethod && user?.profile.email_verified && selectedOrganization?.personal,
   )

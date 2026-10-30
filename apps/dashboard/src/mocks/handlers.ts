@@ -82,8 +82,8 @@ export const handlers = [
   http.get(`${BILLING_API_URL}/v2/organization/:organizationId/usage`, async () => {
     return HttpResponse.json<OrganizationUsage>({
       amountCents: 5000,
-      from: new Date('2026-06-01').toISOString(),
-      to: new Date('2026-06-30').toISOString(),
+      from: new Date('2026-06-01'),
+      to: new Date('2026-06-30'),
       totalAmountCents: 5000,
       usageCharges: [],
     })
@@ -92,8 +92,8 @@ export const handlers = [
     return HttpResponse.json<OrganizationUsage[]>([
       {
         amountCents: 5000,
-        from: new Date('2026-06-01').toISOString(),
-        to: new Date('2026-06-30').toISOString(),
+        from: new Date('2026-06-01'),
+        to: new Date('2026-06-30'),
         totalAmountCents: 5000,
         usageCharges: [],
       },
@@ -134,7 +134,7 @@ export const handlers = [
         {
           id: 'ch_mock_001',
           amountCents: 5000,
-          createdAt: new Date().toISOString(),
+          createdAt: new Date(),
           currency: 'usd',
           description: 'Sandbox usage',
           status: 'succeeded',
@@ -146,9 +146,9 @@ export const handlers = [
   http.get(`${BILLING_API_URL}/organization/:organizationId/tier`, async () => {
     return HttpResponse.json<OrganizationTier>({
       tier: 2,
-      largestSuccessfulPaymentDate: new Date().toISOString(),
+      largestSuccessfulPaymentDate: new Date(),
       largestSuccessfulPaymentCents: 1000,
-      expiresAt: new Date().toISOString(),
+      expiresAt: new Date(),
       hasVerifiedBusinessEmail: true,
     })
   }),
@@ -159,7 +159,7 @@ export const handlers = [
         verified: true,
         owner: true,
         business: false,
-        verifiedAt: new Date().toISOString(),
+        verifiedAt: new Date(),
       },
     ])
   }),
@@ -173,8 +173,8 @@ export const handlers = [
         id: 'inv-001',
         number: 'INV-2026-001',
         currency: 'USD',
-        issuingDate: new Date('2026-01-01').toISOString(),
-        paymentDueDate: new Date('2026-01-15').toISOString(),
+        issuingDate: new Date('2026-01-01'),
+        paymentDueDate: new Date('2026-01-15'),
         paymentOverdue: false,
         paymentStatus: 'succeeded',
         sequentialId: 1,
@@ -188,8 +188,8 @@ export const handlers = [
         id: 'inv-004',
         number: 'INV-2025-010',
         currency: 'USD',
-        issuingDate: new Date('2025-10-01').toISOString(),
-        paymentDueDate: new Date('2025-10-15').toISOString(),
+        issuingDate: new Date('2025-10-01'),
+        paymentDueDate: new Date('2025-10-15'),
         paymentOverdue: true,
         paymentStatus: 'pending',
         sequentialId: 10,
@@ -203,8 +203,8 @@ export const handlers = [
         id: 'inv-009',
         number: 'INV-2030-010',
         currency: 'USD',
-        issuingDate: new Date('2025-10-01').toISOString(),
-        paymentDueDate: new Date('2030-10-15').toISOString(),
+        issuingDate: new Date('2025-10-01'),
+        paymentDueDate: new Date('2030-10-15'),
         paymentOverdue: false,
         paymentStatus: 'pending',
         sequentialId: 10,
@@ -218,8 +218,8 @@ export const handlers = [
         id: 'inv-005',
         number: 'INV-2025-009',
         currency: 'USD',
-        issuingDate: new Date('2025-09-01').toISOString(),
-        paymentDueDate: new Date('2025-09-15').toISOString(),
+        issuingDate: new Date('2025-09-01'),
+        paymentDueDate: new Date('2025-09-15'),
         paymentOverdue: false,
         paymentStatus: 'failed',
         sequentialId: 9,

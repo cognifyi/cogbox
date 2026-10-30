@@ -1,11 +1,12 @@
 # Charge
 
+
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **amountCents** | **number** |  | [optional] [default to undefined]
-**createdAt** | **string** |  | [optional] [default to undefined]
+**createdAt** | **Date** |  | [optional] [default to undefined]
 **currency** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
 **failureMessage** | **string** |  | [optional] [default to undefined]

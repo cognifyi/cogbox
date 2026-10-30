@@ -1,10 +1,11 @@
 # Organization
 
+
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**createdAt** | **string** |  | [optional] [default to undefined]
+**createdAt** | **Date** |  | [optional] [default to undefined]
 **createdBy** | **string** |  | [optional] [default to undefined]
 **creator** | [**User**](User.md) |  | [optional] [default to undefined]
 **defaultRegionId** | **string** |  | [optional] [default to undefined]

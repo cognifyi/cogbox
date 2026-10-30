@@ -1,5 +1,6 @@
 # OrganizationEmail
 
+
 ## Properties
 
 Name | Type | Description | Notes
@@ -8,7 +9,7 @@ Name | Type | Description | Notes
 **email** | **string** |  | [default to undefined]
 **owner** | **boolean** |  | [optional] [default to undefined]
 **verified** | **boolean** |  | [optional] [default to undefined]
-**verifiedAt** | **string** |  | [optional] [default to undefined]
+**verifiedAt** | **Date** |  | [optional] [default to undefined]
 
 ## Example
 
