@@ -1,6 +1,5 @@
 # InvoiceType
 
-
 ## Enum
 
 * `SUBSCRIPTION` (value: `'subscription'`)

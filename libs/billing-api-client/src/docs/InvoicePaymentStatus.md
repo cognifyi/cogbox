@@ -1,6 +1,5 @@
 # InvoicePaymentStatus
 
-
 ## Enum
 
 * `PENDING` (value: `'pending'`)
