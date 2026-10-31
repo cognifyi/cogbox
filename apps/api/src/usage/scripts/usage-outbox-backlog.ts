@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, DataSourceOptions, Repository } from 'typeorm'
 import { USAGE_OUTBOX_STATUSES, UsageOutbox } from '../entities/usage-outbox.entity'
 
 export const DEFAULT_BACKLOG_ALERT_THRESHOLD = 1000
@@ -123,7 +123,9 @@ export async function runUsageOutboxBacklog(options: {
 }
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
-  const { baseDataSourceOptions } = await import('../../migrations/data-source')
+  const { baseDataSourceOptions } = require('../../migrations/data-source') as {
+    baseDataSourceOptions: DataSourceOptions
+  }
   const dataSource = new DataSource(baseDataSourceOptions)
 
   await dataSource.initialize()
