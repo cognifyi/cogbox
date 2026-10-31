@@ -1,6 +1,6 @@
 # TierApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -10,6 +10,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**upgradeTier**](#upgradetier) | **POST** /organization/{organizationId}/tier/upgrade | Upgrade organization tier|
 
 # **downgradeTier**
+>
 > downgradeTier(organizationTierUpdate)
 
 Requests a tier downgrade.
@@ -42,7 +43,6 @@ const { status, data } = await apiInstance.downgradeTier(
 | **organizationTierUpdate** | **OrganizationTierUpdate**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -53,11 +53,11 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Tier downgrade accepted. |  -  |
@@ -65,6 +65,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getTier**
+>
 > OrganizationTier getTier()
 
 Returns the organization\'s current tier and verification state.
@@ -93,7 +94,6 @@ const { status, data } = await apiInstance.getTier(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **OrganizationTier**
@@ -104,11 +104,11 @@ const { status, data } = await apiInstance.getTier(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Organization tier. |  -  |
@@ -116,6 +116,7 @@ const { status, data } = await apiInstance.getTier(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listTiers**
+>
 > Array<Tier> listTiers()
 
 Returns the public tier catalog.
@@ -135,8 +136,8 @@ const { status, data } = await apiInstance.listTiers();
 ```
 
 ### Parameters
-This endpoint does not have any parameters.
 
+This endpoint does not have any parameters.
 
 ### Return type
 
@@ -148,11 +149,11 @@ This endpoint does not have any parameters.
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Tier catalog. |  -  |
@@ -160,6 +161,7 @@ This endpoint does not have any parameters.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **upgradeTier**
+>
 > upgradeTier(organizationTierUpdate)
 
 Requests a tier upgrade.
@@ -192,7 +194,6 @@ const { status, data } = await apiInstance.upgradeTier(
 | **organizationTierUpdate** | **OrganizationTierUpdate**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -203,14 +204,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Tier upgrade accepted. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -1,6 +1,6 @@
 # CouponApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -8,6 +8,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**redeemV2Coupon**](#redeemv2coupon) | **POST** /v2/organization/{organizationId}/redeem-coupon/{couponCode} | Redeem coupon (v2)|
 
 # **redeemCoupon**
+>
 > Organization redeemCoupon()
 
 Redeems a coupon for the organization.
@@ -39,7 +40,6 @@ const { status, data } = await apiInstance.redeemCoupon(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **couponCode** | [**string**] | Coupon code. | defaults to undefined|
 
-
 ### Return type
 
 **Organization**
@@ -50,11 +50,11 @@ const { status, data } = await apiInstance.redeemCoupon(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Updated organization. |  -  |
@@ -62,6 +62,7 @@ const { status, data } = await apiInstance.redeemCoupon(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **redeemV2Coupon**
+>
 > { [key: string]: string; } redeemV2Coupon()
 
 Redeems a coupon for the organization.
@@ -93,7 +94,6 @@ const { status, data } = await apiInstance.redeemV2Coupon(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **couponCode** | [**string**] | Coupon code. | defaults to undefined|
 
-
 ### Return type
 
 **{ [key: string]: string; }**
@@ -104,14 +104,13 @@ const { status, data } = await apiInstance.redeemV2Coupon(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Redemption result. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

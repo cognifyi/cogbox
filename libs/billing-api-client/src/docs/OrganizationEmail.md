@@ -1,6 +1,5 @@
 # OrganizationEmail
 
-
 ## Properties
 
 Name | Type | Description | Notes

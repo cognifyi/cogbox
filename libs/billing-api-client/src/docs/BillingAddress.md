@@ -1,6 +1,5 @@
 # BillingAddress
 
-
 ## Properties
 
 Name | Type | Description | Notes

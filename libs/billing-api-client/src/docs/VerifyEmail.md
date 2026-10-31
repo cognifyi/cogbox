@@ -1,6 +1,5 @@
 # VerifyEmail
 
-
 ## Properties
 
 Name | Type | Description | Notes
