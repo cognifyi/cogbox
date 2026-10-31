@@ -114,11 +114,7 @@ class InMemoryUsageOutbox {
     return affected
   }
 
-  async markFailed(
-    row: UsageOutbox,
-    category: 'retryable' | 'terminal',
-    error: unknown,
-  ): Promise<UsageOutbox> {
+  async markFailed(row: UsageOutbox, category: 'retryable' | 'terminal', error: unknown): Promise<UsageOutbox> {
     row.attempts += 1
     row.lastError = error instanceof Error ? error.message : String(error)
 
@@ -193,7 +189,11 @@ function makeConfig(basePath: string, overrides: Partial<BillingUsageConfig> = {
   } as unknown as TypedConfigService
 }
 
-function makeRelay(options: { basePath: string; outbox: InMemoryUsageOutbox; overrides?: Partial<BillingUsageConfig> }) {
+function makeRelay(options: {
+  basePath: string
+  outbox: InMemoryUsageOutbox
+  overrides?: Partial<BillingUsageConfig>
+}) {
   const configService = makeConfig(options.basePath, options.overrides)
   const redisLockProvider = {
     lock: jest.fn().mockResolvedValue(true),

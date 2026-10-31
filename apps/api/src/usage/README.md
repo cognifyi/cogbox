@@ -146,11 +146,13 @@ and eventually `dead`. Recovery steps:
 4. For rows already `dead`, triage `lastError`. If the cause was transient (e.g. an
    expired key that has since been fixed), reset them for retry with the operator SQL
    below, then let the relay drain them:
+
    ```sql
    UPDATE usage_outbox
    SET status = 'pending', attempts = 0, "nextAttemptAt" = now(), "lastError" = NULL
    WHERE status = 'dead';
    ```
+
    Events are idempotent on `eventId`, so replaying a partially delivered period is safe.
 
 ## Postgres integration tests
