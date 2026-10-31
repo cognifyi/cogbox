@@ -1,6 +1,5 @@
 # UpdateOrganizationEmail
 
-
 ## Properties
 
 Name | Type | Description | Notes

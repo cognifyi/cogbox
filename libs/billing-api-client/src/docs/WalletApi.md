@@ -1,6 +1,6 @@
 # WalletApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -12,6 +12,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**topUpWallet**](#topupwallet) | **POST** /organization/{organizationId}/wallet/top-up | Create wallet top-up (v1)|
 
 # **getV2Wallet**
+>
 > OrganizationWallet getV2Wallet()
 
 Returns the wallet balance and automatic top-up configuration.
@@ -40,7 +41,6 @@ const { status, data } = await apiInstance.getV2Wallet(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **OrganizationWallet**
@@ -51,11 +51,11 @@ const { status, data } = await apiInstance.getV2Wallet(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Organization wallet. |  -  |
@@ -63,6 +63,7 @@ const { status, data } = await apiInstance.getV2Wallet(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getWallet**
+>
 > OrganizationWallet getWallet()
 
 Returns the wallet balance and automatic top-up configuration.
@@ -91,7 +92,6 @@ const { status, data } = await apiInstance.getWallet(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **OrganizationWallet**
@@ -102,11 +102,11 @@ const { status, data } = await apiInstance.getWallet(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Organization wallet. |  -  |
@@ -114,6 +114,7 @@ const { status, data } = await apiInstance.getWallet(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **setAutomaticTopUp**
+>
 > setAutomaticTopUp(automaticTopUp)
 
 Enables, updates or disables automatic wallet top-up.
@@ -146,7 +147,6 @@ const { status, data } = await apiInstance.setAutomaticTopUp(
 | **automaticTopUp** | **AutomaticTopUp**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -157,11 +157,11 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Automatic top-up updated. |  -  |
@@ -169,6 +169,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **setV2AutomaticTopUp**
+>
 > setV2AutomaticTopUp(automaticTopUp)
 
 Enables, updates or disables automatic wallet top-up.
@@ -201,7 +202,6 @@ const { status, data } = await apiInstance.setV2AutomaticTopUp(
 | **automaticTopUp** | **AutomaticTopUp**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -212,11 +212,11 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Automatic top-up updated. |  -  |
@@ -224,6 +224,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **topUpV2Wallet**
+>
 > PaymentUrl topUpV2Wallet(walletTopUpRequest)
 
 Creates a Stripe payment link for a wallet top-up.
@@ -256,7 +257,6 @@ const { status, data } = await apiInstance.topUpV2Wallet(
 | **walletTopUpRequest** | **WalletTopUpRequest**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **PaymentUrl**
@@ -267,11 +267,11 @@ const { status, data } = await apiInstance.topUpV2Wallet(
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
-
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Payment URL. |  -  |
@@ -279,6 +279,7 @@ const { status, data } = await apiInstance.topUpV2Wallet(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **topUpWallet**
+>
 > PaymentUrl topUpWallet(walletTopUpRequest)
 
 Creates a Stripe payment link for a wallet top-up.
@@ -311,7 +312,6 @@ const { status, data } = await apiInstance.topUpWallet(
 | **walletTopUpRequest** | **WalletTopUpRequest**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **PaymentUrl**
@@ -322,14 +322,13 @@ const { status, data } = await apiInstance.topUpWallet(
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
-
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Payment URL. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

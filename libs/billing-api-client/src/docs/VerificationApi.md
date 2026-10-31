@@ -1,12 +1,13 @@
 # VerificationApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**verifyInternetAccess**](#verifyinternetaccess) | **POST** /organization/{organizationId}/verify-internet-access | Verify internet access|
 
 # **verifyInternetAccess**
+>
 > verifyInternetAccess(verifyInternetAccess)
 
 Verifies a Stripe Radar session token to unlock unrestricted egress.
@@ -39,7 +40,6 @@ const { status, data } = await apiInstance.verifyInternetAccess(
 | **verifyInternetAccess** | **VerifyInternetAccess**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -50,14 +50,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Verification accepted. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

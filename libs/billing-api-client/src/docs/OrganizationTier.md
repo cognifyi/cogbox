@@ -1,6 +1,5 @@
 # OrganizationTier
 
-
 ## Properties
 
 Name | Type | Description | Notes
