@@ -1,6 +1,6 @@
 # InvoicesApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -11,6 +11,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**voidInvoice**](#voidinvoice) | **POST** /organization/{organizationId}/invoices/{invoiceId}/void | Void invoice|
 
 # **createPaymentUrl**
+>
 > PaymentUrl createPaymentUrl()
 
 Creates a Stripe payment link for an outstanding invoice.
@@ -42,7 +43,6 @@ const { status, data } = await apiInstance.createPaymentUrl(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **invoiceId** | [**string**] | Invoice identifier. | defaults to undefined|
 
-
 ### Return type
 
 **PaymentUrl**
@@ -53,11 +53,11 @@ const { status, data } = await apiInstance.createPaymentUrl(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Payment URL. |  -  |
@@ -65,6 +65,7 @@ const { status, data } = await apiInstance.createPaymentUrl(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **createV2PaymentURL**
+>
 > PaymentUrl createV2PaymentURL()
 
 Creates a Stripe payment link for an outstanding invoice.
@@ -96,7 +97,6 @@ const { status, data } = await apiInstance.createV2PaymentURL(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **invoiceId** | [**string**] | Invoice identifier. | defaults to undefined|
 
-
 ### Return type
 
 **PaymentUrl**
@@ -107,11 +107,11 @@ const { status, data } = await apiInstance.createV2PaymentURL(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Payment URL. |  -  |
@@ -119,6 +119,7 @@ const { status, data } = await apiInstance.createV2PaymentURL(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listInvoices**
+>
 > PaginatedTInvoice listInvoices()
 
 Returns a paginated invoice list.
@@ -153,7 +154,6 @@ const { status, data } = await apiInstance.listInvoices(
 | **page** | [**number**] | Page number (1-based). | (optional) defaults to 1|
 | **perPage** | [**number**] | Page size. | (optional) defaults to 20|
 
-
 ### Return type
 
 **PaginatedTInvoice**
@@ -164,11 +164,11 @@ const { status, data } = await apiInstance.listInvoices(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Paginated invoices. |  -  |
@@ -176,6 +176,7 @@ const { status, data } = await apiInstance.listInvoices(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listV2Invoices**
+>
 > PaginatedTInvoice listV2Invoices()
 
 Returns a paginated invoice list.
@@ -210,7 +211,6 @@ const { status, data } = await apiInstance.listV2Invoices(
 | **page** | [**number**] | Page number (1-based). | (optional) defaults to 1|
 | **perPage** | [**number**] | Page size. | (optional) defaults to 20|
 
-
 ### Return type
 
 **PaginatedTInvoice**
@@ -221,11 +221,11 @@ const { status, data } = await apiInstance.listV2Invoices(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Paginated invoices. |  -  |
@@ -233,6 +233,7 @@ const { status, data } = await apiInstance.listV2Invoices(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **voidInvoice**
+>
 > voidInvoice()
 
 Voids an unpaid invoice.
@@ -264,7 +265,6 @@ const { status, data } = await apiInstance.voidInvoice(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **invoiceId** | [**string**] | Invoice identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -275,14 +275,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
-
+- **Content-Type**: Not defined
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Invoice voided. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
