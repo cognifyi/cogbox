@@ -34,6 +34,7 @@ function createBuilder() {
   builder.execute = jest.fn().mockResolvedValue({ identifiers: [{ id: '1' }] })
   builder.getMany = jest.fn().mockResolvedValue([])
   builder.getRawMany = jest.fn().mockResolvedValue([])
+  builder.getRawOne = jest.fn().mockResolvedValue({ count: '0' })
   return builder
 }
 
@@ -51,10 +52,14 @@ function makeConfig(overrides: { maxAttempts?: number; baseBackoffMs?: number; m
 
 function makeHarness(overrides?: { maxAttempts?: number; baseBackoffMs?: number; maxBackoffMs?: number }) {
   const builder = createBuilder()
-  const transactionManager = { createQueryBuilder: jest.fn(() => builder) }
+  const transactionManager = {
+    createQueryBuilder: jest.fn(() => builder),
+    query: jest.fn().mockResolvedValue([]),
+  }
   const repository = {
     manager: {
       createQueryBuilder: jest.fn(() => builder),
+      query: transactionManager.query,
       transaction: jest.fn(async (callback: (manager: unknown) => Promise<unknown>) => callback(transactionManager)),
     },
     createQueryBuilder: jest.fn(() => builder),
@@ -137,25 +142,40 @@ describe('UsageOutboxService', () => {
   })
 
   describe('claimDue', () => {
-    it('claims due pending or failed rows with a skip-locked pessimistic transaction', async () => {
-      const { service, repository, builder } = makeHarness()
+    it('leases due rows atomically with SKIP LOCKED so locks cannot be reused after release', async () => {
+      const { service, transactionManager } = makeHarness()
       const dueRow = makeRow()
-      builder.getMany.mockResolvedValue([dueRow])
+      transactionManager.query.mockResolvedValue([dueRow])
 
       await expect(service.claimDue(25)).resolves.toEqual([dueRow])
 
-      expect(repository.manager.transaction).toHaveBeenCalledTimes(1)
-      expect(builder.setLock).toHaveBeenCalledWith('pessimistic_write')
-      expect(builder.setOnLocked).toHaveBeenCalledWith('skip_locked')
+      const [sql, params] = transactionManager.query.mock.calls[0] as [string, unknown[]]
+      expect(sql).toContain('FOR UPDATE SKIP LOCKED')
+      expect(sql).toContain('UPDATE "usage_outbox"')
+      expect(sql).toContain('RETURNING outbox.*')
+      expect(params).toEqual(['pending', 'failed', 25, 300000])
+    })
+
+    it('does not query when the batch limit is not positive', async () => {
+      const { service, transactionManager } = makeHarness()
+
+      await expect(service.claimDue(0)).resolves.toEqual([])
+      expect(transactionManager.query).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('countDue', () => {
+    it('counts due pending and failed rows without locking or mutating them', async () => {
+      const { service, builder } = makeHarness()
+      builder.getRawOne.mockResolvedValue({ count: '7' })
+
+      await expect(service.countDue()).resolves.toBe(7)
+
+      expect(builder.setLock).not.toHaveBeenCalled()
+      expect(builder.select).toHaveBeenCalledWith('COUNT(*)', 'count')
       expect(builder.where).toHaveBeenCalledWith(expect.stringContaining('status IN'), {
         statuses: ['pending', 'failed'],
       })
-      expect(builder.andWhere).toHaveBeenCalledWith(expect.stringContaining('nextAttemptAt <='), {
-        now: expect.any(Date),
-      })
-      expect(builder.orderBy).toHaveBeenCalledWith('outbox.nextAttemptAt', 'ASC')
-      expect(builder.addOrderBy).toHaveBeenCalledWith('outbox.id', 'ASC')
-      expect(builder.limit).toHaveBeenCalledWith(25)
     })
   })
 
@@ -166,7 +186,7 @@ describe('UsageOutboxService', () => {
       await expect(service.markSent(['1', '2'])).resolves.toBe(2)
 
       expect(repository.update).toHaveBeenCalledWith(
-        { id: expect.anything() },
+        { id: expect.anything(), status: expect.anything() },
         { status: 'sent', sentAt: expect.any(Date) },
       )
       expect((repository.update.mock.calls[0][0] as { id: { value: string[] } }).id.value).toEqual(['1', '2'])

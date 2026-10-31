@@ -102,6 +102,14 @@ class InMemoryUsageOutbox {
       .slice(0, limit)
   }
 
+  async countDue(): Promise<number> {
+    const now = Date.now()
+
+    return this.rows.filter(
+      (row) => (row.status === 'pending' || row.status === 'failed') && row.nextAttemptAt.getTime() <= now,
+    ).length
+  }
+
   async markSent(ids: UsageOutbox['id'][]): Promise<number> {
     let affected = 0
     for (const row of this.rows) {

@@ -36,7 +36,7 @@ All flags are read from the API configuration (`billingUsage` in
 | Variable | Default | Meaning |
 |---|---|---|
 | `BILLING_USAGE_ENABLED` | `false` | Master switch. When `false`, periods are archived without generating or enqueueing events, and the relay does nothing. |
-| `BILLING_USAGE_DRY_RUN` | `true` (anything except `false`) | When `true`, the relay claims due rows only to measure backlog and never calls billing or mutates the outbox. Requires `BILLING_USAGE_ENABLED=true` to have any effect. |
+| `BILLING_USAGE_DRY_RUN` | `true` (anything except `false`) | When `true`, the relay only counts due rows to measure backlog and never calls billing, locks or mutates the outbox. Requires `BILLING_USAGE_ENABLED=true` to have any effect. |
 | `BILLING_USAGE_ADMIN_KEY` | unset | Admin key sent as `X-Admin-Key`. **Required when `BILLING_USAGE_ENABLED=true`** — the API fails to start without it. |
 | `BILLING_USAGE_BASE_PATH` | `BILLING_API_URL` or `http://localhost:3001` | Billing API base URL. |
 | `BILLING_USAGE_PRICE_VERSION` | empty string | Price version stamped on every event (`price_version`). Set it before enabling delivery. |
@@ -66,9 +66,13 @@ Run these steps in order. Do not skip ahead.
 
 ## Retry, dead-letter, and backoff
 
-The relay runs every 30 seconds under a Redis lock. It claims up to
+The relay runs every 30 seconds under a Redis lock. In one atomic statement it locks up to
 `BILLING_USAGE_BATCH_SIZE` due `pending`/`failed` rows (`nextAttemptAt <= now`, ordered by
-`nextAttemptAt`) and ingests the batch. A batch failure is applied to each row.
+`nextAttemptAt`, `FOR UPDATE SKIP LOCKED`), leases them by moving `nextAttemptAt` forward
+by five minutes, and returns them; then it ingests the batch. The lease outlives the row
+locks, so another replica cannot re-claim the batch after the transaction commits, and a
+crashed relay retries the rows when the lease expires. A batch failure is applied to each
+row.
 
 Failure classification:
 
@@ -178,6 +182,7 @@ and the `usage_outbox` table is retained with all undelivered (`pending`, `faile
 `BILLING_USAGE_DRY_RUN=true` when you want to keep observing backlog without sending.
 
 **Never run migration `down()` as a routine rollback.** The `usage_outbox` migration's
-`down()` drops the table and therefore discards every undelivered usage event. It is
-**incident-only / manual** and may run only after the outbox has been reconciled or
-replayed and an incident commander has explicitly approved it.
+`down()` drops the table and therefore discards every undelivered usage event. It refuses
+to run while any `pending`, `failed` or `dead` row exists, and is **incident-only /
+manual**: it may run only after the outbox has been reconciled or replayed and an incident
+commander has explicitly approved it.

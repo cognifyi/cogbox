@@ -164,6 +164,12 @@ function createFakePersistence(db: Database) {
         }
         return [...counts.entries()].map(([status, count]) => ({ status, count: String(count) }))
       },
+      async getRawOne() {
+        const count = db.outbox.filter(
+          (row) => state.statuses.includes(row.status) && row.nextAttemptAt.getTime() <= state.now.getTime(),
+        ).length
+        return { count: String(count) }
+      },
     }
 
     return builder
@@ -201,6 +207,23 @@ function createFakePersistence(db: Database) {
       return entities
     },
     createQueryBuilder,
+    async query(_sql: string, params: [string, string, number, number]) {
+      const [pending, failed, limit, leaseMs] = params
+      const now = Date.now()
+      const due = db.outbox
+        .filter((row) => (row.status === pending || row.status === failed) && row.nextAttemptAt.getTime() <= now)
+        .sort(
+          (left, right) =>
+            left.nextAttemptAt.getTime() - right.nextAttemptAt.getTime() || Number(left.id) - Number(right.id),
+        )
+        .slice(0, limit)
+
+      for (const row of due) {
+        row.nextAttemptAt = new Date(now + leaseMs)
+      }
+
+      return due
+    },
     async transaction<T>(callback: (transactionManager: typeof manager) => Promise<T>): Promise<T> {
       return callback(manager)
     },

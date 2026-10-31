@@ -14,6 +14,7 @@ import {
   USAGE_OUTBOX_DEFAULT_BASE_BACKOFF_MS,
   USAGE_OUTBOX_DEFAULT_MAX_ATTEMPTS,
   USAGE_OUTBOX_DEFAULT_MAX_BACKOFF_MS,
+  USAGE_OUTBOX_CLAIM_LEASE_MS,
   USAGE_OUTBOX_DUE_STATUSES,
   USAGE_OUTBOX_FAILURE_RETRYABLE,
   USAGE_OUTBOX_FAILURE_TERMINAL,
@@ -63,18 +64,35 @@ export class UsageOutboxService {
       return []
     }
 
-    return this.outboxRepository.manager.transaction(async (manager) => {
-      return manager
-        .createQueryBuilder(UsageOutbox, 'outbox')
-        .setLock('pessimistic_write')
-        .setOnLocked('skip_locked')
-        .where('outbox.status IN (:...statuses)', { statuses: [...USAGE_OUTBOX_DUE_STATUSES] })
-        .andWhere('outbox.nextAttemptAt <= :now', { now: new Date() })
-        .orderBy('outbox.nextAttemptAt', 'ASC')
-        .addOrderBy('outbox.id', 'ASC')
-        .limit(limit)
-        .getMany()
-    })
+    // One atomic statement: due rows are locked (SKIP LOCKED), leased by moving
+    // nextAttemptAt forward, and returned. The lease survives the transaction so a
+    // second replica cannot claim the same rows after the locks are released.
+    return this.outboxRepository.manager.query<UsageOutbox[]>(
+      `WITH due AS (
+         SELECT id FROM "usage_outbox"
+         WHERE status IN ($1, $2) AND "nextAttemptAt" <= now()
+         ORDER BY "nextAttemptAt" ASC, id ASC
+         LIMIT $3
+         FOR UPDATE SKIP LOCKED
+       )
+       UPDATE "usage_outbox" AS outbox
+       SET "nextAttemptAt" = now() + ($4::int * interval '1 millisecond')
+       FROM due
+       WHERE outbox.id = due.id
+       RETURNING outbox.*`,
+      [USAGE_OUTBOX_STATUS_PENDING, USAGE_OUTBOX_STATUS_FAILED, limit, USAGE_OUTBOX_CLAIM_LEASE_MS],
+    )
+  }
+
+  async countDue(): Promise<number> {
+    const raw = await this.outboxRepository
+      .createQueryBuilder('outbox')
+      .select('COUNT(*)', 'count')
+      .where('outbox.status IN (:...statuses)', { statuses: [...USAGE_OUTBOX_DUE_STATUSES] })
+      .andWhere('outbox.nextAttemptAt <= :now', { now: new Date() })
+      .getRawOne<{ count: string }>()
+
+    return Number(raw?.count ?? 0)
   }
 
   async markSent(ids: UsageOutbox['id'][]): Promise<number> {
@@ -83,7 +101,7 @@ export class UsageOutboxService {
     }
 
     const result = await this.outboxRepository.update(
-      { id: In(ids) },
+      { id: In(ids), status: In([...USAGE_OUTBOX_DUE_STATUSES]) },
       { status: USAGE_OUTBOX_STATUS_SENT, sentAt: new Date() },
     )
 

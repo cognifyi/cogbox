@@ -139,18 +139,19 @@ export class BillingUsageRelayService {
 
     try {
       const batchSize = billingUsage.batchSize ?? DEFAULT_BATCH_SIZE
-      const rows = await this.usageOutboxService.claimDue(batchSize)
-
       if (billingUsage.dryRun) {
-        // Documented backpressure: dry-run only observes due rows. It never calls
-        // billing and never mutates them, so the outbox keeps growing until a
-        // rollout with BILLING_USAGE_DRY_RUN=false drains it.
+        // Documented backpressure: dry-run only counts due rows. It never locks,
+        // mutates or sends them, so the outbox keeps growing until a rollout with
+        // BILLING_USAGE_DRY_RUN=false drains it.
+        const dueCount = await this.usageOutboxService.countDue()
         this.logger.log(
-          `Billing usage relay dry-run: ${rows.length} due outbox event(s) left pending; billing was not called`,
+          `Billing usage relay dry-run: ${dueCount} due outbox event(s) left pending; billing was not called`,
         )
         await this.refreshBacklogMetrics()
         return
       }
+
+      const rows = await this.usageOutboxService.claimDue(batchSize)
 
       if (rows.length === 0) {
         await this.refreshBacklogMetrics()

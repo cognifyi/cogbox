@@ -16,10 +16,19 @@ export class Migration1794000000000 implements MigrationInterface {
     await queryRunner.query(`CREATE INDEX "usage_outbox_due_idx" ON "usage_outbox" (status, "nextAttemptAt")`)
   }
 
-  // INCIDENT-ONLY / manual: down() discards undelivered usage events, so it
-  // must never run as part of a routine rollback. Reconcile or replay the
-  // outbox before dropping the table.
+  // INCIDENT-ONLY / manual: down() would discard undelivered usage events, so it
+  // refuses to run while any row is still pending, failed or dead.
   public async down(queryRunner: QueryRunner): Promise<void> {
+    const [{ count }] = (await queryRunner.query(
+      `SELECT COUNT(*)::int AS count FROM "usage_outbox" WHERE status <> 'sent'`,
+    )) as [{ count: number }]
+
+    if (Number(count) > 0) {
+      throw new Error(
+        `Refusing to drop usage_outbox: ${count} undelivered event(s) remain (status pending/failed/dead). Replay or reconcile them first.`,
+      )
+    }
+
     await queryRunner.query(`DROP INDEX "usage_outbox_due_idx"`)
     await queryRunner.query(`DROP INDEX "usage_outbox_event_id_key"`)
     await queryRunner.query(`DROP TABLE "usage_outbox"`)

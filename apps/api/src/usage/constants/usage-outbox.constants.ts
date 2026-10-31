@@ -35,6 +35,9 @@ export const USAGE_OUTBOX_DEFAULT_MAX_ATTEMPTS = 8
 export const USAGE_OUTBOX_DEFAULT_BASE_BACKOFF_MS = 1000
 export const USAGE_OUTBOX_DEFAULT_MAX_BACKOFF_MS = 300000
 export const USAGE_OUTBOX_MAX_ERROR_LENGTH = 2000
+// A claimed row is leased this long; a crashed relay therefore retries it after the lease
+// instead of stranding it forever. Must exceed the slowest expected batch.
+export const USAGE_OUTBOX_CLAIM_LEASE_MS = 300000
 
 export const USAGE_OUTBOX_FAILURE_RETRYABLE = 'retryable'
 export const USAGE_OUTBOX_FAILURE_TERMINAL = 'terminal'
