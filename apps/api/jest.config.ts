@@ -12,6 +12,9 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   transformIgnorePatterns: ['/node_modules/(?!uuid)'],
+  moduleNameMapper: {
+    '^@cogbox/billing-api-client$': '<rootDir>/../../libs/billing-api-client/src/index.ts',
+  },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/cogbox',
 }
