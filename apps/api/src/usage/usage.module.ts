@@ -12,13 +12,19 @@ import { SandboxUsagePeriod } from './entities/sandbox-usage-period.entity'
 import { UsageService } from './services/usage.service'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SandboxUsagePeriodArchive } from './entities/sandbox-usage-period-archive.entity'
+import { UsageOutbox } from './entities/usage-outbox.entity'
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
 import { SandboxLookupCacheInvalidationService } from '../sandbox/services/sandbox-lookup-cache-invalidation.service'
 import { Sandbox } from '../sandbox/entities/sandbox.entity'
 import { Region } from '../region/entities/region.entity'
+import { UsageEventMapperService } from './services/usage-event-mapper.service'
+import { UsageOutboxService } from './services/usage-outbox.service'
+import { UsageOutboxMetricsService } from './services/usage-outbox.metrics.service'
+import { BillingUsageRelayService } from './services/billing-usage-relay.service'
+import { billingUsageClientProvider } from './providers/billing-usage-client.provider'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod, Sandbox, SandboxUsagePeriodArchive, Region])],
+  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod, Sandbox, SandboxUsagePeriodArchive, Region, UsageOutbox])],
   providers: [
     UsageService,
     RedisLockProvider,
@@ -32,7 +38,12 @@ import { Region } from '../region/entities/region.entity'
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
       ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
     },
+    UsageEventMapperService,
+    UsageOutboxService,
+    UsageOutboxMetricsService,
+    billingUsageClientProvider,
+    BillingUsageRelayService,
   ],
-  exports: [UsageService],
+  exports: [UsageService, UsageOutboxService],
 })
 export class UsageModule {}
