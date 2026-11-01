@@ -357,6 +357,19 @@ const configuration = {
     force: process.env.DRAINING_FORCE === 'true',
   },
   dontServeDashboard: process.env.DONT_SERVE_DASHBOARD === 'true',
+  billingUsage: {
+    enabled: process.env.BILLING_USAGE_ENABLED === 'true',
+    dryRun: process.env.BILLING_USAGE_DRY_RUN !== 'false',
+    adminKey: process.env.BILLING_USAGE_ADMIN_KEY,
+    basePath: process.env.BILLING_USAGE_BASE_PATH || process.env.BILLING_API_URL || 'http://localhost:3001',
+    priceVersion: process.env.BILLING_USAGE_PRICE_VERSION || '',
+    batchSize: parseInt(process.env.BILLING_USAGE_BATCH_SIZE || '100', 10),
+    maxAttempts: parseInt(process.env.BILLING_USAGE_MAX_ATTEMPTS || '8', 10),
+    baseBackoffMs: parseInt(process.env.BILLING_USAGE_BASE_BACKOFF_MS || '1000', 10),
+    maxBackoffMs: parseInt(process.env.BILLING_USAGE_MAX_BACKOFF_MS || '300000', 10),
+    sentRetentionDays: parseInt(process.env.BILLING_USAGE_SENT_RETENTION_DAYS || '30', 10),
+    backlogAlertThreshold: parseInt(process.env.BILLING_USAGE_BACKLOG_ALERT_THRESHOLD || '1000', 10),
+  },
 }
 
 export { configuration }

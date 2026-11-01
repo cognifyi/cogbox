@@ -72,7 +72,10 @@ runs:
     - uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
       if: inputs.install-ruby == 'true'
       with:
-        ruby-version: '3.4.5'
+        # Track the latest 3.4.x: GitHub's newer runner images (ubuntu-26.04)
+        # only build the current patch release, so an exact pin like 3.4.5
+        # fails with a 404 from ruby-builder.
+        ruby-version: '3.4'
         bundler-cache: false
 
     - name: Bundle install

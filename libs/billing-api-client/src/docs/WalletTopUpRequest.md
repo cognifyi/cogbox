@@ -1,6 +1,5 @@
 # WalletTopUpRequest
 
-
 ## Properties
 
 Name | Type | Description | Notes

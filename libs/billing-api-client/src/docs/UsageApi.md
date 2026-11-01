@@ -1,6 +1,6 @@
 # UsageApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -11,6 +11,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**ingestUsageEvents**](#ingestusageevents) | **POST** /v2/usage/events | Ingest usage events|
 
 # **getCurrentUsage**
+>
 > OrganizationUsage getCurrentUsage()
 
 Returns the current billing period usage.
@@ -39,7 +40,6 @@ const { status, data } = await apiInstance.getCurrentUsage(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **OrganizationUsage**
@@ -50,11 +50,11 @@ const { status, data } = await apiInstance.getCurrentUsage(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Current usage. |  -  |
@@ -62,6 +62,7 @@ const { status, data } = await apiInstance.getCurrentUsage(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getPastUsage**
+>
 > OrganizationUsage getPastUsage()
 
 Returns recent closed billing periods.
@@ -93,7 +94,6 @@ const { status, data } = await apiInstance.getPastUsage(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **periods** | [**number**] | Number of closed periods to return. | (optional) defaults to 12|
 
-
 ### Return type
 
 **OrganizationUsage**
@@ -104,11 +104,11 @@ const { status, data } = await apiInstance.getPastUsage(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Past usage. |  -  |
@@ -116,6 +116,7 @@ const { status, data } = await apiInstance.getPastUsage(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2CurrentUsage**
+>
 > OrganizationUsage getV2CurrentUsage()
 
 Returns the current billing period usage.
@@ -144,7 +145,6 @@ const { status, data } = await apiInstance.getV2CurrentUsage(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **OrganizationUsage**
@@ -155,11 +155,11 @@ const { status, data } = await apiInstance.getV2CurrentUsage(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Current usage. |  -  |
@@ -167,6 +167,7 @@ const { status, data } = await apiInstance.getV2CurrentUsage(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2PastUsage**
+>
 > Array<OrganizationUsage> getV2PastUsage()
 
 Returns recent closed billing periods.
@@ -198,7 +199,6 @@ const { status, data } = await apiInstance.getV2PastUsage(
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 | **periods** | [**number**] | Number of closed periods to return. | (optional) defaults to 12|
 
-
 ### Return type
 
 **Array<OrganizationUsage>**
@@ -209,11 +209,11 @@ const { status, data } = await apiInstance.getV2PastUsage(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Past usage. |  -  |
@@ -221,9 +221,10 @@ const { status, data } = await apiInstance.getV2PastUsage(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **ingestUsageEvents**
+>
 > UsageEventIngestResult ingestUsageEvents(usageEventBatch)
 
-Batch ingestion of normalized usage events. Events are idempotent on `event_id`; duplicates are reported but do not fail the request. 
+Batch ingestion of normalized usage events. Events are idempotent on `event_id`; duplicates are reported but do not fail the request.
 
 ### Example
 
@@ -250,7 +251,6 @@ const { status, data } = await apiInstance.ingestUsageEvents(
 |------------- | ------------- | ------------- | -------------|
 | **usageEventBatch** | **UsageEventBatch**|  | |
 
-
 ### Return type
 
 **UsageEventIngestResult**
@@ -261,14 +261,13 @@ const { status, data } = await apiInstance.ingestUsageEvents(
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
-
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**202** | Events accepted for processing. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

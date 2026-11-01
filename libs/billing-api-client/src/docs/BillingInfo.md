@@ -1,6 +1,5 @@
 # BillingInfo
 
-
 ## Properties
 
 Name | Type | Description | Notes

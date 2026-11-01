@@ -1,6 +1,5 @@
 # UsageEventBatch
 
-
 ## Properties
 
 Name | Type | Description | Notes

@@ -1,6 +1,5 @@
 # BillableMetricCode
 
-
 ## Enum
 
 * `CPU_USAGE` (value: `'cpu_usage'`)

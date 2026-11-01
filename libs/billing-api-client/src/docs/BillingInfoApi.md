@@ -1,6 +1,6 @@
 # BillingInfoApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -10,6 +10,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**listV2PaymentMethods**](#listv2paymentmethods) | **GET** /v2/organization/{organizationId}/payment-methods | List payment methods|
 
 # **getV2BillingInfo**
+>
 > BillingInfo getV2BillingInfo()
 
 Returns billing name, email, phone and address.
@@ -38,7 +39,6 @@ const { status, data } = await apiInstance.getV2BillingInfo(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **BillingInfo**
@@ -49,11 +49,11 @@ const { status, data } = await apiInstance.getV2BillingInfo(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Billing info. |  -  |
@@ -61,6 +61,7 @@ const { status, data } = await apiInstance.getV2BillingInfo(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2BillingSummary**
+>
 > BillingSummary getV2BillingSummary()
 
 Console summary with balance, current period estimate and suspension state.
@@ -89,7 +90,6 @@ const { status, data } = await apiInstance.getV2BillingSummary(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **BillingSummary**
@@ -100,11 +100,11 @@ const { status, data } = await apiInstance.getV2BillingSummary(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Billing summary. |  -  |
@@ -112,6 +112,7 @@ const { status, data } = await apiInstance.getV2BillingSummary(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listV2Charges**
+>
 > ChargeList listV2Charges()
 
 Lists successful and failed Stripe charges.
@@ -146,7 +147,6 @@ const { status, data } = await apiInstance.listV2Charges(
 | **limit** | [**number**] | Page size (1-100, default 25). | (optional) defaults to 25|
 | **startingAfter** | [**string**] | Stripe cursor (charge ID) to paginate after. | (optional) defaults to undefined|
 
-
 ### Return type
 
 **ChargeList**
@@ -157,11 +157,11 @@ const { status, data } = await apiInstance.listV2Charges(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Charge list. |  -  |
@@ -169,6 +169,7 @@ const { status, data } = await apiInstance.listV2Charges(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listV2PaymentMethods**
+>
 > Array<PaymentMethod> listV2PaymentMethods()
 
 Lists card payment methods attached to the Stripe customer.
@@ -197,7 +198,6 @@ const { status, data } = await apiInstance.listV2PaymentMethods(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **Array<PaymentMethod>**
@@ -208,14 +208,13 @@ const { status, data } = await apiInstance.listV2PaymentMethods(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Payment methods. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -24,9 +24,10 @@ COPY apps/docs/ apps/docs/
 COPY apps/api/ apps/api/
 COPY apps/daemon/pkg/toolbox/docs/swagger.json apps/daemon/pkg/toolbox/docs/swagger.json
 
-# Lib dependencies (api imports runner-api-client)
+# Lib dependencies (api imports runner-api-client and billing-api-client)
 COPY libs/runner-api-client/ libs/runner-api-client/
 COPY libs/runner-proto/ libs/runner-proto/
+COPY libs/billing-api-client/ libs/billing-api-client/
 
 # Docs build arguments
 ENV PUBLIC_WEB_URL=https://cogbox.pazity.com

@@ -1,6 +1,6 @@
 # CheckoutApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -8,6 +8,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**getV2CheckoutURL**](#getv2checkouturl) | **GET** /v2/organization/{organizationId}/checkout-url | Get Stripe checkout URL (v2)|
 
 # **getCheckoutUrl**
+>
 > string getCheckoutUrl()
 
 Returns a Stripe checkout URL for the organization.
@@ -36,7 +37,6 @@ const { status, data } = await apiInstance.getCheckoutUrl(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **string**
@@ -47,11 +47,11 @@ const { status, data } = await apiInstance.getCheckoutUrl(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: text/plain
-
+- **Content-Type**: Not defined
+- **Accept**: text/plain
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Checkout URL. |  -  |
@@ -59,6 +59,7 @@ const { status, data } = await apiInstance.getCheckoutUrl(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getV2CheckoutURL**
+>
 > string getV2CheckoutURL()
 
 Returns a Stripe checkout URL for the organization.
@@ -87,7 +88,6 @@ const { status, data } = await apiInstance.getV2CheckoutURL(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **string**
@@ -98,14 +98,13 @@ const { status, data } = await apiInstance.getV2CheckoutURL(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: text/plain
-
+- **Content-Type**: Not defined
+- **Accept**: text/plain
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Checkout URL. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

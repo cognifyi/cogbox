@@ -1,6 +1,5 @@
 # BillingType
 
-
 ## Enum
 
 * `PRE_PAID` (value: `'pre-paid'`)

@@ -1,6 +1,5 @@
 # InvoiceErrorDetail
 
-
 ## Properties
 
 Name | Type | Description | Notes

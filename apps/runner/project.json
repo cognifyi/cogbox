@@ -76,7 +76,7 @@
     "serve": {
       "executor": "@nx-go/nx-go:serve",
       "options": {
-        "cmd": "sudo -E PATH=/usr/local/go/bin:$PATH $(which gow)",
+        "cmd": "sudo -E PATH=/usr/local/go/bin:$PATH COGBOX_API_URL=\"$COGBOX_API_URL\" COGBOX_RUNNER_TOKEN=\"$COGBOX_RUNNER_TOKEN\" API_PORT=\"$API_PORT\" $(which gow)",
         "cwd": ".",
         "main": "{projectRoot}/cmd/runner/main.go"
       },

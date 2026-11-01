@@ -26,6 +26,9 @@ import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-de
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 import { Region } from '../../region/entities/region.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { TypedConfigService } from '../../config/typed-config.service'
+import { UsageEventMapperService } from './usage-event-mapper.service'
+import { UsageOutboxService } from './usage-outbox.service'
 
 @Injectable()
 export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
@@ -39,6 +42,9 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
+    private readonly usageEventMapper: UsageEventMapperService,
+    private readonly usageOutboxService: UsageOutboxService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   async onApplicationShutdown() {
@@ -254,6 +260,19 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
       }
 
       this.logger.debug(`Found ${usagePeriods.length} usage periods to archive`)
+
+      if (this.configService.get('billingUsage.enabled')) {
+        const priceVersion = this.configService.get('billingUsage.priceVersion') ?? ''
+        const usageEvents = usagePeriods
+          .filter((usagePeriod) => usagePeriod.organizationId !== SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION)
+          .flatMap((usagePeriod) => this.usageEventMapper.mapPeriod(usagePeriod, priceVersion))
+
+        if (usageEvents.length > 0) {
+          // F1: UsageOutbox rows are enqueued in this transaction; enqueue uses insert(...).orIgnore()
+          // so retries dedupe on eventId while archive and delete commit atomically with them.
+          await this.usageOutboxService.enqueue(usageEvents, transactionalEntityManager)
+        }
+      }
 
       await transactionalEntityManager.delete(
         SandboxUsagePeriod,

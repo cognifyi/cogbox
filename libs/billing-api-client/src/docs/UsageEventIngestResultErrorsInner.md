@@ -1,6 +1,5 @@
 # UsageEventIngestResultErrorsInner
 
-
 ## Properties
 
 Name | Type | Description | Notes

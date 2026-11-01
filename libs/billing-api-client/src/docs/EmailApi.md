@@ -1,6 +1,6 @@
 # EmailApi
 
-All URIs are relative to *https://billing.pazity.com*
+All URIs are relative to _https://billing.pazity.com_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
@@ -11,6 +11,7 @@ All URIs are relative to *https://billing.pazity.com*
 |[**verifyEmail**](#verifyemail) | **POST** /organization/{organizationId}/email/verify | Verify email|
 
 # **addOrganizationEmail**
+>
 > OrganizationEmail addOrganizationEmail(updateOrganizationEmail)
 
 Adds a billing email and sends a verification message.
@@ -43,7 +44,6 @@ const { status, data } = await apiInstance.addOrganizationEmail(
 | **updateOrganizationEmail** | **UpdateOrganizationEmail**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **OrganizationEmail**
@@ -54,11 +54,11 @@ const { status, data } = await apiInstance.addOrganizationEmail(
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: application/json
-
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Added email. |  -  |
@@ -66,6 +66,7 @@ const { status, data } = await apiInstance.addOrganizationEmail(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteOrganizationEmail**
+>
 > deleteOrganizationEmail(updateOrganizationEmail)
 
 Removes a billing email.
@@ -98,7 +99,6 @@ const { status, data } = await apiInstance.deleteOrganizationEmail(
 | **updateOrganizationEmail** | **UpdateOrganizationEmail**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -109,11 +109,11 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Email removed. |  -  |
@@ -121,6 +121,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listOrganizationEmails**
+>
 > Array<OrganizationEmail> listOrganizationEmails()
 
 Returns billing emails for the organization.
@@ -149,7 +150,6 @@ const { status, data } = await apiInstance.listOrganizationEmails(
 |------------- | ------------- | ------------- | -------------|
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 **Array<OrganizationEmail>**
@@ -160,11 +160,11 @@ const { status, data } = await apiInstance.listOrganizationEmails(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Organization emails. |  -  |
@@ -172,6 +172,7 @@ const { status, data } = await apiInstance.listOrganizationEmails(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **resendVerificationEmail**
+>
 > resendVerificationEmail(updateOrganizationEmail)
 
 Resends the verification message for an email.
@@ -204,7 +205,6 @@ const { status, data } = await apiInstance.resendVerificationEmail(
 | **updateOrganizationEmail** | **UpdateOrganizationEmail**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -215,11 +215,11 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Verification email resent. |  -  |
@@ -227,6 +227,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **verifyEmail**
+>
 > verifyEmail(verifyEmail)
 
 Verifies a billing email with the token from the email.
@@ -259,7 +260,6 @@ const { status, data } = await apiInstance.verifyEmail(
 | **verifyEmail** | **VerifyEmail**|  | |
 | **organizationId** | [**string**] | Organization identifier. | defaults to undefined|
 
-
 ### Return type
 
 void (empty response body)
@@ -270,14 +270,13 @@ void (empty response body)
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
- - **Accept**: Not defined
-
+- **Content-Type**: application/json
+- **Accept**: Not defined
 
 ### HTTP response details
+
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**204** | Email verified. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -1,6 +1,5 @@
 # TierLimit
 
-
 ## Properties
 
 Name | Type | Description | Notes

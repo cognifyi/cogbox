@@ -1,6 +1,5 @@
 # InvoiceStatus
 
-
 ## Enum
 
 * `DRAFT` (value: `'draft'`)

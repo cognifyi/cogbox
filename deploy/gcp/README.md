@@ -216,6 +216,35 @@ Notes:
   from `docker-compose`, docs, and default values; nothing reports to
   Daytona anymore.
 
+## 5.4 Billing usage outbox
+
+The usage outbox forwards sandbox usage events to the billing API. It is
+disabled by default; enable it only after the billing endpoint and admin key
+exist. Values below are placeholders — never commit a real key.
+
+Secret Manager (add this key to the control chart's ExternalSecret when the
+relay step wires it; the current chart does not render it yet):
+
+```bash
+# Secret: <release>-control/BILLING_USAGE_ADMIN_KEY
+echo -n '<placeholder-billing-usage-admin-key>' | \
+  gcloud secrets create <release>-control/BILLING_USAGE_ADMIN_KEY --data-file=-
+```
+
+Config settings (add these to the control chart ConfigMap / environment when
+the relay step wires it):
+
+| Variable | Example | Purpose |
+|---|---|---|
+| `BILLING_USAGE_ENABLED` | `false` | Master switch; `true` starts the outbox relay |
+| `BILLING_USAGE_DRY_RUN` | `true` | Log deliveries without sending; set `false` to deliver |
+| `BILLING_USAGE_BASE_PATH` | `https://billing.example.com` | Billing API base URL (falls back to `BILLING_API_URL`) |
+| `BILLING_USAGE_PRICE_VERSION` | `<placeholder-price-version>` | Price table version sent with usage events |
+| `BILLING_USAGE_ADMIN_KEY` | secret (see above) | Admin credential for the billing API |
+
+Keep `BILLING_USAGE_DRY_RUN=true` until the endpoint is verified. The admin
+key must come from Secret Manager, not from the ConfigMap or the repo.
+
 ## 6. Known gaps and operational notes
 
 ### 6.1 Runner sandbox persistence ("No such container" on start)
