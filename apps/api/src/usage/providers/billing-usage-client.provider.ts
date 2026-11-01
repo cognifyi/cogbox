@@ -23,6 +23,9 @@ export function createBillingUsageClient(configService: TypedConfigService): Usa
     new Configuration({
       basePath: billingUsage.basePath,
       apiKey: billingUsage.adminKey,
+      baseOptions: {
+        timeout: billingUsage.requestTimeoutMs,
+      },
     }),
   )
 }

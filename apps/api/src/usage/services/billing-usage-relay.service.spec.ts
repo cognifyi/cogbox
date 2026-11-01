@@ -28,6 +28,9 @@ type BillingUsageConfig = {
   maxAttempts: number
   baseBackoffMs: number
   maxBackoffMs: number
+  requestTimeoutMs?: number
+  circuitBreakerFailureThreshold?: number
+  circuitBreakerCooldownMs?: number
 }
 
 type RecordedRequest = {
@@ -37,7 +40,7 @@ type RecordedRequest = {
   body: unknown
 }
 
-type StubHandler = (request: RecordedRequest, attempt: number) => number
+type StubHandler = (request: RecordedRequest, attempt: number) => number | Promise<number>
 
 async function startStub(handler: StubHandler): Promise<{
   basePath: string
@@ -61,7 +64,7 @@ async function startStub(handler: StubHandler): Promise<{
     }
     requests.push(recorded)
 
-    const status = handler(recorded, requests.length)
+    const status = await handler(recorded, requests.length)
     res.statusCode = status
     res.setHeader('Content-Type', 'application/json')
     res.end(
@@ -189,6 +192,9 @@ function makeConfig(basePath: string, overrides: Partial<BillingUsageConfig> = {
     maxAttempts: 8,
     baseBackoffMs: 1000,
     maxBackoffMs: 300000,
+    requestTimeoutMs: 5000,
+    circuitBreakerFailureThreshold: 5,
+    circuitBreakerCooldownMs: 60000,
     ...overrides,
   }
 
@@ -233,6 +239,14 @@ describe('billingUsageClientFactory', () => {
     const configService = makeConfig('http://127.0.0.1:1', { enabled: false, adminKey: '' })
 
     expect(() => billingUsageClientFactory(configService)).not.toThrow()
+  })
+
+  it('passes the configured request timeout to the generated billing client', () => {
+    const client = billingUsageClientFactory(makeConfig('http://127.0.0.1:1', { requestTimeoutMs: 2500 }))
+
+    expect(
+      (client as unknown as { configuration: { baseOptions: { timeout: number } } }).configuration.baseOptions.timeout,
+    ).toBe(2500)
   })
 })
 
@@ -325,6 +339,77 @@ describe('BillingUsageRelayService', () => {
     await relay.relayUsageEvents()
 
     expect(stub.requests).toHaveLength(1)
+    expect(outbox.rows[0].status).toBe('sent')
+  })
+
+  it('times out a slow billing request instead of holding the relay lock indefinitely', async () => {
+    stub = await startStub(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      return 200
+    })
+    const outbox = new InMemoryUsageOutbox([makeRow(makeEvent())])
+    const { relay } = makeRelay({ basePath: stub.basePath, outbox, overrides: { requestTimeoutMs: 40 } })
+
+    await relay.relayUsageEvents()
+
+    expect(outbox.rows[0].status).toBe('failed')
+    expect(outbox.rows[0].attempts).toBe(1)
+    expect(outbox.rows[0].lastError).toMatch(/timeout/i)
+  })
+
+  it('does not open the circuit for a terminal rejection because billing is reachable', async () => {
+    stub = await startStub((_request, attempt) => (attempt === 1 ? 422 : 200))
+    const first = makeRow(makeEvent({ event_id: 'org-1:cpu_seconds:1' }), { id: '1' })
+    const second = makeRow(makeEvent({ event_id: 'org-1:cpu_seconds:2' }), { id: '2' })
+    const outbox = new InMemoryUsageOutbox([first, second])
+    const { relay } = makeRelay({
+      basePath: stub.basePath,
+      outbox,
+      overrides: { batchSize: 1, circuitBreakerFailureThreshold: 1, circuitBreakerCooldownMs: 300 },
+    })
+
+    await relay.relayUsageEvents()
+    await relay.relayUsageEvents()
+
+    expect(stub.requests).toHaveLength(2)
+    expect(outbox.rows[0].status).toBe('dead')
+    expect(outbox.rows[1].status).toBe('sent')
+  })
+
+  it('opens the circuit after repeated batch failures and skips billing until the cooldown elapses', async () => {
+    stub = await startStub(() => 500)
+    const outbox = new InMemoryUsageOutbox([makeRow(makeEvent())])
+    const { relay } = makeRelay({
+      basePath: stub.basePath,
+      outbox,
+      overrides: { circuitBreakerFailureThreshold: 2, circuitBreakerCooldownMs: 300 },
+    })
+
+    await relay.relayUsageEvents()
+    await relay.relayUsageEvents()
+    await relay.relayUsageEvents()
+
+    expect(stub.requests).toHaveLength(2)
+    expect(outbox.rows[0].status).toBe('failed')
+    expect(outbox.rows[0].attempts).toBe(2)
+  })
+
+  it('closes the circuit after a successful half-open probe', async () => {
+    stub = await startStub((_request, attempt) => (attempt === 1 ? 500 : 200))
+    const outbox = new InMemoryUsageOutbox([makeRow(makeEvent())])
+    const { relay } = makeRelay({
+      basePath: stub.basePath,
+      outbox,
+      overrides: { circuitBreakerFailureThreshold: 1, circuitBreakerCooldownMs: 30 },
+    })
+
+    await relay.relayUsageEvents()
+    expect(stub.requests).toHaveLength(1)
+
+    await new Promise((resolve) => setTimeout(resolve, 40))
+    await relay.relayUsageEvents()
+
+    expect(stub.requests).toHaveLength(2)
     expect(outbox.rows[0].status).toBe('sent')
   })
 

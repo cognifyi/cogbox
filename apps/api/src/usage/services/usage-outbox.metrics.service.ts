@@ -36,6 +36,7 @@ export class UsageOutboxMetricsService {
   })
 
   private readonly backlogValues = new Map<string, number>()
+  private circuitOpen = 0
 
   constructor() {
     this.meter
@@ -46,6 +47,14 @@ export class UsageOutboxMetricsService {
         for (const [status, value] of this.backlogValues) {
           observableResult.observe(value, { status })
         }
+      })
+
+    this.meter
+      .createObservableGauge('cogbox_usage_outbox_relay_circuit_open', {
+        description: 'Whether the usage relay circuit breaker is open (1) or closed (0)',
+      })
+      .addCallback((observableResult) => {
+        observableResult.observe(this.circuitOpen)
       })
   }
 
@@ -81,5 +90,9 @@ export class UsageOutboxMetricsService {
     for (const [status, count] of Object.entries(counts)) {
       this.setBacklog(status, count)
     }
+  }
+
+  setCircuitOpen(open: boolean): void {
+    this.circuitOpen = open ? 1 : 0
   }
 }
