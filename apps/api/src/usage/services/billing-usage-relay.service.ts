@@ -13,6 +13,11 @@ import { UsageOutbox } from '../entities/usage-outbox.entity'
 import { UsageOutboxService, UsageOutboxFailureCategory } from './usage-outbox.service'
 import { UsageOutboxMetricsService } from './usage-outbox.metrics.service'
 import { BILLING_USAGE_CLIENT } from '../providers/billing-usage-client.provider'
+import {
+  BillingUsageCircuitBreaker,
+  DEFAULT_CIRCUIT_BREAKER_COOLDOWN_MS,
+  DEFAULT_CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+} from './billing-usage-circuit-breaker'
 
 const RELAY_LOCK_KEY = 'billing-usage-relay'
 // The lock must outlive the slowest batch (HTTP call plus row updates), otherwise a
@@ -116,6 +121,7 @@ export function classifyBillingUsageError(error: unknown): UsageOutboxFailureCat
 @Injectable()
 export class BillingUsageRelayService {
   private readonly logger = new Logger(BillingUsageRelayService.name)
+  private readonly circuitBreaker = new BillingUsageCircuitBreaker()
 
   constructor(
     private readonly usageOutboxService: UsageOutboxService,
@@ -151,6 +157,16 @@ export class BillingUsageRelayService {
         return
       }
 
+      const circuitBreakerCooldownMs = billingUsage.circuitBreakerCooldownMs ?? DEFAULT_CIRCUIT_BREAKER_COOLDOWN_MS
+      const circuitBreakerFailureThreshold =
+        billingUsage.circuitBreakerFailureThreshold ?? DEFAULT_CIRCUIT_BREAKER_FAILURE_THRESHOLD
+
+      if (this.isCircuitOpen(circuitBreakerCooldownMs)) {
+        this.logger.warn('Billing usage relay circuit is open; leaving the outbox untouched for this tick')
+        await this.refreshBacklogMetrics()
+        return
+      }
+
       const rows = await this.usageOutboxService.claimDue(batchSize)
 
       if (rows.length === 0) {
@@ -163,8 +179,9 @@ export class BillingUsageRelayService {
         await this.billingUsageClient.ingestUsageEvents({ events })
         await this.usageOutboxService.markSent(rows.map((row) => row.id))
         this.metrics.incrementSent(rows.length)
+        this.recordSuccess()
       } catch (error) {
-        await this.handleFailure(rows, error)
+        await this.handleFailure(rows, error, circuitBreakerFailureThreshold)
       }
 
       await this.refreshBacklogMetrics()
@@ -177,11 +194,44 @@ export class BillingUsageRelayService {
     }
   }
 
-  private async handleFailure(rows: UsageOutbox[], error: unknown): Promise<void> {
+  private isCircuitOpen(cooldownMs: number): boolean {
+    const isOpen = this.circuitBreaker.isOpen(cooldownMs)
+
+    if (!isOpen && this.circuitBreaker.failureCount > 0) {
+      this.logger.log('Billing usage relay circuit is half-open; allowing one probe batch')
+    }
+
+    return isOpen
+  }
+
+  private recordSuccess(): void {
+    if (this.circuitBreaker.recordSuccess()) {
+      this.metrics.setCircuitOpen(false)
+      this.logger.log('Billing usage relay circuit closed after a successful delivery')
+    }
+  }
+
+  private recordFailure(failureThreshold: number): void {
+    if (this.circuitBreaker.recordFailure(failureThreshold)) {
+      this.metrics.setCircuitOpen(true)
+      this.logger.warn(
+        `Billing usage relay circuit opened after ${this.circuitBreaker.failureCount} consecutive failed batch(es)`,
+      )
+    }
+  }
+
+  private async handleFailure(rows: UsageOutbox[], error: unknown, failureThreshold: number): Promise<void> {
     const category = classifyBillingUsageError(error)
     this.logger.warn(
       `Billing usage relay failed to send ${rows.length} outbox event(s) (${category}): ${this.safeErrorMessage(error)}`,
     )
+
+    if (category === 'retryable') {
+      this.recordFailure(failureThreshold)
+    } else {
+      // A terminal response still proves billing is reachable; only the payload was rejected.
+      this.recordSuccess()
+    }
 
     for (const row of rows) {
       const failed = await this.usageOutboxService.markFailed(row, category, error)

@@ -30,8 +30,16 @@ import {
 import axios, { AxiosError } from 'axios'
 import { CogboxError } from './errors'
 
+const BILLING_REQUEST_TIMEOUT_MS = 5000
+
+function bearerHeaders(accessToken: string) {
+  return { Authorization: `Bearer ${accessToken}` }
+}
+
 export class ApiClient {
   private config: Configuration
+  private billingConfig: BillingConfiguration | null = null
+  private analyticsConfig: AnalyticsConfiguration | null = null
   private _snapshotApi: SnapshotsApi
   private _sandboxApi: SandboxApi
   private _userApi: UsersApi
@@ -79,16 +87,15 @@ export class ApiClient {
     this._apiKeyApi = new ApiKeysApi(this.config, undefined, axiosInstance)
     this._dockerRegistryApi = new DockerRegistryApi(this.config, undefined, axiosInstance)
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
-    const billingConfig = new BillingConfiguration({
+    this.billingConfig = new BillingConfiguration({
       basePath: config.billingApiUrl || window.location.origin,
       accessToken: accessToken,
       baseOptions: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: bearerHeaders(accessToken),
+        timeout: BILLING_REQUEST_TIMEOUT_MS,
       },
     })
-    this._billingApi = new BillingApiClient(billingConfig, axiosInstance)
+    this._billingApi = new BillingApiClient(this.billingConfig, axiosInstance)
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
     this._auditApi = new AuditApi(this.config, undefined, axiosInstance)
@@ -97,17 +104,15 @@ export class ApiClient {
     this._webhooksApi = new WebhooksApi(this.config, undefined, axiosInstance)
 
     if (config.analyticsApiUrl) {
-      const analyticsConfig = new AnalyticsConfiguration({
+      this.analyticsConfig = new AnalyticsConfiguration({
         basePath: config.analyticsApiUrl,
         accessToken: accessToken,
         baseOptions: {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: bearerHeaders(accessToken),
         },
       })
-      this._analyticsUsageApi = new AnalyticsUsageApi(analyticsConfig, undefined, axiosInstance)
-      this._analyticsTelemetryApi = new AnalyticsTelemetryApi(analyticsConfig, undefined, axiosInstance)
+      this._analyticsUsageApi = new AnalyticsUsageApi(this.analyticsConfig, undefined, axiosInstance)
+      this._analyticsTelemetryApi = new AnalyticsTelemetryApi(this.analyticsConfig, undefined, axiosInstance)
     } else {
       this._analyticsUsageApi = null
       this._analyticsTelemetryApi = null
@@ -116,6 +121,21 @@ export class ApiClient {
 
   public setAccessToken(accessToken: string) {
     this.config.accessToken = accessToken
+
+    for (const generatedConfig of [this.billingConfig, this.analyticsConfig]) {
+      if (!generatedConfig) {
+        continue
+      }
+
+      generatedConfig.accessToken = accessToken
+      generatedConfig.baseOptions = {
+        ...generatedConfig.baseOptions,
+        headers: {
+          ...generatedConfig.baseOptions?.headers,
+          ...bearerHeaders(accessToken),
+        },
+      }
+    }
   }
 
   public get snapshotApi() {

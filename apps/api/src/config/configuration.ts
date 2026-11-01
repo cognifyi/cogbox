@@ -6,6 +6,12 @@
 
 import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
 
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value)
+
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
 const configuration = {
   production: process.env.NODE_ENV === 'production',
   version: process.env.VERSION || '0.0.0-dev',
@@ -369,6 +375,9 @@ const configuration = {
     maxBackoffMs: parseInt(process.env.BILLING_USAGE_MAX_BACKOFF_MS || '300000', 10),
     sentRetentionDays: parseInt(process.env.BILLING_USAGE_SENT_RETENTION_DAYS || '30', 10),
     backlogAlertThreshold: parseInt(process.env.BILLING_USAGE_BACKLOG_ALERT_THRESHOLD || '1000', 10),
+    requestTimeoutMs: positiveInteger(process.env.BILLING_USAGE_REQUEST_TIMEOUT_MS, 5000),
+    circuitBreakerFailureThreshold: positiveInteger(process.env.BILLING_USAGE_CIRCUIT_BREAKER_FAILURE_THRESHOLD, 5),
+    circuitBreakerCooldownMs: positiveInteger(process.env.BILLING_USAGE_CIRCUIT_BREAKER_COOLDOWN_MS, 60000),
   },
 }
 

@@ -44,7 +44,9 @@ All flags are read from the API configuration (`billingUsage` in
 Tuning knobs (defaults shown): `BILLING_USAGE_BATCH_SIZE=100`,
 `BILLING_USAGE_MAX_ATTEMPTS=8`, `BILLING_USAGE_BASE_BACKOFF_MS=1000`,
 `BILLING_USAGE_MAX_BACKOFF_MS=300000`, `BILLING_USAGE_SENT_RETENTION_DAYS=30`,
-`BILLING_USAGE_BACKLOG_ALERT_THRESHOLD=1000`.
+`BILLING_USAGE_BACKLOG_ALERT_THRESHOLD=1000`, `BILLING_USAGE_REQUEST_TIMEOUT_MS=5000`,
+`BILLING_USAGE_CIRCUIT_BREAKER_FAILURE_THRESHOLD=5`,
+`BILLING_USAGE_CIRCUIT_BREAKER_COOLDOWN_MS=60000`.
 
 **Dry-run backpressure:** dry-run leaves every due row `pending` and does not consume
 them, so the backlog grows until a real (non-dry-run) relay drains it. This is expected;
@@ -82,6 +84,16 @@ Failure classification:
   network errors (`ECONNRESET`, `ECONNREFUSED`, `ENOTFOUND`, `EAI_AGAIN`, etc.):
   rescheduled with exponential backoff.
 - After `BILLING_USAGE_MAX_ATTEMPTS` attempts (default 8) a retryable row is marked `dead`.
+
+Each billing HTTP call uses `BILLING_USAGE_REQUEST_TIMEOUT_MS` (default 5000). After
+`BILLING_USAGE_CIRCUIT_BREAKER_FAILURE_THRESHOLD` consecutive retryable delivery failures
+the relay opens a circuit for `BILLING_USAGE_CIRCUIT_BREAKER_COOLDOWN_MS` (default 60000),
+leaves the outbox untouched, and exposes `cogbox_usage_outbox_relay_circuit_open` (1 = open).
+Terminal rejections prove billing is reachable, so they reset the failure count instead of
+opening the circuit. When the cooldown elapses one half-open probe batch is allowed; an
+empty tick leaves the probe pending until the next batch, success closes the circuit, and
+a failure re-opens it. The breaker state is per relay process, so replicas keep independent
+views; the Redis lock still ensures only one replica sends at a time.
 
 Backoff is `min(maxBackoffMs, baseBackoffMs * 2^attempts)` after the attempt is counted.
 With defaults (base 1000 ms, max 300000 ms, 8 attempts):

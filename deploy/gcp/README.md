@@ -241,6 +241,9 @@ the relay step wires it):
 | `BILLING_USAGE_BASE_PATH` | `https://billing.example.com` | Billing API base URL (falls back to `BILLING_API_URL`) |
 | `BILLING_USAGE_PRICE_VERSION` | `<placeholder-price-version>` | Price table version sent with usage events |
 | `BILLING_USAGE_ADMIN_KEY` | secret (see above) | Admin credential for the billing API |
+| `BILLING_USAGE_REQUEST_TIMEOUT_MS` | `5000` | Per-request timeout for billing calls |
+| `BILLING_USAGE_CIRCUIT_BREAKER_FAILURE_THRESHOLD` | `5` | Consecutive failed batches before the relay circuit opens |
+| `BILLING_USAGE_CIRCUIT_BREAKER_COOLDOWN_MS` | `60000` | Circuit cooldown before a half-open probe |
 
 Keep `BILLING_USAGE_DRY_RUN=true` until the endpoint is verified. The admin
 key must come from Secret Manager, not from the ConfigMap or the repo.

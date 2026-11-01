@@ -407,10 +407,13 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
+    if (!organization.suspended || !organization.suspendedAt) {
+      organization.suspendedAt = new Date()
+    }
+
     organization.suspended = true
     organization.suspensionReason = suspensionReason || null
     organization.suspendedUntil = suspendedUntil || null
-    organization.suspendedAt = new Date()
     if (suspensionCleanupGracePeriodHours) {
       organization.suspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
     }
@@ -741,7 +744,6 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       .select('id')
       .where('suspended = true')
       .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 hour' * "suspensionCleanupGracePeriodHours"`)
-      .andWhere(`"suspendedAt" > NOW() - INTERVAL '7 day'`)
       .andWhereExists(
         this.sandboxRepository
           .createQueryBuilder('sandbox')
@@ -795,7 +797,6 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       .select('id')
       .where('suspended = true')
       .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 hour' * "suspensionCleanupGracePeriodHours"`)
-      .andWhere(`"suspendedAt" > NOW() - INTERVAL '7 day'`)
       .andWhereExists(
         this.snapshotRepository
           .createQueryBuilder('snapshot')
