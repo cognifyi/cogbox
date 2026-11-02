@@ -12,6 +12,7 @@ EIP_TAG="${EIP_TAG:-$CLUSTER-entry}"
 EIP_ALLOC="${EIP_ALLOC:-}"
 SYSTEM_DESIRED="${SYSTEM_DESIRED:-}"
 RUNNER_DESIRED="${RUNNER_DESIRED:-}"
+EXTRA_DESIREDS="${EXTRA_DESIREDS:-}"
 TIMEOUT="${TIMEOUT:-900}"
 STATE_DIR="${STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/cogbox-eks}"
 STATE_FILE="$STATE_DIR/$CLUSTER.env"
@@ -33,6 +34,7 @@ Options:
   --eip-alloc <id>           Elastic IP allocation id (default: discover $EIP_TAG)
   --system-desired <n>       Restore system capacity (default: saved or 1)
   --runner-desired <n>       Restore runner capacity (default: saved or 1)
+  --extra-desireds <list>    Restore extra pools as name=n,... (default: saved or 1)
   --timeout <seconds>        Wait timeout (default: $TIMEOUT)
   --state-dir <dir>          State directory (default: $STATE_DIR)
   --no-kubeconfig            Do not update kubeconfig or run kubectl checks
@@ -57,6 +59,7 @@ while [ $# -gt 0 ]; do
     --eip-alloc) EIP_ALLOC="$2"; shift ;;
     --system-desired) SYSTEM_DESIRED="$2"; shift ;;
     --runner-desired) RUNNER_DESIRED="$2"; shift ;;
+    --extra-desireds) EXTRA_DESIREDS="$2"; shift ;;
     --timeout) TIMEOUT="$2"; shift ;;
     --state-dir) STATE_DIR="$2"; shift ;;
     --no-kubeconfig) KUBE=0 ;;
@@ -93,6 +96,23 @@ asg_caps() {
 
 asg_instances() {
   asg_query "$1" 'AutoScalingGroups[0].Instances[].InstanceId' | tr '\t' '\n' | sed '/^$/d'
+}
+
+# Additional pools opt into cluster down/up by tagging the ASG
+# cogbox.io/node-lifecycle=scale. Discovery is name-agnostic so nothing
+# outside this cluster's pools is ever touched.
+extra_asgs() {
+  aws autoscaling describe-auto-scaling-groups --region "$REGION" \
+    --filters "Name=tag:cogbox.io/node-lifecycle,Values=scale" \
+    --query 'AutoScalingGroups[].AutoScalingGroupName' --output text 2>/dev/null \
+    | tr '\t' '\n' | sed -e "/^${SYSTEM_ASG}$/d" -e "/^${RUNNER_ASG}$/d" -e '/^$/d'
+}
+
+saved_desired() { # <pairs> <name> — print the saved desired for name, if any
+  local pair
+  for pair in ${1//,/ }; do
+    [ "${pair%%=*}" = "$2" ] && { echo "${pair#*=}"; return; }
+  done
 }
 
 instance_state() {
@@ -177,6 +197,7 @@ save_state() {
     echo "EIP_ALLOC=$EIP_ALLOC"
     echo "RESTORE_SYSTEM_DESIRED=$RESTORE_SYSTEM_DESIRED"
     echo "RESTORE_RUNNER_DESIRED=$RESTORE_RUNNER_DESIRED"
+    echo "RESTORE_EXTRA_DESIREDS=$RESTORE_EXTRA_DESIREDS"
     echo "POSTGRES_VOLUME=$POSTGRES_VOLUME"
   } > "$tmp"
   mv "$tmp" "$STATE_FILE"
@@ -192,6 +213,7 @@ load_state() {
       POSTGRES_VOLUME) [ -n "${POSTGRES_VOLUME:-}" ] || POSTGRES_VOLUME="$val" ;;
       RESTORE_SYSTEM_DESIRED) RESTORE_SYSTEM_DESIRED="${RESTORE_SYSTEM_DESIRED:-$val}" ;;
       RESTORE_RUNNER_DESIRED) RESTORE_RUNNER_DESIRED="${RESTORE_RUNNER_DESIRED:-$val}" ;;
+      RESTORE_EXTRA_DESIREDS) RESTORE_EXTRA_DESIREDS="${RESTORE_EXTRA_DESIREDS:-$val}" ;;
     esac
   done < "$STATE_FILE"
 }
@@ -237,9 +259,27 @@ do_down() {
   [ "$RESTORE_RUNNER_DESIRED" -ge 1 ] || RESTORE_RUNNER_DESIRED=1
   check_desired "$SYSTEM_ASG" "$RESTORE_SYSTEM_DESIRED" "$sys_max"
   check_desired "$RUNNER_ASG" "$RESTORE_RUNNER_DESIRED" "$run_max"
+
+  # Extra pools tagged cogbox.io/node-lifecycle=scale go down with the
+  # cluster; a pool already at 0 must not overwrite the recorded baseline.
+  local extras=() extra
+  while IFS= read -r extra; do
+    extras+=("$extra")
+  done < <(extra_asgs)
+  local extra_pairs=""
+  for extra in "${extras[@]}"; do
+    asg_caps "$extra"
+    [ "$ASG_DESIRED" -ge 1 ] && extra_pairs="${extra_pairs:+$extra_pairs,}$extra=$ASG_DESIRED"
+  done
+  RESTORE_EXTRA_DESIREDS="${EXTRA_DESIREDS:-$extra_pairs}"
+
   local sys_ids run_ids
   sys_ids="$(asg_instances "$SYSTEM_ASG")"
   run_ids="$(asg_instances "$RUNNER_ASG")"
+  local -A extra_ids=()
+  for extra in "${extras[@]}"; do
+    extra_ids["$extra"]="$(asg_instances "$extra")"
+  done
 
   echo "Cluster: $CLUSTER ($REGION)"
   echo "System: $SYSTEM_ASG min=$sys_min desired=$sys_des max=$sys_max"
@@ -247,22 +287,30 @@ do_down() {
   echo "EIP: $EIP_ALLOC"
   echo "Postgres volume: ${POSTGRES_VOLUME:-unknown}"
   echo "Restore capacity: system=$RESTORE_SYSTEM_DESIRED runner=$RESTORE_RUNNER_DESIRED"
+  [ -z "$RESTORE_EXTRA_DESIREDS" ] || echo "Extra pools: $RESTORE_EXTRA_DESIREDS"
 
   if [ "$DRY_RUN" = 1 ]; then
-    echo "DRY-RUN: would scale $RUNNER_ASG and $SYSTEM_ASG to 0"
+    echo "DRY-RUN: would scale ${extras[*]:+$extras, }$RUNNER_ASG and $SYSTEM_ASG to 0"
     return 0
   fi
   if [ "$ASSUME_YES" != 1 ]; then
-    read -r -p "Scale both node groups to 0? [y/N] " answer
+    read -r -p "Scale all node groups to 0? [y/N] " answer
     case "$answer" in y|Y|yes|YES) ;; *) die "aborted" ;; esac
   fi
 
   save_state
+  for extra in "${extras[@]}"; do
+    aws autoscaling update-auto-scaling-group --region "$REGION" \
+      --auto-scaling-group-name "$extra" --min-size 0 --desired-capacity 0
+  done
   aws autoscaling update-auto-scaling-group --region "$REGION" \
     --auto-scaling-group-name "$RUNNER_ASG" --min-size 0 --desired-capacity 0
   aws autoscaling update-auto-scaling-group --region "$REGION" \
     --auto-scaling-group-name "$SYSTEM_ASG" --min-size 0 --desired-capacity 0
 
+  for extra in "${extras[@]}"; do
+    wait_asg_empty "$extra" "${extra_ids[$extra]}"
+  done
   wait_asg_empty "$RUNNER_ASG" "$run_ids"
   wait_asg_empty "$SYSTEM_ASG" "$sys_ids"
   wait_eip_free
@@ -278,6 +326,7 @@ do_up() {
   [ -n "${RESTORE_RUNNER_DESIRED:-}" ] || RESTORE_RUNNER_DESIRED="${RUNNER_DESIRED:-1}"
   [ -z "${SYSTEM_DESIRED:-}" ] || RESTORE_SYSTEM_DESIRED="$SYSTEM_DESIRED"
   [ -z "${RUNNER_DESIRED:-}" ] || RESTORE_RUNNER_DESIRED="$RUNNER_DESIRED"
+  [ -z "${EXTRA_DESIREDS:-}" ] || RESTORE_EXTRA_DESIREDS="$EXTRA_DESIREDS"
 
   asg_caps "$SYSTEM_ASG"; local sys_max=$ASG_MAX
   asg_caps "$RUNNER_ASG"; local run_max=$ASG_MAX
@@ -302,6 +351,24 @@ do_up() {
     --auto-scaling-group-name "$SYSTEM_ASG" --min-size 1 --desired-capacity 1
   aws autoscaling update-auto-scaling-group --region "$REGION" \
     --auto-scaling-group-name "$RUNNER_ASG" --min-size 1 --desired-capacity "$RESTORE_RUNNER_DESIRED"
+
+  # Extra tagged pools never host the EIP/hostPort entry pods, so they can
+  # come back in parallel with everything else.
+  local extra_total=0 extra_d
+  while IFS= read -r extra; do
+    extra_d="$(saved_desired "$RESTORE_EXTRA_DESIREDS" "$extra")"
+    extra_d="${extra_d:-1}"
+    asg_caps "$extra"
+    if [ "$extra_d" -gt "$ASG_MAX" ]; then
+      echo "  warn: saved desired $extra_d > max $ASG_MAX for $extra; restoring $ASG_MAX" >&2
+      extra_d="$ASG_MAX"
+    fi
+    [ "$extra_d" -ge 1 ] || extra_d=1
+    aws autoscaling update-auto-scaling-group --region "$REGION" \
+      --auto-scaling-group-name "$extra" --min-size 1 --desired-capacity "$extra_d"
+    extra_total=$((extra_total + extra_d))
+    echo "  $extra -> desired=$extra_d"
+  done < <(extra_asgs)
 
   local instance_id="" deadline=$((SECONDS + TIMEOUT)) eni current public_ip
   while [ "$SECONDS" -lt "$deadline" ]; do
@@ -382,7 +449,7 @@ do_up() {
   deadline=$((SECONDS + TIMEOUT))
   while [ "$SECONDS" -lt "$deadline" ]; do
     ready_count="$(kubectl get nodes -o jsonpath='{range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}' | grep -c '^True$' || true)"
-    [ "$ready_count" -ge $((RESTORE_SYSTEM_DESIRED + RESTORE_RUNNER_DESIRED)) ] && break
+    [ "$ready_count" -ge $((RESTORE_SYSTEM_DESIRED + RESTORE_RUNNER_DESIRED + extra_total)) ] && break
     sleep 5
   done
   echo "OK: system and runner nodes are Ready"

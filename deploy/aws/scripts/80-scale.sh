@@ -29,6 +29,22 @@ asg_desired() { # <pool>
     --query 'AutoScalingGroups[0].DesiredCapacity' --output text
 }
 
+# Pools outside the built-in two opt into cluster scaling by tagging the ASG
+# cogbox.io/node-lifecycle=scale.
+extra_asgs() {
+  aws autoscaling describe-auto-scaling-groups \
+    --filters "Name=tag:cogbox.io/node-lifecycle,Values=scale" \
+    --query 'AutoScalingGroups[].AutoScalingGroupName' --output text \
+    | tr '\t' '\n' | sed -e "/^$CLUSTER-system\$/d" -e "/^$CLUSTER-runner\$/d" -e '/^$/d'
+}
+
+extra_scaled() { # <asg> <min> <desired> — full ASG name (no $CLUSTER- prefix)
+  aws autoscaling update-auto-scaling-group \
+    --auto-scaling-group-name "$1" \
+    --min-size "$2" --desired-capacity "$3" >/dev/null
+  echo "  $1 -> min=$2 desired=$3 (max preserved)"
+}
+
 scaled() { # <pool> <min> <desired>
   aws autoscaling update-auto-scaling-group \
     --auto-scaling-group-name "$CLUSTER-$1" \
@@ -70,18 +86,47 @@ case "${1:-status}" in
   all-off)
     note_off runner
     note_off system
+    for extra in $(extra_asgs); do
+      d="$(aws autoscaling describe-auto-scaling-groups \
+        --auto-scaling-group-names "$extra" \
+        --query 'AutoScalingGroups[0].DesiredCapacity' --output text)"
+      if [ "$d" -ge 1 ]; then
+        save_state "SCALE_RESTORE_EXTRA_$(echo "$extra" | tr 'a-z-' 'A-Z_')_DESIRED=$d"
+        echo "  $extra: saved desired=$d for restore"
+      fi
+      extra_scaled "$extra" 0 0
+    done
     scaled runner 0 0
     scaled system 0 0
     echo "  note: the system node's hostPath (postgres/registry) is lost with the node" ;;
   all-on)
     scaled system 1 "$(restore_desired system)"
-    scaled runner 1 "$(restore_desired runner)" ;;
+    scaled runner 1 "$(restore_desired runner)"
+    for extra in $(extra_asgs); do
+      var="SCALE_RESTORE_EXTRA_$(echo "$extra" | tr 'a-z-' 'A-Z_')_DESIRED"
+      d="$(aws autoscaling describe-auto-scaling-groups \
+        --auto-scaling-group-names "$extra" \
+        --query 'AutoScalingGroups[0].DesiredCapacity' --output text)"
+      [ "$d" -eq 0 ] && d="${!var:-1}"
+      max="$(aws autoscaling describe-auto-scaling-groups \
+        --auto-scaling-group-names "$extra" \
+        --query 'AutoScalingGroups[0].MaxSize' --output text)"
+      [ "$d" -gt "$max" ] && d="$max"
+      [ "$d" -ge 1 ] || d=1
+      extra_scaled "$extra" 1 "$d"
+    done ;;
   status)
     for pool in system runner; do
       aws autoscaling describe-auto-scaling-groups \
         --auto-scaling-group-names "$CLUSTER-$pool" \
         --query 'AutoScalingGroups[0].[AutoScalingGroupName,MinSize,DesiredCapacity,MaxSize,length(Instances)]' \
         --output text 2>/dev/null || echo "$CLUSTER-$pool missing"
+    done
+    for extra in $(extra_asgs); do
+      aws autoscaling describe-auto-scaling-groups \
+        --auto-scaling-group-names "$extra" \
+        --query 'AutoScalingGroups[0].[AutoScalingGroupName,MinSize,DesiredCapacity,MaxSize,length(Instances)]' \
+        --output text 2>/dev/null || echo "$extra missing"
     done
     echo "  EKS control plane: \$0.10/hr regardless of node count"
     ;;
