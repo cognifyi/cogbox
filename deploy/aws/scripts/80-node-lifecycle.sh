@@ -207,6 +207,19 @@ wait_node_ready() {
   die "timeout waiting for node $dns"
 }
 
+wait_pod_on_node() { # <ns> <label-selector> <node_dns>
+  local ns="$1" sel="$2" dns="$3" deadline=$((SECONDS + TIMEOUT))
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    if kubectl -n "$ns" get pods -l "$sel" \
+        --field-selector "spec.nodeName=$dns,status.phase=Running" \
+        -o name 2>/dev/null | grep -q .; then
+      return 0
+    fi
+    sleep 5
+  done
+  die "timeout waiting for a $ns pod ($sel) to run on $dns"
+}
+
 check_desired() {
   local name="$1" desired="$2" max="$3"
   [ "$desired" -ge 1 ] || die "$name desired capacity must be >= 1"
@@ -280,8 +293,13 @@ do_up() {
     return 0
   fi
 
+  # ingress-nginx (hostPort 80/443) and region-shared-ssh-entry (hostPort
+  # 2222) can run on any role=system node, but the EIP can only point at one.
+  # Bring the system pool up at a single node so every hostPort entry pod is
+  # forced onto the node that owns the EIP, then restore the full desired
+  # count once those ports are bound.
   aws autoscaling update-auto-scaling-group --region "$REGION" \
-    --auto-scaling-group-name "$SYSTEM_ASG" --min-size 1 --desired-capacity "$RESTORE_SYSTEM_DESIRED"
+    --auto-scaling-group-name "$SYSTEM_ASG" --min-size 1 --desired-capacity 1
   aws autoscaling update-auto-scaling-group --region "$REGION" \
     --auto-scaling-group-name "$RUNNER_ASG" --min-size 1 --desired-capacity "$RESTORE_RUNNER_DESIRED"
 
@@ -318,6 +336,11 @@ do_up() {
   echo "OK: $instance_id -> $eni, EIP $public_ip"
 
   if [ "$KUBE" = 0 ]; then
+    if [ "$RESTORE_SYSTEM_DESIRED" -gt 1 ]; then
+      aws autoscaling update-auto-scaling-group --region "$REGION" \
+        --auto-scaling-group-name "$SYSTEM_ASG" --desired-capacity "$RESTORE_SYSTEM_DESIRED"
+      echo "WARN: restored system desired=$RESTORE_SYSTEM_DESIRED without verifying hostPort entry pods share the EIP node" >&2
+    fi
     echo "Skipped Kubernetes checks (--no-kubeconfig/--skip-verify)"
     return 0
   fi
@@ -329,6 +352,19 @@ do_up() {
     --query 'Reservations[0].Instances[0].PrivateDnsName' --output text)"
   wait_node_ready "$node_dns"
   echo "OK: node $node_dns is Ready"
+
+  wait_pod_on_node ingress-nginx \
+    "app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx" \
+    "$node_dns"
+  if kubectl -n region-shared get deploy region-shared-ssh-entry >/dev/null 2>&1; then
+    wait_pod_on_node region-shared "app=region-shared-ssh-entry" "$node_dns"
+  fi
+  echo "OK: hostPort entry pods are bound on $node_dns"
+
+  if [ "$RESTORE_SYSTEM_DESIRED" -gt 1 ]; then
+    aws autoscaling update-auto-scaling-group --region "$REGION" \
+      --auto-scaling-group-name "$SYSTEM_ASG" --desired-capacity "$RESTORE_SYSTEM_DESIRED"
+  fi
 
   local runner_id="" runner_dns="" ready_count
   deadline=$((SECONDS + TIMEOUT))
@@ -346,7 +382,7 @@ do_up() {
   deadline=$((SECONDS + TIMEOUT))
   while [ "$SECONDS" -lt "$deadline" ]; do
     ready_count="$(kubectl get nodes -o jsonpath='{range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}' | grep -c '^True$' || true)"
-    [ "$ready_count" -ge $((1 + RESTORE_RUNNER_DESIRED)) ] && break
+    [ "$ready_count" -ge $((RESTORE_SYSTEM_DESIRED + RESTORE_RUNNER_DESIRED)) ] && break
     sleep 5
   done
   echo "OK: system and runner nodes are Ready"
