@@ -347,3 +347,19 @@ direnv allow
 # Verify nix-direnv is installed
 nix-env -q nix-direnv
 ```
+
+<!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
+> 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-391: NC-385: micro-steps with empty assertions and flat compile_mode with no verifies for 401 unauthenticated, 403 org_claim_required, 502/503/504 fail-closed
+- NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
+- NC-389: NC-383: import.meta.env plumbing in Jest/nx-covered dashboard lib code without vite-jest interop
+- NC-388: NC-382: custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag gate defaulting to flag_disabled that disables existing billing paths in repo tests
+- NC-387: NC-381: bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts
+- NC-386: NC-380: parallel client under apps/dashboard/src/lib/billing/ duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts
+- NC-385: do not ship micro-steps with empty assertions and flat compile_mode with no verifies for auth/error mapping (401 unauthenticated, 403 org_claim_required, 502/503/504 fail-closed)
+- NC-384: do not set forbidden_paths=[tests/] to block BL-03/BL-04 contract and error-mapping tests
+- NC-383: do not use import.meta.env plumbing in Jest/nx-covered dashboard lib code without vite-jest interop
+- NC-382: do not introduce custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag gate defaulting to flag_disabled that disables existing billing paths in repo tests
+- NC-381: do not bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts
+- NC-380: do not create parallel client under apps/dashboard/src/lib/billing/ duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts
+<!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
