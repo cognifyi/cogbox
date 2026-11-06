@@ -6,11 +6,14 @@
 
 // Wallet billing view wired to the real billing client via
 // `useBillingWallet` (no mock data fallbacks). Covers loading, error
-// (with retry), empty, and success states. The view only queries when an
+// (with retry), empty, and success states. Timeout / upstream failures
+// (401/403/502-504) render an explicit fallback banner via
+// `useBillingFallbackBanner` (with operator signal, never navigating). The view only queries when an
 // organization is selected, the billing API is configured
 // (`config.billingApiUrl`), and the member has the OWNER role — mirroring
 // the `BillingOwnerAccessOutlet` route guard.
 
+import { Banner } from '@/components/Banner'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,7 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useBillingWallet } from '@/lib/billing/hooks'
+import { useBillingFallbackBanner, useBillingWallet } from '@/lib/billing/hooks'
 import { formatAmount } from '@/lib/utils'
 import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import { BillingType } from '@cogbox/billing-api-client'
@@ -34,6 +37,9 @@ export function WalletBillingPage() {
   const billingAvailable = Boolean(config.billingApiUrl && isOwner)
   const walletQuery = useBillingWallet({ organizationId, enabled: billingAvailable })
   const wallet = walletQuery.data
+  // Timeout / upstream failures (401/403/502-504) map to an explicit fallback
+  // banner with an operator signal; the banner never triggers navigation.
+  const fallbackBanner = useBillingFallbackBanner(walletQuery.error)
 
   return (
     <PageLayout>
@@ -77,26 +83,40 @@ export function WalletBillingPage() {
             </CardContent>
           </Card>
         ) : walletQuery.isError ? (
-          <Empty className="flex-none rounded-md border py-12">
-            <EmptyHeader>
-              <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
-                <TriangleAlertIcon />
-              </EmptyMedia>
-              <EmptyTitle className="text-destructive">Failed to load wallet</EmptyTitle>
-              <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => walletQuery.refetch()}
-                disabled={walletQuery.isFetching}
-              >
-                {walletQuery.isFetching && <Spinner />}
-                Retry
-              </Button>
-            </EmptyContent>
-          </Empty>
+          <>
+            {fallbackBanner ? (
+              <Banner
+                variant={fallbackBanner.variant}
+                title={fallbackBanner.title}
+                description={fallbackBanner.description}
+                action={
+                  fallbackBanner.retryable
+                    ? { label: fallbackBanner.actionLabel, onClick: () => walletQuery.refetch() }
+                    : undefined
+                }
+              />
+            ) : null}
+            <Empty className="flex-none rounded-md border py-12">
+              <EmptyHeader>
+                <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                  <TriangleAlertIcon />
+                </EmptyMedia>
+                <EmptyTitle className="text-destructive">Failed to load wallet</EmptyTitle>
+                <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => walletQuery.refetch()}
+                  disabled={walletQuery.isFetching}
+                >
+                  {walletQuery.isFetching && <Spinner />}
+                  Retry
+                </Button>
+              </EmptyContent>
+            </Empty>
+          </>
         ) : !wallet ? (
           <Empty className="flex-none rounded-md border py-12">
             <EmptyHeader>

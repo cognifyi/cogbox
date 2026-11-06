@@ -6,13 +6,16 @@
 
 // Invoice list view wired to the real billing client via
 // `useBillingInvoices` (no mock data fallbacks). Covers loading (table
-// skeletons), error (with retry), and empty (table empty state) cases. The
+// skeletons), error (with retry), and empty (table empty state) cases.
+// Timeout / upstream failures (401/403/502-504) render an explicit fallback
+// banner via `useBillingFallbackBanner` (with operator signal, never navigating). The
 // view only queries when an organization is selected, the billing API is
 // configured (`config.billingApiUrl`), and the member has the OWNER role —
 // mirroring the `BillingOwnerAccessOutlet` route guard. External navigation
 // never opens a blank/missing URL: missing file or payment URLs surface a
 // toast instead.
 
+import { Banner } from '@/components/Banner'
 import { InvoicesTable } from '@/components/Invoices'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
@@ -22,7 +25,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useBillingInvoices } from '@/lib/billing/hooks'
+import { useBillingFallbackBanner, useBillingInvoices } from '@/lib/billing/hooks'
 import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import type { Invoice } from '@cogbox/billing-api-client'
 import { FileTextIcon, TriangleAlertIcon } from 'lucide-react'
@@ -45,6 +48,9 @@ export function InvoicesBillingPage() {
     enabled: billingAvailable,
   })
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
+  // Timeout / upstream failures (401/403/502-504) map to an explicit fallback
+  // banner with an operator signal; the banner never triggers navigation.
+  const fallbackBanner = useBillingFallbackBanner(invoicesQuery.error)
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
     if (!invoice.fileUrl) {
@@ -132,26 +138,40 @@ export function InvoicesBillingPage() {
                 </EmptyHeader>
               </Empty>
             ) : invoicesQuery.isError ? (
-              <Empty className="py-12">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
-                    <TriangleAlertIcon />
-                  </EmptyMedia>
-                  <EmptyTitle className="text-destructive">Failed to load invoices</EmptyTitle>
-                  <EmptyDescription>Something went wrong while fetching invoices. Please try again.</EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => invoicesQuery.refetch()}
-                    disabled={invoicesQuery.isFetching}
-                  >
-                    {invoicesQuery.isFetching && <Spinner />}
-                    Retry
-                  </Button>
-                </EmptyContent>
-              </Empty>
+              <>
+                {fallbackBanner ? (
+                  <Banner
+                    variant={fallbackBanner.variant}
+                    title={fallbackBanner.title}
+                    description={fallbackBanner.description}
+                    action={
+                      fallbackBanner.retryable
+                        ? { label: fallbackBanner.actionLabel, onClick: () => invoicesQuery.refetch() }
+                        : undefined
+                    }
+                  />
+                ) : null}
+                <Empty className="py-12">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                      <TriangleAlertIcon />
+                    </EmptyMedia>
+                    <EmptyTitle className="text-destructive">Failed to load invoices</EmptyTitle>
+                    <EmptyDescription>Something went wrong while fetching invoices. Please try again.</EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => invoicesQuery.refetch()}
+                      disabled={invoicesQuery.isFetching}
+                    >
+                      {invoicesQuery.isFetching && <Spinner />}
+                      Retry
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              </>
             ) : (
               <InvoicesTable
                 data={invoicesQuery.data?.items ?? []}
