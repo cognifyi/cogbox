@@ -6,3 +6,5 @@
 
 export * from './types'
 export * from './client'
+export * from './period'
+export * from './reconcile'
