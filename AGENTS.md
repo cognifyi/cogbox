@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-423: Zero compiled assertions across all 3 steps (steps[0].assertions=[], steps[1].assertions=[], steps[2].assertions=[]) violates REGRESSION RULE; timeout/retry/error-mapping/pagination behavior has no seam that can fail
 - NC-411: Do not set forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests while shipping source files; do not ship micro-steps with empty assertions and no verifies for 401/403/502-504…
 - NC-410: Do not derive invoice detail via single listV2Invoices page + Array.find without pagination loop (findInvoiceAcrossPages required) and do not window.open(fileUrl ?? '') / navigate to url ?? '' without guard/toast (NC-404)
 - NC-409: Do not use import.meta.env plumbing in Jest/nx-covered lib code and do not introduce custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag defaulting to disabled (NC-382/NC-383/NC-388/NC-389/NC-403)
@@ -358,5 +359,4 @@ nix-env -q nix-direnv
 - NC-406: Do not add Next.js App Router convention src/app/billing/*/page.tsx/detail.tsx in Vite + react-router dashboard — dead code/speculative generality; use App.tsx + routes.ts + src/pages/* (NC-400)
 - NC-405: Do not create parallel fetch client under apps/dashboard/src/lib/billing/ (api-client.ts/auth.ts/feature-flag.ts/types.ts, client.ts/hooks.ts) duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts…
 - NC-404: do not derive invoice detail via single listV2Invoices page + Array.find without pagination loop, and do not window.open(fileUrl ?? '') / navigate to url ?? '' without guard/toast
-- NC-403: do not use import.meta.env plumbing in Jest/nx-covered lib code without vite-jest interop and do not introduce custom BILLING_UI_V2 flag defaulting to disabled (NC-382/NC-383/NC-388/NC-389)
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
