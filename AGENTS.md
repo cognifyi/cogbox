@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-426: Complexity gate triggered: 9 distinct files across 3 steps >=8-file threshold with no recorded structure choice
 - NC-425: Empty scope baseline: goal_intent='' / empty issue body with no background/goals/acceptance; acceptance coverage untraceable to user request
 - NC-424: 9 expected artifacts with no compiled-assertion coverage and unproven reachability: billing-client.ts, hooks.ts, billing-client.test.ts, wallet/page.tsx, invoices/page.tsx, wallet-invoices.test.ts, detail.tsx, invoice-detail.test.ts,…
 - NC-423: Zero compiled assertions across all 3 steps (steps[0].assertions=[], steps[1].assertions=[], steps[2].assertions=[]) violates REGRESSION RULE; timeout/retry/error-mapping/pagination behavior has no seam that can fail
@@ -358,5 +359,5 @@ nix-env -q nix-direnv
 - NC-409: Do not use import.meta.env plumbing in Jest/nx-covered lib code and do not introduce custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag defaulting to disabled (NC-382/NC-383/NC-388/NC-389/NC-403)
 - NC-408: Do not gate billing queries only on Boolean(enabled && organizationId); must gate on config.billingApiUrl via useConfig + OWNER role + preserve refetchOnWindowFocus/queryOptions passthrough (NC-401)
 - NC-407: Do not bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts useSelectedOrgBillingScope/useOwnerWalletQuery/useOwnerInvoicesQuery; do not…
-- NC-406: Do not add Next.js App Router convention src/app/billing/*/page.tsx/detail.tsx in Vite + react-router dashboard — dead code/speculative generality; use App.tsx + routes.ts + src/pages/* (NC-400)
+- NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
