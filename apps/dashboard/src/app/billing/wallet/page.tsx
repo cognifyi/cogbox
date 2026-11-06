@@ -6,7 +6,10 @@
 
 // Wallet billing view wired to the real billing client via
 // `useBillingWallet` (no mock data fallbacks). Covers loading, error
-// (with retry), empty, and success states.
+// (with retry), empty, and success states. The view only queries when an
+// organization is selected, the billing API is configured
+// (`config.billingApiUrl`), and the member has the OWNER role — mirroring
+// the `BillingOwnerAccessOutlet` route guard.
 
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Badge } from '@/components/ui/badge'
@@ -15,16 +18,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
+import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useBillingWallet } from '@/lib/billing/hooks'
 import { formatAmount } from '@/lib/utils'
+import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import { BillingType } from '@cogbox/billing-api-client'
 import { TriangleAlertIcon, WalletIcon } from 'lucide-react'
 
 export function WalletBillingPage() {
-  const { selectedOrganization } = useSelectedOrganization()
+  const config = useConfig()
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
   const organizationId = selectedOrganization?.id ?? ''
-  const walletQuery = useBillingWallet({ organizationId, enabled: Boolean(organizationId) })
+  const isOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+  const billingAvailable = Boolean(config.billingApiUrl && isOwner)
+  const walletQuery = useBillingWallet({ organizationId, enabled: billingAvailable })
   const wallet = walletQuery.data
 
   return (
@@ -41,6 +49,20 @@ export function WalletBillingPage() {
               </EmptyMedia>
               <EmptyTitle>No organization selected</EmptyTitle>
               <EmptyDescription>Select an organization to view its wallet.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : !billingAvailable ? (
+          <Empty className="flex-none rounded-md border py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <WalletIcon />
+              </EmptyMedia>
+              <EmptyTitle>Wallet unavailable</EmptyTitle>
+              <EmptyDescription>
+                {!config.billingApiUrl
+                  ? 'Billing is not configured for this deployment.'
+                  : 'Only organization owners can view the wallet.'}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : walletQuery.isLoading ? (
@@ -64,7 +86,12 @@ export function WalletBillingPage() {
               <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button variant="secondary" size="sm" onClick={() => walletQuery.refetch()} disabled={walletQuery.isFetching}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => walletQuery.refetch()}
+                disabled={walletQuery.isFetching}
+              >
                 {walletQuery.isFetching && <Spinner />}
                 Retry
               </Button>
@@ -80,7 +107,12 @@ export function WalletBillingPage() {
               <EmptyDescription>The billing service returned no wallet for this organization.</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button variant="secondary" size="sm" onClick={() => walletQuery.refetch()} disabled={walletQuery.isFetching}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => walletQuery.refetch()}
+                disabled={walletQuery.isFetching}
+              >
                 {walletQuery.isFetching && <Spinner />}
                 Retry
               </Button>

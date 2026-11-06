@@ -5,9 +5,13 @@
  */
 
 // Invoice detail view wired to the real billing client via
-// `useBillingInvoiceDetail` (resolved from `listV2Invoices`, no mock
-// data fallbacks). Covers loading, error (with retry), not-found, and
-// success states.
+// `useBillingInvoiceDetail` (resolved by scanning every page of
+// `listV2Invoices`, no mock data fallbacks). Covers loading, error (with
+// retry), not-found, and success states. The view only queries when an
+// organization and invoice are selected, the billing API is configured
+// (`config.billingApiUrl`), and the member has the OWNER role. External
+// navigation never opens a blank/missing URL: missing file or payment URLs
+// surface a toast instead.
 
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
@@ -16,9 +20,11 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
+import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useBillingInvoiceDetail } from '@/lib/billing/hooks'
 import { formatAmount } from '@/lib/utils'
+import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import { FileTextIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -28,14 +34,27 @@ export interface InvoiceDetailBillingPageProps {
 }
 
 export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPageProps) {
-  const { selectedOrganization } = useSelectedOrganization()
+  const config = useConfig()
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
   const organizationId = selectedOrganization?.id ?? ''
+  const isOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+  const billingAvailable = Boolean(config.billingApiUrl && isOwner)
   const { query, invoice, notFound } = useBillingInvoiceDetail({
     organizationId,
     invoiceId,
-    enabled: Boolean(organizationId && invoiceId),
+    enabled: billingAvailable,
   })
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
+
+  const handleViewPdf = useCallback(() => {
+    if (!invoice?.fileUrl) {
+      toast.error('Invoice file unavailable', {
+        description: 'This invoice has no downloadable file yet.',
+      })
+      return
+    }
+    window.open(invoice.fileUrl, '_blank')
+  }, [invoice])
 
   const handlePayInvoice = useCallback(async () => {
     if (!organizationId || !invoice?.id) {
@@ -47,8 +66,15 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
         organizationId,
         invoiceId: invoice.id,
       })
+      if (!result.url) {
+        newWindow?.close()
+        toast.error('Payment link unavailable', {
+          description: 'The billing service returned no payment URL.',
+        })
+        return
+      }
       if (newWindow) {
-        newWindow.location.href = result.url ?? ''
+        newWindow.location.href = result.url
       }
     } catch (error) {
       newWindow?.close()
@@ -71,6 +97,20 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
               </EmptyMedia>
               <EmptyTitle>Invoice not specified</EmptyTitle>
               <EmptyDescription>Select an organization and an invoice to view its details.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : !billingAvailable ? (
+          <Empty className="flex-none rounded-md border py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <FileTextIcon />
+              </EmptyMedia>
+              <EmptyTitle>Invoice unavailable</EmptyTitle>
+              <EmptyDescription>
+                {!config.billingApiUrl
+                  ? 'Billing is not configured for this deployment.'
+                  : 'Only organization owners can view invoices.'}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : query.isLoading ? (
@@ -128,7 +168,7 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
               </div>
               <div className="flex gap-2">
                 {invoice.fileUrl ? (
-                  <Button variant="secondary" size="sm" onClick={() => window.open(invoice.fileUrl ?? '', '_blank')}>
+                  <Button variant="secondary" size="sm" onClick={handleViewPdf}>
                     View PDF
                   </Button>
                 ) : null}

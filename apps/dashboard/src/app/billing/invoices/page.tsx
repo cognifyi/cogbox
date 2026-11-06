@@ -6,7 +6,12 @@
 
 // Invoice list view wired to the real billing client via
 // `useBillingInvoices` (no mock data fallbacks). Covers loading (table
-// skeletons), error (with retry), and empty (table empty state) cases.
+// skeletons), error (with retry), and empty (table empty state) cases. The
+// view only queries when an organization is selected, the billing API is
+// configured (`config.billingApiUrl`), and the member has the OWNER role —
+// mirroring the `BillingOwnerAccessOutlet` route guard. External navigation
+// never opens a blank/missing URL: missing file or payment URLs surface a
+// toast instead.
 
 import { InvoicesTable } from '@/components/Invoices'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
@@ -15,8 +20,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
+import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useBillingInvoices } from '@/lib/billing/hooks'
+import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import type { Invoice } from '@cogbox/billing-api-client'
 import { FileTextIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useState } from 'react'
@@ -25,19 +32,28 @@ import { toast } from 'sonner'
 const DEFAULT_PAGE_SIZE = 10
 
 export function InvoicesBillingPage() {
-  const { selectedOrganization } = useSelectedOrganization()
+  const config = useConfig()
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
   const organizationId = selectedOrganization?.id ?? ''
+  const isOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+  const billingAvailable = Boolean(config.billingApiUrl && isOwner)
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE })
   const invoicesQuery = useBillingInvoices({
     organizationId,
     page: pagination.pageIndex + 1,
     perPage: pagination.pageSize,
-    enabled: Boolean(organizationId),
+    enabled: billingAvailable,
   })
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
-    window.open(invoice.fileUrl ?? '', '_blank')
+    if (!invoice.fileUrl) {
+      toast.error('Invoice file unavailable', {
+        description: 'This invoice has no downloadable file yet.',
+      })
+      return
+    }
+    window.open(invoice.fileUrl, '_blank')
   }, [])
 
   const handlePayInvoice = useCallback(
@@ -45,14 +61,27 @@ export function InvoicesBillingPage() {
       if (!organizationId) {
         return
       }
+      if (!invoice.id) {
+        toast.error('Cannot pay invoice', {
+          description: 'This invoice has no identifier.',
+        })
+        return
+      }
       const newWindow = window.open('', '_blank')
       try {
         const result = await createInvoicePaymentUrlMutation.mutateAsync({
           organizationId,
-          invoiceId: invoice.id ?? '',
+          invoiceId: invoice.id,
         })
+        if (!result.url) {
+          newWindow?.close()
+          toast.error('Payment link unavailable', {
+            description: 'The billing service returned no payment URL.',
+          })
+          return
+        }
         if (newWindow) {
-          newWindow.location.href = result.url ?? ''
+          newWindow.location.href = result.url
         }
       } catch (error) {
         newWindow?.close()
@@ -73,8 +102,8 @@ export function InvoicesBillingPage() {
           <CardHeader>
             <CardTitle>Invoices</CardTitle>
             <CardDescription>
-              View and download your billing invoices. All invoices are automatically generated and sent to your
-              billing emails.
+              View and download your billing invoices. All invoices are automatically generated and sent to your billing
+              emails.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -86,6 +115,20 @@ export function InvoicesBillingPage() {
                   </EmptyMedia>
                   <EmptyTitle>No organization selected</EmptyTitle>
                   <EmptyDescription>Select an organization to view its invoices.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : !billingAvailable ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <FileTextIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Invoices unavailable</EmptyTitle>
+                  <EmptyDescription>
+                    {!config.billingApiUrl
+                      ? 'Billing is not configured for this deployment.'
+                      : 'Only organization owners can view invoices.'}
+                  </EmptyDescription>
                 </EmptyHeader>
               </Empty>
             ) : invoicesQuery.isError ? (
