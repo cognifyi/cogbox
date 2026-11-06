@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-429: Step-02 build/e2e claims aspirational: npx nx run dashboard:build + eslint + dashboard e2e billing-ledger flow claimed in goal text with no command/test_pass/file_exists assertions and no project.json-edit guard
 - NC-428: Failure-mode visibility unproven for all new paths (Is-tested=No, Is-handled=claimed-only, Is-visible=claimed-only): 401/403/502-504 fallback-banner, timeout+single-retry-backoff, cache invalidation, bounded pagination/no-N+1, guarded…
 - NC-427: Dependency order correct but unenforced: no assertions pinning client API before consumers, no forbidden_paths, no spec_anchors, permissive allowed_tools write/edit/bash permits out-of-scope drift
 - NC-426: Complexity gate triggered: 9 distinct files across 3 steps >=8-file threshold with no recorded structure choice
@@ -358,6 +359,5 @@ nix-env -q nix-direnv
 - NC-423: Zero compiled assertions across all 3 steps (steps[0].assertions=[], steps[1].assertions=[], steps[2].assertions=[]) violates REGRESSION RULE; timeout/retry/error-mapping/pagination behavior has no seam that can fail
 - NC-411: Do not set forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests while shipping source files; do not ship micro-steps with empty assertions and no verifies for 401/403/502-504…
 - NC-410: Do not derive invoice detail via single listV2Invoices page + Array.find without pagination loop (findInvoiceAcrossPages required) and do not window.open(fileUrl ?? '') / navigate to url ?? '' without guard/toast (NC-404)
-- NC-409: Do not use import.meta.env plumbing in Jest/nx-covered lib code and do not introduce custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag defaulting to disabled (NC-382/NC-383/NC-388/NC-389/NC-403)
 - NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
