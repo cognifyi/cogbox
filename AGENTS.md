@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-392: Zero executable assertions: all 6 steps assertions:[] — 19/19 expected_artifacts uncovered per plan_review, unexecutable acceptance batch; step-01 l0:artifacts passed but no verifies for 401/403/502-504/flag_disabled
 - NC-391: NC-385: micro-steps with empty assertions and flat compile_mode with no verifies for 401 unauthenticated, 403 org_claim_required, 502/503/504 fail-closed
 - NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
 - NC-389: NC-383: import.meta.env plumbing in Jest/nx-covered dashboard lib code without vite-jest interop
