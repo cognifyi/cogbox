@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-393: forbidden_paths=[tests/] on steps 01-04 blocked BL-03/BL-04 contract and error-mapping tests while delivering 15 source files — REGRESSION RULE violated, testing deferred to step-05 reconcile.test.ts + billing.spec.ts
 - NC-392: Zero executable assertions: all 6 steps assertions:[] — 19/19 expected_artifacts uncovered per plan_review, unexecutable acceptance batch; step-01 l0:artifacts passed but no verifies for 401/403/502-504/flag_disabled
 - NC-391: NC-385: micro-steps with empty assertions and flat compile_mode with no verifies for 401 unauthenticated, 403 org_claim_required, 502/503/504 fail-closed
 - NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
@@ -361,6 +362,5 @@ nix-env -q nix-direnv
 - NC-384: do not set forbidden_paths=[tests/] to block BL-03/BL-04 contract and error-mapping tests
 - NC-383: do not use import.meta.env plumbing in Jest/nx-covered dashboard lib code without vite-jest interop
 - NC-382: do not introduce custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag gate defaulting to flag_disabled that disables existing billing paths in repo tests
-- NC-381: do not bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts
-- NC-380: do not create parallel client under apps/dashboard/src/lib/billing/ duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts
+_共 14 条，省略 2 条；运行 `omni nc list` 查看完整账本。_
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
