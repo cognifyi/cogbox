@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-397: Ship blocked high-risk: semantic reward_hacking=[superficial_compliance] ADI=0.0, ship_results risk_level=high (reward_hacking, step_failure, deploy_test_failed, execution_failed), deploy_test_passed=false source=cogos_unavailable,…
 - NC-396: Security claims unproven: Keycloak JWT org_id + aud=cogbox plumbing, 401/403/503 mapping, no-secrets, BILLING_UI_V2 gate have no command/test/file_exists assertion — failure invisible to operator; skill_review marks Spec UNVERIFIABLE,…
 - NC-395: Environment preflight miss: step-01 failed at current_step_index 1 on l0:repo_tests `npx nx run dashboard:build` with `Could not find Nx modules, Have you run npm/yarn install?` — 5/6 steps never attempted (pending), session failed=true
 - NC-394: Untraceable spec: issue body empty, dag_id empty, all spec_anchors:[] — BL-03 wallet and BL-04 invoices untraceable, minimum-change unverifiable
@@ -359,6 +360,5 @@ nix-env -q nix-direnv
 - NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
 - NC-389: NC-383: import.meta.env plumbing in Jest/nx-covered dashboard lib code without vite-jest interop
 - NC-388: NC-382: custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag gate defaulting to flag_disabled that disables existing billing paths in repo tests
-- NC-387: NC-381: bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts
-- NC-386: NC-380: parallel client under apps/dashboard/src/lib/billing/ duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts
+- NC-384: do not set forbidden_paths=[tests/] to block BL-03/BL-04 contract and error-mapping tests
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
