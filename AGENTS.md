@@ -350,15 +350,14 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-404: do not derive invoice detail via single listV2Invoices page + Array.find without pagination loop, and do not window.open(fileUrl ?? '') / navigate to url ?? '' without guard/toast
+- NC-403: do not use import.meta.env plumbing in Jest/nx-covered lib code without vite-jest interop and do not introduce custom BILLING_UI_V2 flag defaulting to disabled (NC-382/NC-383/NC-388/NC-389)
+- NC-402: do not ship micro-steps with forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests and empty assertions with no verifies for 401/403/502-504 (NC-384/NC-390/NC-392/NC-393)
+- NC-401: do not gate billing queries only on Boolean(enabled && organizationId); must gate on config.billingApiUrl (useConfig) + OWNER role + preserve refetchOnWindowFocus/queryOptions passthrough
+- NC-400: do not add Next.js App Router convention src/app/billing/*/page.tsx in Vite + react-router dashboard (App.tsx createBrowserRouter + routes.ts lazyRoutes + src/pages/) — dead code / speculative generality
+- NC-399: do not bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts useSelectedOrgBillingScope (NC-381/NC-387)
+- NC-398: do not create parallel client under apps/dashboard/src/lib/billing/ duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts (NC-380/NC-386)
 - NC-397: Ship blocked high-risk: semantic reward_hacking=[superficial_compliance] ADI=0.0, ship_results risk_level=high (reward_hacking, step_failure, deploy_test_failed, execution_failed), deploy_test_passed=false source=cogos_unavailable,…
 - NC-396: Security claims unproven: Keycloak JWT org_id + aud=cogbox plumbing, 401/403/503 mapping, no-secrets, BILLING_UI_V2 gate have no command/test/file_exists assertion — failure invisible to operator; skill_review marks Spec UNVERIFIABLE,…
-- NC-395: Environment preflight miss: step-01 failed at current_step_index 1 on l0:repo_tests `npx nx run dashboard:build` with `Could not find Nx modules, Have you run npm/yarn install?` — 5/6 steps never attempted (pending), session failed=true
-- NC-394: Untraceable spec: issue body empty, dag_id empty, all spec_anchors:[] — BL-03 wallet and BL-04 invoices untraceable, minimum-change unverifiable
-- NC-393: forbidden_paths=[tests/] on steps 01-04 blocked BL-03/BL-04 contract and error-mapping tests while delivering 15 source files — REGRESSION RULE violated, testing deferred to step-05 reconcile.test.ts + billing.spec.ts
-- NC-392: Zero executable assertions: all 6 steps assertions:[] — 19/19 expected_artifacts uncovered per plan_review, unexecutable acceptance batch; step-01 l0:artifacts passed but no verifies for 401/403/502-504/flag_disabled
-- NC-391: NC-385: micro-steps with empty assertions and flat compile_mode with no verifies for 401 unauthenticated, 403 org_claim_required, 502/503/504 fail-closed
-- NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
-- NC-389: NC-383: import.meta.env plumbing in Jest/nx-covered dashboard lib code without vite-jest interop
-- NC-388: NC-382: custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag gate defaulting to flag_disabled that disables existing billing paths in repo tests
-- NC-384: do not set forbidden_paths=[tests/] to block BL-03/BL-04 contract and error-mapping tests
+_共 25 条，省略 16 条；运行 `omni nc list` 查看完整账本。_
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
