@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-396: Security claims unproven: Keycloak JWT org_id + aud=cogbox plumbing, 401/403/503 mapping, no-secrets, BILLING_UI_V2 gate have no command/test/file_exists assertion — failure invisible to operator; skill_review marks Spec UNVERIFIABLE,…
 - NC-395: Environment preflight miss: step-01 failed at current_step_index 1 on l0:repo_tests `npx nx run dashboard:build` with `Could not find Nx modules, Have you run npm/yarn install?` — 5/6 steps never attempted (pending), session failed=true
 - NC-394: Untraceable spec: issue body empty, dag_id empty, all spec_anchors:[] — BL-03 wallet and BL-04 invoices untraceable, minimum-change unverifiable
 - NC-393: forbidden_paths=[tests/] on steps 01-04 blocked BL-03/BL-04 contract and error-mapping tests while delivering 15 source files — REGRESSION RULE violated, testing deferred to step-05 reconcile.test.ts + billing.spec.ts
@@ -360,6 +361,4 @@ nix-env -q nix-direnv
 - NC-388: NC-382: custom BILLING_UI_V2/VITE_BILLING_UI_V2 flag gate defaulting to flag_disabled that disables existing billing paths in repo tests
 - NC-387: NC-381: bypass canonical BillingApiClient.getOrganizationWallet/listInvoices and hooks useOrganizationWalletQuery/useOrganizationInvoicesQuery/billingQueries.ts
 - NC-386: NC-380: parallel client under apps/dashboard/src/lib/billing/ duplicating libs/billing-api-client and apps/dashboard/src/billing-api/billingApiClient.ts
-- NC-385: do not ship micro-steps with empty assertions and flat compile_mode with no verifies for auth/error mapping (401 unauthenticated, 403 org_claim_required, 502/503/504 fail-closed)
-_共 16 条，省略 5 条；运行 `omni nc list` 查看完整账本。_
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
