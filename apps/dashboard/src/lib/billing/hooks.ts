@@ -7,9 +7,13 @@
 // Thin wrappers over the canonical billing client (`BillingApiClient`
 // exposed via `useApi().billingApi`, which wraps the generated
 // `@cogbox/billing-api-client` v2 endpoints) and the canonical query keys.
-// No mock datasources, no mock fallbacks, no `import.meta.env` plumbing and
+// No mock datasources, no mock fallbacks, no Vite env plumbing and
 // no custom feature flags: errors propagate to callers so views can render
-// explicit loading / error / empty states.
+// explicit loading / error / empty states. The additive resilience helpers
+// (`useBillingFallbackBanner`, `useInvalidateBilling`) delegate to
+// `./billing-client` (timeout + single retry with backoff, 401/403/502-504
+// banner mapping with operator signal, cache invalidation) without changing
+// the queries below.
 //
 // Gating mirrors the canonical queries in
 // `@/hooks/queries/useOrganizationWalletQuery` and
@@ -26,7 +30,12 @@ import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import type { Invoice, OrganizationWallet, PaginatedTInvoice } from '@cogbox/billing-api-client'
-import { useQuery, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query'
+import { useQuery, useQueryClient, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query'
+import {
+  invalidateBillingQueries,
+  mapBillingErrorToFallbackBanner,
+  type BillingFallbackBannerProps,
+} from './billing-client'
 
 export interface BillingScope {
   organizationId: string
@@ -160,4 +169,32 @@ export function useBillingInvoiceDetail({
     invoice: query.data,
     notFound: query.isSuccess && query.data === undefined,
   }
+}
+
+/**
+ * Map a billing query failure to fallback-banner props (401/403/502-504
+ * explicit, everything else generic). Returns `null` when there is no error
+ * so views can render `<Banner {...banner} />` only on failure. Pure wrapper
+ * over `mapBillingErrorToFallbackBanner`; never triggers navigation and never
+ * opens a blank URL.
+ */
+export function useBillingFallbackBanner(error: unknown): BillingFallbackBannerProps | null {
+  if (!error) {
+    return null
+  }
+  return mapBillingErrorToFallbackBanner(error)
+}
+
+/**
+ * Invalidate cached billing reads for an organization (in-memory entries via
+ * `invalidateBillingCache` plus the react-query wallet + invoices keys).
+ * Additive only: existing queries keep their keys and gating, so a production
+ * rollback is a plain revert of this file plus `billing-client.ts`.
+ */
+export function useInvalidateBilling(organizationId: string): () => void {
+  const queryClient = useQueryClient()
+  return () =>
+    invalidateBillingQueries((key) => {
+      void queryClient.invalidateQueries({ queryKey: key as readonly unknown[] })
+    }, organizationId)
 }
