@@ -29,7 +29,7 @@ import { useBillingFallbackBanner, useBillingInvoices } from '@/lib/billing/hook
 import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import type { Invoice } from '@cogbox/billing-api-client'
 import { FileTextIcon, TriangleAlertIcon } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 const DEFAULT_PAGE_SIZE = 10
@@ -47,6 +47,14 @@ export function InvoicesBillingPage() {
     perPage: pagination.pageSize,
     enabled: billingAvailable,
   })
+  // Clamp the page when the result shrinks underneath the table (invoices
+  // voided/removed): without this the table sits on an empty page forever.
+  const pageCount = invoicesQuery.data?.totalPages ?? 0
+  useEffect(() => {
+    if (pageCount > 0 && pagination.pageIndex > pageCount - 1) {
+      setPagination((prev) => ({ ...prev, pageIndex: pageCount - 1 }))
+    }
+  }, [pageCount, pagination.pageIndex])
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
   // Timeout / upstream failures (401/403/502-504) map to an explicit fallback
   // banner with an operator signal; the banner never triggers navigation.
@@ -88,6 +96,14 @@ export function InvoicesBillingPage() {
         }
         if (newWindow) {
           newWindow.location.href = result.url
+        } else {
+          toast.info('Payment link ready', {
+            description: 'Your browser blocked the popup — open the payment page.',
+            action: {
+              label: 'Open payment',
+              onClick: () => window.open(result.url, '_blank', 'noopener'),
+            },
+          })
         }
       } catch (error) {
         newWindow?.close()
@@ -159,17 +175,19 @@ export function InvoicesBillingPage() {
                     <EmptyTitle className="text-destructive">Failed to load invoices</EmptyTitle>
                     <EmptyDescription>Something went wrong while fetching invoices. Please try again.</EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => invoicesQuery.refetch()}
-                      disabled={invoicesQuery.isFetching}
-                    >
-                      {invoicesQuery.isFetching && <Spinner />}
-                      Retry
-                    </Button>
-                  </EmptyContent>
+                  {fallbackBanner && !fallbackBanner.retryable ? null : (
+                    <EmptyContent>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => invoicesQuery.refetch()}
+                        disabled={invoicesQuery.isFetching}
+                      >
+                        {invoicesQuery.isFetching && <Spinner />}
+                        Retry
+                      </Button>
+                    </EmptyContent>
+                  )}
                 </Empty>
               </>
             ) : (

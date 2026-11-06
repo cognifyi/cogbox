@@ -67,6 +67,9 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
 
   const handlePayInvoice = useCallback(async () => {
     if (!organizationId || !invoice?.id) {
+      toast.error('Cannot pay invoice', {
+        description: 'This invoice has no identifier.',
+      })
       return
     }
     const newWindow = window.open('', '_blank')
@@ -84,6 +87,16 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
       }
       if (newWindow) {
         newWindow.location.href = result.url
+      } else {
+        // Popup blocker ate the pre-opened window: surface the link so the
+        // user can open it manually instead of staring at a spinner.
+        toast.info('Payment link ready', {
+          description: 'Your browser blocked the popup — open the payment page.',
+          action: {
+            label: 'Open payment',
+            onClick: () => window.open(result.url, '_blank', 'noopener'),
+          },
+        })
       }
     } catch (error) {
       newWindow?.close()
@@ -152,12 +165,14 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
                 <EmptyTitle className="text-destructive">Failed to load invoice</EmptyTitle>
                 <EmptyDescription>Something went wrong while fetching the invoice. Please try again.</EmptyDescription>
               </EmptyHeader>
-              <EmptyContent>
-                <Button variant="secondary" size="sm" onClick={() => query.refetch()} disabled={query.isFetching}>
-                  {query.isFetching && <Spinner />}
-                  Retry
-                </Button>
-              </EmptyContent>
+              {fallbackBanner && !fallbackBanner.retryable ? null : (
+                <EmptyContent>
+                  <Button variant="secondary" size="sm" onClick={() => query.refetch()} disabled={query.isFetching}>
+                    {query.isFetching && <Spinner />}
+                    Retry
+                  </Button>
+                </EmptyContent>
+              )}
             </Empty>
           </>
         ) : notFound || !invoice ? (

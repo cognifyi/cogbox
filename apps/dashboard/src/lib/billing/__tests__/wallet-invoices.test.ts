@@ -145,7 +145,10 @@ describe('bounded pagination without N+1', () => {
   it('resolves invoice detail through the page walk, one sequential scan', () => {
     const source = readSource(HOOKS_SOURCE)
 
-    expect(source).toContain('findInvoiceAcrossPages((page)')
+    expect(source).toContain('findInvoiceAcrossPages(')
+    // Detail scans the full list (never a single-page find) and goes
+    // through the retry wrapper with the query signal.
+    expect(source).toContain('withBillingRetry(')
   })
 
   it('never resolves invoice detail via a single-page list call', () => {

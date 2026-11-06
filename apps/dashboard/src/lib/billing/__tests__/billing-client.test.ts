@@ -121,7 +121,7 @@ describe('fetchWithBillingRetry', () => {
     expect(BILLING_MAX_ATTEMPTS).toBe(2)
   })
 
-  it('does not retry 401/403 failures', async () => {
+  it('throws (never returns) non-retryable failures like 401/403', async () => {
     const delayFn = vi.fn(async () => {
       await Promise.resolve()
     })
@@ -129,16 +129,19 @@ describe('fetchWithBillingRetry', () => {
       .fn()
       .mockResolvedValueOnce({ ok: false, status: 401, json: async () => ({}), text: async () => 'no' })
 
-    const response = await fetchWithBillingRetry(
-      fetchFn,
-      'https://billing/v2/organization/org-1/wallet',
-      {},
-      { timeoutMs: 1000, retryDelayMs: 5, delayFn },
-    )
+    // A failed response must throw: returning it would let callers mistake
+    // an error body for data (code-review finding: silent error-as-data).
+    await expect(
+      fetchWithBillingRetry(
+        fetchFn,
+        'https://billing/v2/organization/org-1/wallet',
+        {},
+        { timeoutMs: 1000, retryDelayMs: 5, delayFn },
+      ),
+    ).rejects.toMatchObject({ status: 401 })
 
     expect(fetchFn).toHaveBeenCalledTimes(1)
     expect(delayFn).not.toHaveBeenCalled()
-    expect(response.status).toBe(401)
   })
 
   it('aborts a hung attempt via the per-attempt timeout', async () => {

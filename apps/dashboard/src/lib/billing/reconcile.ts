@@ -9,6 +9,12 @@
 // module: no fetching, no storage, no clock reads (callers pass `occurredAt`
 // when building adjustments) so results are deterministic and testable.
 //
+// NOTE: intentionally not wired to any dashboard view. The dashboard's
+// billing client only exposes aggregated usage (current/past), not the
+// per-event detail feed this math needs — that feed lives in the staging
+// reconciliation script (CB-04 verification), which imports this module.
+// Do not add dashboard UI around it until a per-event read endpoint exists.
+//
 // Entry kinds:
 // - `matched`: expected event id posted with the expected net quantity.
 // - `missing`: expected event id with no posting or correction at all.
@@ -75,6 +81,12 @@ export interface ReconciliationResult {
    * balanced within tolerance.
    */
   totalDiff: number
+  /**
+   * Base event ids delivered more than once. Redeliveries are deduped
+   * (first posting wins) and never affect quantities; listed here for
+   * operator visibility into at-least-once transport behavior.
+   */
+  duplicateEventIds: string[]
 }
 
 export interface ReconcileOptions {
@@ -115,7 +127,12 @@ export function reconcilePeriodEvents(
   const billed = actual.map(toBilled)
 
   const expectedById = new Map(expected.map((entry) => [entry.eventId, entry]))
-  const baseById = new Map<string, BilledEventLike[]>()
+  // Base postings deduped by event_id: billing treats event_id as the
+  // idempotency key, so a redelivered base event is a replay, not an
+  // additional charge. Corrections (corrects_event_id) are distinct ledger
+  // entries and still accumulate.
+  const baseById = new Map<string, BilledEventLike>()
+  const baseDuplicates = new Map<string, number>()
   const correctionsByTarget = new Map<string, BilledEventLike[]>()
 
   for (const event of billed) {
@@ -124,10 +141,10 @@ export function reconcilePeriodEvents(
       const list = correctionsByTarget.get(target) ?? []
       list.push(event)
       correctionsByTarget.set(target, list)
+    } else if (!baseById.has(event.event_id)) {
+      baseById.set(event.event_id, event)
     } else {
-      const list = baseById.get(event.event_id) ?? []
-      list.push(event)
-      baseById.set(event.event_id, list)
+      baseDuplicates.set(event.event_id, (baseDuplicates.get(event.event_id) ?? 1) + 1)
     }
   }
 
@@ -137,12 +154,13 @@ export function reconcilePeriodEvents(
   let totalDiff = 0
 
   for (const entry of expected) {
-    const base = baseById.get(entry.eventId) ?? []
+    const base = baseById.get(entry.eventId)
     const corrections = correctionsByTarget.get(entry.eventId) ?? []
+    const baseQuantity = base?.quantity ?? 0
     const actualQuantity =
-      base.reduce((sum, event) => sum + event.quantity, 0) + corrections.reduce((sum, event) => sum + event.quantity, 0)
+      baseQuantity + corrections.reduce((sum, event) => sum + event.quantity, 0)
 
-    if (base.length === 0 && corrections.length === 0) {
+    if (base === undefined && corrections.length === 0) {
       missing.push({ eventId: entry.eventId, metric: entry.metric, expectedQuantity: entry.quantity })
       totalDiff += entry.quantity
       continue
@@ -171,13 +189,12 @@ export function reconcilePeriodEvents(
   }
 
   const extra: ExtraEntry[] = []
-  for (const [eventId, events] of baseById) {
+  for (const [eventId, event] of baseById) {
     if (expectedById.has(eventId)) {
       continue
     }
-    const actualQuantity = events.reduce((sum, event) => sum + event.quantity, 0)
-    extra.push({ eventId, metric: events[0].metric, actualQuantity })
-    totalDiff -= actualQuantity
+    extra.push({ eventId, metric: event.metric, actualQuantity: event.quantity })
+    totalDiff -= event.quantity
   }
   for (const [target, events] of correctionsByTarget) {
     if (expectedById.has(target)) {
@@ -200,6 +217,7 @@ export function reconcilePeriodEvents(
     adjusted,
     isBalanced: missing.length === 0 && extra.length === 0 && adjusted.length === 0,
     totalDiff,
+    duplicateEventIds: [...baseDuplicates.keys()],
   }
 }
 

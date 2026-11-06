@@ -53,16 +53,31 @@ export interface BillingFallbackBannerProps {
   operatorSignal: string
 }
 
-/** Extract the HTTP status from any thrown billing failure. */
+/**
+ * Extract the HTTP status from any thrown billing failure.
+ *
+ * The dashboard axios interceptor rethrows failures as status-less
+ * `CogboxError` with the original axios error on `cause`, so the lookup
+ * walks the `cause` chain (axios `response.status`, nested `status`) before
+ * giving up with 0 (network/timeout).
+ */
 export function billingStatusOf(error: unknown): number {
-  if (error instanceof BillingError) {
-    return error.status
-  }
-  if (typeof error === 'object' && error !== null && 'status' in error) {
-    const status = (error as { status: unknown }).status
-    if (typeof status === 'number') {
-      return status
+  const seen = new Set<unknown>()
+  let current: unknown = error
+  while (typeof current === 'object' && current !== null && !seen.has(current)) {
+    seen.add(current)
+    if (current instanceof BillingError) {
+      return current.status
     }
+    const record = current as Record<string, unknown>
+    if (typeof record.status === 'number') {
+      return record.status
+    }
+    const response = record.response as Record<string, unknown> | undefined
+    if (response && typeof response.status === 'number') {
+      return response.status
+    }
+    current = record.cause
   }
   return 0
 }
@@ -87,8 +102,16 @@ export function reportBillingError(signal: string, error: unknown): void {
   console.error(`[billing:${signal}] status=${status} ${detail}`)
 }
 
-/** Map any billing failure to fallback-banner props (never throws). */
-export function mapBillingErrorToFallbackBanner(error: unknown): BillingFallbackBannerProps {
+/** Map any billing failure to fallback-banner props (never throws).
+ *
+ * Emits the operator signal via `reportBillingError` unless `{ silent: true }`
+ * — callers that log in an effect (e.g. `useBillingFallbackBanner`) pass
+ * silent to avoid logging during render.
+ */
+export function mapBillingErrorToFallbackBanner(
+  error: unknown,
+  options?: { silent?: boolean },
+): BillingFallbackBannerProps {
   const status = billingStatusOf(error)
 
   if (status === 401) {
@@ -101,7 +124,9 @@ export function mapBillingErrorToFallbackBanner(error: unknown): BillingFallback
       status,
       operatorSignal: 'billing.auth.unauthorized',
     }
-    reportBillingError(banner.operatorSignal, error)
+    if (!options?.silent) {
+      reportBillingError(banner.operatorSignal, error)
+    }
     return banner
   }
 
@@ -115,7 +140,9 @@ export function mapBillingErrorToFallbackBanner(error: unknown): BillingFallback
       status,
       operatorSignal: 'billing.auth.forbidden',
     }
-    reportBillingError(banner.operatorSignal, error)
+    if (!options?.silent) {
+      reportBillingError(banner.operatorSignal, error)
+    }
     return banner
   }
 
@@ -129,7 +156,9 @@ export function mapBillingErrorToFallbackBanner(error: unknown): BillingFallback
       status,
       operatorSignal: 'billing.upstream.unavailable',
     }
-    reportBillingError(banner.operatorSignal, error)
+    if (!options?.silent) {
+      reportBillingError(banner.operatorSignal, error)
+    }
     return banner
   }
 
@@ -212,21 +241,96 @@ export async function fetchWithBillingRetry(
         outerSignal.removeEventListener('abort', onAbort)
       }
 
-      if (
-        !response.ok &&
-        isRetryableBillingError(new BillingError(response.status, `Billing request failed (${response.status})`))
-      ) {
+      if (!response.ok) {
+        // Non-2xx is always a failure: retryable ones loop, everything else
+        // throws immediately. Never return a failed response as data.
         lastError = new BillingError(response.status, `Billing request failed (${response.status})`)
-        if (attempt < BILLING_MAX_ATTEMPTS) {
+        if (
+          attempt < BILLING_MAX_ATTEMPTS &&
+          isRetryableBillingError(lastError)
+        ) {
           await delayFn(retryDelayMs)
           continue
         }
+        throw lastError
       }
       return response
     } catch (error) {
       clearTimeout(timeoutId)
       if (outerSignal) {
         outerSignal.removeEventListener('abort', onAbort)
+      }
+      lastError = error
+      if (attempt < BILLING_MAX_ATTEMPTS && isRetryableBillingError(error)) {
+        await delayFn(retryDelayMs)
+        continue
+      }
+      throw error
+    }
+  }
+
+  throw lastError
+}
+
+export interface BillingCallRetryOptions {
+  timeoutMs?: number
+  retryDelayMs?: number
+  delayFn?: BillingDelayFn
+  signal?: AbortSignal
+}
+
+/**
+ * Retry wrapper for promise-based billing calls (e.g. the axios
+ * `BillingApiClient` used by `./hooks`). Same policy as
+ * `fetchWithBillingRetry`: per-attempt timeout, exactly one retry with
+ * backoff for network failures and 502/503/504, immediate throw otherwise.
+ * The caller's AbortSignal (react-query's query signal) is honored: an
+ * aborted outer signal rejects with the abort reason instead of retrying.
+ */
+export async function withBillingRetry<T>(
+  call: (signal: AbortSignal) => Promise<T>,
+  options?: BillingCallRetryOptions,
+): Promise<T> {
+  const timeoutMs = options?.timeoutMs ?? BILLING_REQUEST_TIMEOUT_MS
+  const retryDelayMs = options?.retryDelayMs ?? BILLING_RETRY_DELAY_MS
+  const delayFn = options?.delayFn ?? defaultDelay
+  const outerSignal = options?.signal
+
+  let lastError: unknown = null
+
+  for (let attempt = 1; attempt <= BILLING_MAX_ATTEMPTS; attempt += 1) {
+    if (outerSignal?.aborted) {
+      throw outerSignal.reason instanceof Error
+        ? outerSignal.reason
+        : new BillingError(0, 'Billing request aborted')
+    }
+    const controller = new AbortController()
+    const onAbort = (): void => controller.abort()
+    if (outerSignal) {
+      outerSignal.addEventListener('abort', onAbort, { once: true })
+    }
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+    try {
+      // The underlying client ignores unknown signals; the timeout
+      // controller only guards clients that honor AbortSignal. Either way
+      // the attempt is bounded by the timeout race below.
+      const result = await Promise.race([
+        call(controller.signal),
+        new Promise<never>((_, reject) => {
+          controller.signal.addEventListener('abort', () =>
+            reject(new BillingError(0, 'Billing request timed out')),
+          )
+        }),
+      ])
+      clearTimeout(timeoutId)
+      outerSignal?.removeEventListener('abort', onAbort)
+      return result
+    } catch (error) {
+      clearTimeout(timeoutId)
+      outerSignal?.removeEventListener('abort', onAbort)
+      if (outerSignal?.aborted) {
+        throw error
       }
       lastError = error
       if (attempt < BILLING_MAX_ATTEMPTS && isRetryableBillingError(error)) {

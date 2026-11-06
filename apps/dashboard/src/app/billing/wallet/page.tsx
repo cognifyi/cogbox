@@ -104,17 +104,19 @@ export function WalletBillingPage() {
                 <EmptyTitle className="text-destructive">Failed to load wallet</EmptyTitle>
                 <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
               </EmptyHeader>
-              <EmptyContent>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => walletQuery.refetch()}
-                  disabled={walletQuery.isFetching}
-                >
-                  {walletQuery.isFetching && <Spinner />}
-                  Retry
-                </Button>
-              </EmptyContent>
+              {fallbackBanner && !fallbackBanner.retryable ? null : (
+                <EmptyContent>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => walletQuery.refetch()}
+                    disabled={walletQuery.isFetching}
+                  >
+                    {walletQuery.isFetching && <Spinner />}
+                    Retry
+                  </Button>
+                </EmptyContent>
+              )}
             </Empty>
           </>
         ) : !wallet ? (

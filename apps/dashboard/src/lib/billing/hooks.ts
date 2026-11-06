@@ -31,9 +31,12 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import type { Invoice, OrganizationWallet, PaginatedTInvoice } from '@cogbox/billing-api-client'
 import { useQuery, useQueryClient, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import {
   invalidateBillingQueries,
   mapBillingErrorToFallbackBanner,
+  reportBillingError,
+  withBillingRetry,
   type BillingFallbackBannerProps,
 } from './billing-client'
 
@@ -79,7 +82,8 @@ export function useBillingWallet({
 
   return useQuery<OrganizationWallet, Error>({
     queryKey: queryKeys.organization.wallet(organizationId),
-    queryFn: () => billingApi.getOrganizationWallet(organizationId),
+    queryFn: ({ signal }) =>
+      withBillingRetry(() => billingApi.getOrganizationWallet(organizationId), { signal }),
     enabled: queryEnabled,
     refetchOnWindowFocus: true,
     ...queryOptions,
@@ -99,7 +103,8 @@ export function useBillingInvoices({
 
   return useQuery<PaginatedTInvoice, Error>({
     queryKey: queryKeys.billing.invoices(organizationId, page, perPage),
-    queryFn: () => billingApi.listInvoices(organizationId, page, perPage),
+    queryFn: ({ signal }) =>
+      withBillingRetry(() => billingApi.listInvoices(organizationId, page, perPage), { signal }),
     enabled: queryEnabled,
     refetchOnWindowFocus: true,
     ...queryOptions,
@@ -107,18 +112,24 @@ export function useBillingInvoices({
 }
 
 /**
- * Walk every page of `listV2Invoices` until the invoice matching `id`
- * (falling back to `number`) is found or all pages are exhausted. The list
- * endpoint has no single-invoice counterpart, so a single-page lookup could
- * wrongly report an invoice as missing.
+ * Walk `listV2Invoices` pages until the invoice matching `id` (falling back
+ * to `number`) is found or pages are exhausted. The list endpoint has no
+ * single-invoice counterpart, so a single-page lookup could wrongly report
+ * an invoice as missing. Bounded by `maxPages` (default 20 → 2000 invoices
+ * at the default page size) so a misbehaving server cannot trap the detail
+ * view in an endless serial scan; the caller's AbortSignal cancels the walk.
  */
 export async function findInvoiceAcrossPages(
   listPage: (page: number, perPage: number) => Promise<PaginatedTInvoice>,
   invoiceId: string,
   perPage = 100,
+  options?: { maxPages?: number; signal?: AbortSignal },
 ): Promise<Invoice | undefined> {
+  const maxPages = options?.maxPages ?? 20
+  const signal = options?.signal
   let page = 1
   for (;;) {
+    signal?.throwIfAborted()
     const result = await listPage(page, perPage)
     const match = result.items?.find(
       (item) => item.id === invoiceId || (item.number !== undefined && item.number === invoiceId),
@@ -127,7 +138,7 @@ export async function findInvoiceAcrossPages(
       return match
     }
     const totalPages = result.totalPages ?? 1
-    if (page >= totalPages) {
+    if (page >= totalPages || page >= maxPages) {
       return undefined
     }
     page += 1
@@ -157,8 +168,17 @@ export function useBillingInvoiceDetail({
 
   const query = useQuery<Invoice | undefined, Error>({
     queryKey: [...queryKeys.billing.invoices(organizationId), 'detail', invoiceId] as const,
-    queryFn: () =>
-      findInvoiceAcrossPages((page) => billingApi.listInvoices(organizationId, page, perPage), invoiceId, perPage),
+    queryFn: ({ signal }) =>
+      withBillingRetry(
+        () =>
+          findInvoiceAcrossPages(
+            (page) => billingApi.listInvoices(organizationId, page, perPage),
+            invoiceId,
+            perPage,
+            { signal },
+          ),
+        { signal },
+      ),
     enabled: queryEnabled,
     refetchOnWindowFocus: true,
     ...queryOptions,
@@ -177,12 +197,21 @@ export function useBillingInvoiceDetail({
  * so views can render `<Banner {...banner} />` only on failure. Pure wrapper
  * over `mapBillingErrorToFallbackBanner`; never triggers navigation and never
  * opens a blank URL.
+ *
+ * The operator signal is logged once per distinct error in an effect (never
+ * during render, so StrictMode double-render cannot duplicate log lines).
  */
 export function useBillingFallbackBanner(error: unknown): BillingFallbackBannerProps | null {
-  if (!error) {
-    return null
-  }
-  return mapBillingErrorToFallbackBanner(error)
+  const banner = error ? mapBillingErrorToFallbackBanner(error, { silent: true }) : null
+  // Log once per distinct error in an effect — never during render, so
+  // StrictMode double-render cannot duplicate operator log lines.
+  // (banner/signal intentionally excluded: they derive from `error`.)
+  useEffect(() => {
+    if (banner && error) {
+      reportBillingError(banner.operatorSignal, error)
+    }
+  }, [error])
+  return banner
 }
 
 /**
