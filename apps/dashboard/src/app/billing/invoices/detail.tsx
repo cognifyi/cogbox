@@ -7,12 +7,18 @@
 // Invoice detail view wired to the real billing client via
 // `useBillingInvoiceDetail` (resolved by scanning every page of
 // `listV2Invoices`, no mock data fallbacks). Covers loading, error (with
-// retry), not-found, and success states. The view only queries when an
+// retry), not-found, and success states. Timeout / upstream failures
+// (401/403/502-504) render an explicit fallback banner via
+// `useBillingFallbackBanner` (with operator signal, never navigating);
+// bounded fetch (per-attempt timeout, single retry) and cache invalidation
+// live in the billing resilience layer (`billing-client.ts`, exposed via
+// `hooks.ts`). The view only queries when an
 // organization and invoice are selected, the billing API is configured
 // (`config.billingApiUrl`), and the member has the OWNER role. External
 // navigation never opens a blank/missing URL: missing file or payment URLs
 // surface a toast instead.
 
+import { Banner } from '@/components/Banner'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,7 +28,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useBillingInvoiceDetail } from '@/lib/billing/hooks'
+import { useBillingFallbackBanner, useBillingInvoiceDetail } from '@/lib/billing/hooks'
 import { formatAmount } from '@/lib/utils'
 import { OrganizationUserRoleEnum } from '@cogbox/api-client'
 import { FileTextIcon, TriangleAlertIcon } from 'lucide-react'
@@ -45,6 +51,9 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
     enabled: billingAvailable,
   })
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
+  // Timeout / upstream failures (401/403/502-504) map to an explicit fallback
+  // banner with an operator signal; the banner never triggers navigation.
+  const fallbackBanner = useBillingFallbackBanner(query.error)
 
   const handleViewPdf = useCallback(() => {
     if (!invoice?.fileUrl) {
@@ -122,21 +131,35 @@ export function InvoiceDetailBillingPage({ invoiceId }: InvoiceDetailBillingPage
             </CardContent>
           </Card>
         ) : query.isError ? (
-          <Empty className="flex-none rounded-md border py-12">
-            <EmptyHeader>
-              <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
-                <TriangleAlertIcon />
-              </EmptyMedia>
-              <EmptyTitle className="text-destructive">Failed to load invoice</EmptyTitle>
-              <EmptyDescription>Something went wrong while fetching the invoice. Please try again.</EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button variant="secondary" size="sm" onClick={() => query.refetch()} disabled={query.isFetching}>
-                {query.isFetching && <Spinner />}
-                Retry
-              </Button>
-            </EmptyContent>
-          </Empty>
+          <>
+            {fallbackBanner ? (
+              <Banner
+                variant={fallbackBanner.variant}
+                title={fallbackBanner.title}
+                description={fallbackBanner.description}
+                action={
+                  fallbackBanner.retryable
+                    ? { label: fallbackBanner.actionLabel, onClick: () => query.refetch() }
+                    : undefined
+                }
+              />
+            ) : null}
+            <Empty className="flex-none rounded-md border py-12">
+              <EmptyHeader>
+                <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                  <TriangleAlertIcon />
+                </EmptyMedia>
+                <EmptyTitle className="text-destructive">Failed to load invoice</EmptyTitle>
+                <EmptyDescription>Something went wrong while fetching the invoice. Please try again.</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant="secondary" size="sm" onClick={() => query.refetch()} disabled={query.isFetching}>
+                  {query.isFetching && <Spinner />}
+                  Retry
+                </Button>
+              </EmptyContent>
+            </Empty>
+          </>
         ) : notFound || !invoice ? (
           <Empty className="flex-none rounded-md border py-12">
             <EmptyHeader>
