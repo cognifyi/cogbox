@@ -5,7 +5,7 @@
  */
 
 import { randomUUID } from 'crypto'
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, Optional } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, LessThan, Repository } from 'typeorm'
@@ -82,7 +82,7 @@ export class OrganizationMembershipOutboxService {
   constructor(
     @InjectRepository(OrganizationMembershipOutbox)
     private readonly outboxRepository: Repository<OrganizationMembershipOutbox>,
-    private readonly options?: MembershipOutboxOptions,
+    @Optional() private readonly options?: MembershipOutboxOptions,
   ) {}
 
   async enqueue(input: EnqueueMembershipOutboxInput, manager?: EntityManager): Promise<OrganizationMembershipOutbox> {
