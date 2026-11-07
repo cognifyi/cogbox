@@ -38,8 +38,10 @@ import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
 import { OrganizationRegionController } from './controllers/organization-region.controller'
 import { OrganizationIntrospectionController } from './controllers/organization-introspection.controller'
+import { OrganizationMembershipDriftController } from './controllers/organization-membership-drift.controller'
 import { OrganizationMembershipIntrospectionCacheService } from './services/organization-membership-introspection-cache.service'
 import { OrganizationMembershipCacheInvalidationService } from './services/organization-membership-cache-invalidation.service'
+import { OrganizationMembershipDriftService } from './services/organization-membership-drift.service'
 import { Region } from '../region/entities/region.entity'
 import { EncryptionModule } from '../encryption/encryption.module'
 
@@ -68,6 +70,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationInvitationController,
     OrganizationRegionController,
     OrganizationIntrospectionController,
+    OrganizationMembershipDriftController,
   ],
   providers: [
     OrganizationService,
@@ -80,6 +83,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationMembershipOutboxRelayService,
     OrganizationMembershipIntrospectionCacheService,
     OrganizationMembershipCacheInvalidationService,
+    OrganizationMembershipDriftService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
     {
@@ -109,6 +113,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationMembershipOutboxRelayService,
     OrganizationMembershipIntrospectionCacheService,
     OrganizationMembershipCacheInvalidationService,
+    OrganizationMembershipDriftService,
     OrganizationAuthContextGuard,
   ],
 })
