@@ -350,14 +350,13 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
-- NC-430: Ship blocked as high-risk with empty verification: assertion_results=[], test_results={}, deploy_test_failed via cogos_unavailable, merge_decision=checks_failed, pr_created=false (missing head branch), merge_result=not_attempted
-- NC-429: Step-02 build/e2e claims aspirational: npx nx run dashboard:build + eslint + dashboard e2e billing-ledger flow claimed in goal text with no command/test_pass/file_exists assertions and no project.json-edit guard
-- NC-428: Failure-mode visibility unproven for all new paths (Is-tested=No, Is-handled=claimed-only, Is-visible=claimed-only): 401/403/502-504 fallback-banner, timeout+single-retry-backoff, cache invalidation, bounded pagination/no-N+1, guarded…
-- NC-427: Dependency order correct but unenforced: no assertions pinning client API before consumers, no forbidden_paths, no spec_anchors, permissive allowed_tools write/edit/bash permits out-of-scope drift
-- NC-426: Complexity gate triggered: 9 distinct files across 3 steps >=8-file threshold with no recorded structure choice
-- NC-425: Empty scope baseline: goal_intent='' / empty issue body with no background/goals/acceptance; acceptance coverage untraceable to user request
-- NC-424: 9 expected artifacts with no compiled-assertion coverage and unproven reachability: billing-client.ts, hooks.ts, billing-client.test.ts, wallet/page.tsx, invoices/page.tsx, wallet-invoices.test.ts, detail.tsx, invoice-detail.test.ts,…
-- NC-423: Zero compiled assertions across all 3 steps (steps[0].assertions=[], steps[1].assertions=[], steps[2].assertions=[]) violates REGRESSION RULE; timeout/retry/error-mapping/pagination behavior has no seam that can fail
-- NC-411: Do not set forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests while shipping source files; do not ship micro-steps with empty assertions and no verifies for 401/403/502-504…
-- NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
+- NC-576: No rollout/reversibility: no feature flag, staged rollout/canary, migration backfill/compat plan, backwards-compat note, or logs/metrics/traces/alerts; budget max_tool_calls 20-25 and max_retries 2 not credible without assertions
+- NC-575: Failure-mode invisibility: N+1 drift scan, unbounded relay batch memory, missing cogbox timeouts, 60s cache stampede, migration lock/backfill risk all with Is-tested=No/Is-handled=claimed-only/Is-visible=claimed-only and no timeout/retry…
+- NC-574: Test thinness: only 3 spec files for 17 prod files (step-00 0 specs), no E2E mutation->outbox->relay->invalidation within 60s, no fault-injection for relay/cache down until step-04, no regression seam per behavior
+- NC-573: Blast-radius / shotgun surgery: step-00 edits organization.module.ts, step-01 edits organization-user.service.ts with forbidden_paths=[] on all steps, no reuse inventory, serial 00-04 lanes overlap on module/services without conflict map
+- NC-572: Late fail-closed guard: availability service and fail-closed semantics land in step-04 after step-02 cache controller and step-03 drift controller expose reads — partial execution ships unguarded reads
+- NC-571: Outbox lifecycle missing: step-00 entity+migration 1771000000000 with retry/idempotency in goal text only, no cleanup/archival, backoff/jitter, retry-storm guard, ordering, poison-message handling or operator visibility — unbounded…
+- NC-570: Distributed invalidation gap: step-01 NestJS EventEmitter2 in-process does not propagate across scaled api instances, no Redis/pubsub, ordering, DLQ, polling interval or metrics — instance B serves stale billing introspection cache for…
+- NC-569: Ship blocked as high-risk: risk_level=high due to deploy_test_failed via cogos_unavailable, merge_decision=checks_failed, pr_created=false (missing head branch), merge_result=not_attempted
+_共 10 条，省略 2 条；运行 `omni nc list` 查看完整账本。_
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->

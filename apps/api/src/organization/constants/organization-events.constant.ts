@@ -14,4 +14,5 @@ export const OrganizationEvents = {
   SUSPENDED_SNAPSHOT_DEACTIVATED: 'organization.suspended-snapshot-deactivated',
   PERMISSIONS_UNASSIGNED: 'permissions.unassigned',
   USER_REMOVED: 'organization.user.removed',
+  MEMBERSHIP_CHANGED: 'organization.membership.changed',
 } as const

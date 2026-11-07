@@ -14,6 +14,7 @@ import { Organization } from './entities/organization.entity'
 import { OrganizationRole } from './entities/organization-role.entity'
 import { OrganizationUser } from './entities/organization-user.entity'
 import { OrganizationInvitation } from './entities/organization-invitation.entity'
+import { OrganizationMembershipOutbox } from './entities/organization-membership-outbox.entity'
 import { OrganizationService } from './services/organization.service'
 import { OrganizationRoleService } from './services/organization-role.service'
 import { OrganizationUserService } from './services/organization-user.service'
@@ -26,6 +27,8 @@ import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
 import { OrgMetricsExporterService } from './services/org-metrics-exporter.service'
+import { OrganizationMembershipOutboxService } from './services/organization-membership-outbox.service'
+import { OrganizationMembershipOutboxRelayService } from './services/organization-membership-outbox-relay.service'
 import { DataSource } from 'typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
@@ -34,6 +37,13 @@ import { OrganizationAuthContextGuard } from './guards/organization-auth-context
 import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
 import { OrganizationRegionController } from './controllers/organization-region.controller'
+import { OrganizationIntrospectionController } from './controllers/organization-introspection.controller'
+import { OrganizationMembershipDriftController } from './controllers/organization-membership-drift.controller'
+import { OrganizationMembershipIntrospectionCacheService } from './services/organization-membership-introspection-cache.service'
+import { OrganizationMembershipCacheInvalidationService } from './services/organization-membership-cache-invalidation.service'
+import { OrganizationMembershipAvailabilityService } from './services/organization-membership-availability.service'
+import { OrganizationMembershipFailClosedCheck } from './guards/organization-membership-fail-closed.check'
+import { OrganizationMembershipDriftService } from './services/organization-membership-drift.service'
 import { Region } from '../region/entities/region.entity'
 import { EncryptionModule } from '../encryption/encryption.module'
 
@@ -46,6 +56,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
       OrganizationRole,
       OrganizationUser,
       OrganizationInvitation,
+      OrganizationMembershipOutbox,
       Sandbox,
       Volume,
       SnapshotRunner,
@@ -60,6 +71,8 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationUserController,
     OrganizationInvitationController,
     OrganizationRegionController,
+    OrganizationIntrospectionController,
+    OrganizationMembershipDriftController,
   ],
   providers: [
     OrganizationService,
@@ -68,6 +81,13 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationInvitationService,
     OrganizationUsageService,
     OrgMetricsExporterService,
+    OrganizationMembershipOutboxService,
+    OrganizationMembershipOutboxRelayService,
+    OrganizationMembershipIntrospectionCacheService,
+    OrganizationMembershipCacheInvalidationService,
+    OrganizationMembershipAvailabilityService,
+    OrganizationMembershipFailClosedCheck,
+    OrganizationMembershipDriftService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
     {
@@ -93,6 +113,13 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationUserService,
     OrganizationInvitationService,
     OrganizationUsageService,
+    OrganizationMembershipOutboxService,
+    OrganizationMembershipOutboxRelayService,
+    OrganizationMembershipIntrospectionCacheService,
+    OrganizationMembershipCacheInvalidationService,
+    OrganizationMembershipAvailabilityService,
+    OrganizationMembershipFailClosedCheck,
+    OrganizationMembershipDriftService,
     OrganizationAuthContextGuard,
   ],
 })
