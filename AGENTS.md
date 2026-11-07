@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-575: Failure-mode invisibility: N+1 drift scan, unbounded relay batch memory, missing cogbox timeouts, 60s cache stampede, migration lock/backfill risk all with Is-tested=No/Is-handled=claimed-only/Is-visible=claimed-only and no timeout/retry…
 - NC-574: Test thinness: only 3 spec files for 17 prod files (step-00 0 specs), no E2E mutation->outbox->relay->invalidation within 60s, no fault-injection for relay/cache down until step-04, no regression seam per behavior
 - NC-573: Blast-radius / shotgun surgery: step-00 edits organization.module.ts, step-01 edits organization-user.service.ts with forbidden_paths=[] on all steps, no reuse inventory, serial 00-04 lanes overlap on module/services without conflict map
 - NC-572: Late fail-closed guard: availability service and fail-closed semantics land in step-04 after step-02 cache controller and step-03 drift controller expose reads — partial execution ships unguarded reads
@@ -357,5 +358,5 @@ nix-env -q nix-direnv
 - NC-570: Distributed invalidation gap: step-01 NestJS EventEmitter2 in-process does not propagate across scaled api instances, no Redis/pubsub, ordering, DLQ, polling interval or metrics — instance B serves stale billing introspection cache for…
 - NC-569: Ship blocked as high-risk: risk_level=high due to deploy_test_failed via cogos_unavailable, merge_decision=checks_failed, pr_created=false (missing head branch), merge_result=not_attempted
 - NC-568: Empty scope traceability: goal_intent='', empty issue body/dag_id, spec_anchors=[] , assigned_skills=[] , no contract C1-C7/ADR/TODO/flow-to-rollback mapping — reuse and minimum-change unverifiable
-- NC-567: Empty verification baseline: assertion_results=[] , test_results={} , all 5 steps have assertions=[] with 20 expected_artifacts at zero compiled-assertion coverage — any write satisfies step, recovered only as pass without proof
+_共 9 条，省略 1 条；运行 `omni nc list` 查看完整账本。_
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
