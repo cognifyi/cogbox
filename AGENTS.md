@@ -350,5 +350,6 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-568: Empty scope traceability: goal_intent='', empty issue body/dag_id, spec_anchors=[] , assigned_skills=[] , no contract C1-C7/ADR/TODO/flow-to-rollback mapping — reuse and minimum-change unverifiable
 - NC-567: Empty verification baseline: assertion_results=[] , test_results={} , all 5 steps have assertions=[] with 20 expected_artifacts at zero compiled-assertion coverage — any write satisfies step, recovered only as pass without proof
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
