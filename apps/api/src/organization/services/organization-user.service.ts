@@ -22,6 +22,8 @@ import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
 import { UserEvents } from '../../user/constants/user-events.constant'
 import { UserDeletedEvent } from '../../user/events/user-deleted.event'
+import { OrganizationMembershipOutboxService } from './organization-membership-outbox.service'
+import type { OrganizationMembershipChangeType } from '../events/organization-membership-changed.event'
 
 @Injectable()
 export class OrganizationUserService {
@@ -32,6 +34,7 @@ export class OrganizationUserService {
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
+    private readonly membershipOutboxService?: OrganizationMembershipOutboxService,
   ) {}
 
   async findAll(organizationId: string): Promise<OrganizationUserDto[]> {
@@ -121,17 +124,25 @@ export class OrganizationUserService {
     organizationUser.role = role
     organizationUser.assignedRoles = assignedRoles
 
-    if (permissionsToRevoke.length > 0) {
-      await this.dataSource.transaction(async (em) => {
-        organizationUser = await em.save(organizationUser)
+    // The membership write and its outbox row commit atomically so the relay can
+    // publish every mutation exactly as it happened. The relay carries the
+    // idempotency key (`eventId`) with each event so consumers can deduplicate.
+    await this.runInMembershipTransaction(async (em) => {
+      organizationUser = await em.save(organizationUser)
+      if (permissionsToRevoke.length > 0) {
         await this.eventEmitter.emitAsync(
           OrganizationEvents.PERMISSIONS_UNASSIGNED,
           new OrganizationResourcePermissionsUnassignedEvent(em, organizationId, userId, permissionsToRevoke),
         )
+      }
+      await this.enqueueMembershipChange(em, {
+        organizationId,
+        userId,
+        changeType: 'role_changed',
+        role,
+        assignedRoleIds: assignedRoleIds,
       })
-    } else {
-      organizationUser = await this.organizationUserRepository.save(organizationUser)
-    }
+    })
 
     const user = await this.userService.findOne(userId)
 
@@ -150,7 +161,16 @@ export class OrganizationUserService {
       throw new NotFoundException(`User with ID ${userId} not found in organization with ID ${organizationId}`)
     }
 
-    await this.removeWithEntityManager(this.organizationUserRepository.manager, organizationUser)
+    // Remove the membership and its outbox row in one transaction so a crash
+    // between the two cannot lose the `removed` event.
+    await this.runInMembershipTransaction(async (em) => {
+      await this.removeWithEntityManager(em, organizationUser)
+      await this.enqueueMembershipChange(em, {
+        organizationId,
+        userId,
+        changeType: 'removed',
+      })
+    })
 
     // Membership is revoked: eject the user's live notification sockets from the organization room
     // so they stop receiving its realtime events. Emitted after the removal has committed (the
@@ -197,7 +217,15 @@ export class OrganizationUserService {
     organizationUser.userId = userId
     organizationUser.role = role
     organizationUser.assignedRoles = assignedRoles
-    return entityManager.save(organizationUser)
+    const saved = await entityManager.save(organizationUser)
+    await this.enqueueMembershipChange(entityManager, {
+      organizationId,
+      userId,
+      changeType: 'added',
+      role,
+      assignedRoleIds: assignedRoles.map((assignedRole) => assignedRole.id),
+    })
+    return saved
   }
 
   @OnAsyncEvent({
@@ -238,7 +266,39 @@ export class OrganizationUserService {
     //  - auto-delete the organization if there are no other members
     //  - auto-promote a new owner if there are other members
     */
-    await Promise.all(memberships.map((membership) => this.removeWithEntityManager(payload.entityManager, membership)))
+    await Promise.all(
+      memberships.map(async (membership) => {
+        await this.removeWithEntityManager(payload.entityManager, membership)
+        await this.enqueueMembershipChange(payload.entityManager, {
+          organizationId: membership.organizationId,
+          userId: payload.userId,
+          changeType: 'removed',
+        })
+      }),
+    )
+  }
+
+  private async runInMembershipTransaction<T>(work: (em: EntityManager) => Promise<T>): Promise<T> {
+    if (this.dataSource) {
+      return this.dataSource.transaction(work)
+    }
+    return work(this.organizationUserRepository.manager)
+  }
+
+  private async enqueueMembershipChange(
+    entityManager: EntityManager,
+    input: {
+      organizationId: string
+      userId: string
+      changeType: OrganizationMembershipChangeType
+      role?: OrganizationMemberRole
+      assignedRoleIds?: string[]
+    },
+  ): Promise<void> {
+    if (!this.membershipOutboxService) {
+      return
+    }
+    await this.membershipOutboxService.enqueue(input, entityManager)
   }
 
   private getAssignedPermissions(

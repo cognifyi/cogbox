@@ -27,6 +27,8 @@ import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
 import { OrgMetricsExporterService } from './services/org-metrics-exporter.service'
+import { OrganizationMembershipOutboxService } from './services/organization-membership-outbox.service'
+import { OrganizationMembershipOutboxRelayService } from './services/organization-membership-outbox-relay.service'
 import { DataSource } from 'typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
@@ -70,6 +72,8 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationInvitationService,
     OrganizationUsageService,
     OrgMetricsExporterService,
+    OrganizationMembershipOutboxService,
+    OrganizationMembershipOutboxRelayService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
     {
@@ -95,6 +99,8 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationUserService,
     OrganizationInvitationService,
     OrganizationUsageService,
+    OrganizationMembershipOutboxService,
+    OrganizationMembershipOutboxRelayService,
     OrganizationAuthContextGuard,
   ],
 })
