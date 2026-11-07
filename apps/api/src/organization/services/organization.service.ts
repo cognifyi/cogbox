@@ -6,13 +6,14 @@
 
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
   Logger,
-  OnModuleInit,
+  NotFoundException,
   OnApplicationShutdown,
-  ConflictException,
+  OnModuleInit,
+  Optional,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
@@ -22,6 +23,7 @@ import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
+import { OrganizationMembershipOutboxService } from './organization-membership-outbox.service'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserEvents } from '../../user/constants/user-events.constant'
 import { UserCreatedEvent } from '../../user/events/user-created.event'
@@ -82,6 +84,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly regionService: RegionService,
     private readonly encryptionService: EncryptionService,
     @InjectRedis() private readonly redis: Redis,
+    @Optional() private readonly membershipOutboxService?: OrganizationMembershipOutboxService,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -675,6 +678,23 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
     await entityManager.transaction(async (em) => {
       organization = await em.save(organization)
+      // The initial OWNER membership must also enter the membership outbox
+      // in the same transaction: without it, billing/drift never learn of
+      // the owner until a later cache miss, and drift flags it missing.
+      if (!this.membershipOutboxService) {
+        throw new Error(
+          'OrganizationMembershipOutboxService is not wired: refusing to create an organization with no owner-added outbox event',
+        )
+      }
+      await this.membershipOutboxService.enqueue(
+        {
+          organizationId: organization.id,
+          userId: createdBy,
+          changeType: 'added',
+          role: OrganizationMemberRole.OWNER,
+        },
+        em,
+      )
       await this.eventEmitter.emitAsync(OrganizationEvents.CREATED, organization)
     })
 

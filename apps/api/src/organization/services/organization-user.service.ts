@@ -78,6 +78,7 @@ export class OrganizationUserService {
     userId: string,
     role: OrganizationMemberRole,
     assignedRoleIds: string[],
+    idempotencyKey?: string,
   ): Promise<OrganizationUserDto> {
     let organizationUser = await this.organizationUserRepository.findOne({
       where: {
@@ -141,6 +142,7 @@ export class OrganizationUserService {
         changeType: 'role_changed',
         role,
         assignedRoleIds: assignedRoleIds,
+        ...(idempotencyKey ? { eventId: idempotencyKey } : {}),
       })
     })
 
@@ -149,7 +151,7 @@ export class OrganizationUserService {
     return OrganizationUserDto.fromEntities(organizationUser, user)
   }
 
-  async delete(organizationId: string, userId: string): Promise<void> {
+  async delete(organizationId: string, userId: string, idempotencyKey?: string): Promise<void> {
     const organizationUser = await this.organizationUserRepository.findOne({
       where: {
         organizationId,
@@ -169,6 +171,7 @@ export class OrganizationUserService {
         organizationId,
         userId,
         changeType: 'removed',
+        ...(idempotencyKey ? { eventId: idempotencyKey } : {}),
       })
     })
 
@@ -293,12 +296,20 @@ export class OrganizationUserService {
       changeType: OrganizationMembershipChangeType
       role?: OrganizationMemberRole
       assignedRoleIds?: string[]
+      eventId?: string
     },
   ): Promise<void> {
+    // Fail loudly when the outbox is unwired: silently committing a
+    // mutation with no event leaves billing/drfit blind until TTL heals
+    // it. Every production construction path injects the service (module
+    // wiring); only ad-hoc test doubles may omit it — and those tests must
+    // opt out explicitly, not silently lose events.
     if (!this.membershipOutboxService) {
-      return
+      throw new Error(
+        'OrganizationMembershipOutboxService is not wired: refusing to commit a membership mutation with no outbox event',
+      )
     }
-    await this.membershipOutboxService.enqueue(input, entityManager)
+    await this.membershipOutboxService.enqueue({ ...input, ...(input.eventId ? {} : {}) }, entityManager)
   }
 
   private getAssignedPermissions(

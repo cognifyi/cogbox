@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationMembershipFailClosedGuard } from '../guards/organization-membership-fail-closed.guard'
+import { OrganizationMembershipFailClosedCheck } from '../guards/organization-membership-fail-closed.check'
 import { OrganizationMembershipAvailabilityService } from './organization-membership-availability.service'
 import {
   ORGANIZATION_MEMBERSHIP_INTROSPECTION_CACHE_TTL_MS,
@@ -17,7 +17,7 @@ function makeGuardHarness() {
   const findOne = jest.fn()
   const organizationUserService = { findOne } as never
   const availability = new OrganizationMembershipAvailabilityService()
-  const guard = new OrganizationMembershipFailClosedGuard(organizationUserService as never, availability)
+  const guard = new OrganizationMembershipFailClosedCheck(organizationUserService as never, availability)
   return { guard, findOne, availability }
 }
 
@@ -72,7 +72,7 @@ describe('OrganizationMembership fail-closed (RED slice)', () => {
   it('recovers after the cooldown so a later lookup succeeds', async () => {
     const availability = new OrganizationMembershipAvailabilityService(1, 1_000)
     const findOne = jest.fn().mockRejectedValue(new Error('db down'))
-    const guard = new OrganizationMembershipFailClosedGuard({ findOne } as never, availability)
+    const guard = new OrganizationMembershipFailClosedCheck({ findOne } as never, availability)
 
     await expect(guard.canActivate('org-1', 'user-1')).rejects.toThrow(InvalidAuthenticationContextException)
     expect(availability.getState()).toBe('degraded')

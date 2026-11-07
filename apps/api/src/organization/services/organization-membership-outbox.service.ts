@@ -5,7 +5,8 @@
  */
 
 import { randomUUID } from 'crypto'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, LessThan, Repository } from 'typeorm'
 import {
@@ -72,8 +73,12 @@ const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
  * ({@link OrganizationMembershipOutboxRelayService}) then delivers rows reliably
  * with retry/backoff, keyed by the idempotency key (`eventId`).
  */
+/** Retention for delivered outbox rows (purge cron). */
+export const MEMBERSHIP_OUTBOX_SENT_RETENTION_DAYS = 30;
+
 @Injectable()
 export class OrganizationMembershipOutboxService {
+  private readonly logger = new Logger(OrganizationMembershipOutboxService.name)
   constructor(
     @InjectRepository(OrganizationMembershipOutbox)
     private readonly outboxRepository: Repository<OrganizationMembershipOutbox>,
@@ -199,6 +204,25 @@ export class OrganizationMembershipOutboxService {
     await this.outboxRepository.save(row)
 
     return row
+  }
+
+  /**
+   * Nightly retention: delete `sent` rows older than the retention window
+   * so the outbox table stays bounded. `dead` rows are kept for operator
+   * inspection (explicit purge only).
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_3AM, { name: 'organization-membership-outbox-purge' })
+  async purgeSentCron(): Promise<void> {
+    try {
+      const removed = await this.purgeSent(MEMBERSHIP_OUTBOX_SENT_RETENTION_DAYS)
+      if (removed > 0) {
+        this.logger.log(`Purged ${removed} sent membership outbox rows older than 30 days`)
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Membership outbox purge failed: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
   }
 
   async purgeSent(olderThanDays: number): Promise<number> {

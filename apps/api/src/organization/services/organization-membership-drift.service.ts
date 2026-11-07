@@ -43,7 +43,27 @@ export class OrganizationMembershipDriftService {
   async reconcileOrganization(organizationId: string): Promise<MembershipDriftReportDto> {
     const dbMemberships = await this.organizationUserService.findAll(organizationId)
     const cachedMemberships = await this.getCachedMemberships(organizationId)
-    return this.buildReport(organizationId, dbMemberships, cachedMemberships)
+    // Lazily-cached users are not drift: resolve each DB member live once
+    // (populating the cache as a side effect) and only then compare. A user
+    // the live read still cannot see is genuinely missing, not merely
+    // never-introspected.
+    const cachedByUser = new Map(cachedMemberships.map((c) => [c.userId, c]))
+    const resolved: MembershipIntrospection[] = [...cachedMemberships]
+    for (const member of dbMemberships) {
+      const userId = member.userId
+      if (!cachedByUser.has(userId)) {
+        try {
+          resolved.push(await this.introspectionCache.getMembership(organizationId, userId))
+        } catch (error) {
+          this.logger.warn(
+            `Drift live-read failed for ${organizationId}:${userId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          )
+        }
+      }
+    }
+    return this.buildReport(organizationId, dbMemberships, resolved)
   }
 
   async reconcileAll(organizationIds?: string[]): Promise<MembershipDriftReportDto[]> {

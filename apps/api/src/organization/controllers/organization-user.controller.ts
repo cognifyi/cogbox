@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, ForbiddenException, Get, Headers, Param, Post, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
@@ -87,12 +87,13 @@ export class OrganizationUserController {
     @Param('organizationId') organizationId: string,
     @Param('userId') userId: string,
     @Body() dto: UpdateOrganizationMemberAccessDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ): Promise<OrganizationUserDto> {
     if (authContext.userId === userId) {
       throw new ForbiddenException('You cannot update your own access')
     }
 
-    return this.organizationUserService.updateAccess(organizationId, userId, dto.role, dto.assignedRoleIds)
+    return this.organizationUserService.updateAccess(organizationId, userId, dto.role, dto.assignedRoleIds, idempotencyKey)
   }
 
   @Delete('/:userId')
@@ -120,7 +121,11 @@ export class OrganizationUserController {
     targetType: AuditTarget.ORGANIZATION_USER,
     targetIdFromRequest: (req) => req.params.userId,
   })
-  async delete(@Param('organizationId') organizationId: string, @Param('userId') userId: string): Promise<void> {
-    return this.organizationUserService.delete(organizationId, userId)
+  async delete(
+    @Param('organizationId') organizationId: string,
+    @Param('userId') userId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ): Promise<void> {
+    return this.organizationUserService.delete(organizationId, userId, idempotencyKey)
   }
 }

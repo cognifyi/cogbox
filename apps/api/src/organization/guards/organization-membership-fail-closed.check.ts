@@ -10,16 +10,21 @@ import { OrganizationMembershipAvailabilityService } from '../services/organizat
 import { OrganizationUserService } from '../services/organization-user.service'
 
 /**
- * Fail-closed membership check.
+ * Fail-closed membership check (plain injectable, NOT a Nest route guard).
  *
  * Any inability to verify membership (database error, degraded dependency,
- * missing row) denies access. The guard never grants on stale or absent
- * evidence: errors are recorded against the availability service and rethrown
- * as denial, so callers cannot mistake an outage for a membership.
+ * missing row) denies access. The check never grants on stale or absent
+ * evidence: errors are recorded against the availability service and
+ * rethrown as denial, so callers cannot mistake an outage for a membership.
+ *
+ * Callers invoke `canActivate(organizationId, userId)` directly (e.g. the
+ * introspection cache on degraded paths) — it is intentionally not wired
+ * via `@UseGuards`, whose `ExecutionContext` signature this method does
+ * not implement.
  */
 @Injectable()
-export class OrganizationMembershipFailClosedGuard {
-  private readonly logger = new Logger(OrganizationMembershipFailClosedGuard.name)
+export class OrganizationMembershipFailClosedCheck {
+  private readonly logger = new Logger(OrganizationMembershipFailClosedCheck.name)
 
   constructor(
     private readonly organizationUserService: OrganizationUserService,

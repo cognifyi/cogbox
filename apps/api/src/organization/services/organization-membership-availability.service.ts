@@ -23,6 +23,10 @@ export type MembershipAvailabilityState = 'available' | 'degraded'
 export class OrganizationMembershipAvailabilityService {
   private consecutiveFailures = 0
   private degradedSince: number | null = null
+  // Half-open probe: after cooldown, exactly one caller probes the
+  // dependency while the rest keep failing closed. Without this, cooldown
+  // expiry opens the floodgates to full traffic at once.
+  private probing = false
 
   constructor(
     @Optional() private readonly failureThreshold: number = MEMBERSHIP_AVAILABILITY_DEFAULT_FAILURE_THRESHOLD,
@@ -32,10 +36,12 @@ export class OrganizationMembershipAvailabilityService {
   markSuccess(): void {
     this.consecutiveFailures = 0
     this.degradedSince = null
+    this.probing = false
   }
 
   markFailure(now = Date.now()): void {
     this.consecutiveFailures += 1
+    this.probing = false
     if (this.consecutiveFailures >= Math.max(1, this.failureThreshold)) {
       this.degradedSince = now
     }
@@ -46,8 +52,12 @@ export class OrganizationMembershipAvailabilityService {
       return true
     }
     if (now - this.degradedSince >= this.cooldownMs) {
-      this.degradedSince = null
-      this.consecutiveFailures = 0
+      // Cooldown elapsed: first caller becomes the single probe, the rest
+      // stay denied until the probe reports back via markSuccess/markFailure.
+      if (this.probing) {
+        return false
+      }
+      this.probing = true
       return true
     }
     return false

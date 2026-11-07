@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Param, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
-import { OrganizationAuthContextGuard } from '../guards/organization-auth-context.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
+import { SystemRole } from '../../user/enums/system-role.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import {
   MembershipIntrospection,
@@ -19,9 +20,9 @@ import {
 @ApiTags('organizations')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
-@AuthStrategy(AuthStrategyType.JWT)
+@AuthStrategy(AuthStrategyType.API_KEY)
+@RequiredSystemRole(SystemRole.ADMIN)
 @UseGuards(AuthenticatedRateLimitGuard)
-@UseGuards(OrganizationAuthContextGuard)
 export class OrganizationIntrospectionController {
   constructor(private readonly introspectionCache: OrganizationMembershipIntrospectionCacheService) {}
 
@@ -47,7 +48,13 @@ export class OrganizationIntrospectionController {
   async getMembership(
     @Param('organizationId') organizationId: string,
     @Param('userId') userId: string,
+    @Query('fresh') fresh?: string,
   ): Promise<MembershipIntrospection> {
-    return this.introspectionCache.getMembership(organizationId, userId)
+    // ?fresh=true bypasses the 60s cache for charge/suspend decisions:
+    // billing passes it so a missed invalidation can never grant a revoked
+    // member. Default (absent) keeps the cached fast path.
+    return this.introspectionCache.getMembership(organizationId, userId, {
+      forceRefresh: fresh === 'true',
+    })
   }
 }

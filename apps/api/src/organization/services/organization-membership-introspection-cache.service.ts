@@ -46,12 +46,22 @@ export class OrganizationMembershipIntrospectionCacheService {
 
   constructor(private readonly organizationUserService: OrganizationUserService) {}
 
-  async getMembership(organizationId: string, userId: string): Promise<MembershipIntrospection> {
+  async getMembership(
+    organizationId: string,
+    userId: string,
+    options: { forceRefresh?: boolean } = {},
+  ): Promise<MembershipIntrospection> {
+    // Fail-closed escape hatch: billing must pass forceRefresh on
+    // charge/suspend decisions so a missed invalidation (crash, backlog,
+    // cross-replica gap) can never grant a revoked member up to 60s of
+    // access. Routine reads use the cached path.
     const key = buildMembershipIntrospectionCacheKey(organizationId, userId)
     const now = Date.now()
-    const cached = this.entries.get(key)
-    if (cached && cached.expiresAt > now) {
-      return cached.value
+    if (!options.forceRefresh) {
+      const cached = this.entries.get(key)
+      if (cached && cached.expiresAt > now) {
+        return cached.value
+      }
     }
 
     const membership = await this.organizationUserService.findOne(organizationId, userId)

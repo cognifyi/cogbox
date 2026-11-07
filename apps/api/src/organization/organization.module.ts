@@ -42,7 +42,7 @@ import { OrganizationMembershipDriftController } from './controllers/organizatio
 import { OrganizationMembershipIntrospectionCacheService } from './services/organization-membership-introspection-cache.service'
 import { OrganizationMembershipCacheInvalidationService } from './services/organization-membership-cache-invalidation.service'
 import { OrganizationMembershipAvailabilityService } from './services/organization-membership-availability.service'
-import { OrganizationMembershipFailClosedGuard } from './guards/organization-membership-fail-closed.guard'
+import { OrganizationMembershipFailClosedCheck } from './guards/organization-membership-fail-closed.check'
 import { OrganizationMembershipDriftService } from './services/organization-membership-drift.service'
 import { Region } from '../region/entities/region.entity'
 import { EncryptionModule } from '../encryption/encryption.module'
@@ -86,7 +86,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationMembershipIntrospectionCacheService,
     OrganizationMembershipCacheInvalidationService,
     OrganizationMembershipAvailabilityService,
-    OrganizationMembershipFailClosedGuard,
+    OrganizationMembershipFailClosedCheck,
     OrganizationMembershipDriftService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
@@ -118,7 +118,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationMembershipIntrospectionCacheService,
     OrganizationMembershipCacheInvalidationService,
     OrganizationMembershipAvailabilityService,
-    OrganizationMembershipFailClosedGuard,
+    OrganizationMembershipFailClosedCheck,
     OrganizationMembershipDriftService,
     OrganizationAuthContextGuard,
   ],

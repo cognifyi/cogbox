@@ -34,6 +34,7 @@ describe('OrganizationUserService', () => {
       undefined as unknown as UserService,
       { emit, emitAsync: jest.fn() } as unknown as EventEmitter2,
       undefined as unknown as DataSource,
+      { enqueue: jest.fn() } as unknown as OrganizationMembershipOutboxService,
     )
   })
 
