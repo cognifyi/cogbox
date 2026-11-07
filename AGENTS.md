@@ -350,14 +350,5 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
-- NC-430: Ship blocked as high-risk with empty verification: assertion_results=[], test_results={}, deploy_test_failed via cogos_unavailable, merge_decision=checks_failed, pr_created=false (missing head branch), merge_result=not_attempted
-- NC-429: Step-02 build/e2e claims aspirational: npx nx run dashboard:build + eslint + dashboard e2e billing-ledger flow claimed in goal text with no command/test_pass/file_exists assertions and no project.json-edit guard
-- NC-428: Failure-mode visibility unproven for all new paths (Is-tested=No, Is-handled=claimed-only, Is-visible=claimed-only): 401/403/502-504 fallback-banner, timeout+single-retry-backoff, cache invalidation, bounded pagination/no-N+1, guarded…
-- NC-427: Dependency order correct but unenforced: no assertions pinning client API before consumers, no forbidden_paths, no spec_anchors, permissive allowed_tools write/edit/bash permits out-of-scope drift
-- NC-426: Complexity gate triggered: 9 distinct files across 3 steps >=8-file threshold with no recorded structure choice
-- NC-425: Empty scope baseline: goal_intent='' / empty issue body with no background/goals/acceptance; acceptance coverage untraceable to user request
-- NC-424: 9 expected artifacts with no compiled-assertion coverage and unproven reachability: billing-client.ts, hooks.ts, billing-client.test.ts, wallet/page.tsx, invoices/page.tsx, wallet-invoices.test.ts, detail.tsx, invoice-detail.test.ts,…
-- NC-423: Zero compiled assertions across all 3 steps (steps[0].assertions=[], steps[1].assertions=[], steps[2].assertions=[]) violates REGRESSION RULE; timeout/retry/error-mapping/pagination behavior has no seam that can fail
-- NC-411: Do not set forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests while shipping source files; do not ship micro-steps with empty assertions and no verifies for 401/403/502-504…
-- NC-390: NC-384: forbidden_paths=[tests/] blocking BL-03/BL-04 contract and error-mapping tests
+- NC-567: Empty verification baseline: assertion_results=[] , test_results={} , all 5 steps have assertions=[] with 20 expected_artifacts at zero compiled-assertion coverage — any write satisfies step, recovered only as pass without proof
 <!-- END: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
