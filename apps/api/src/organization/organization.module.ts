@@ -14,6 +14,7 @@ import { Organization } from './entities/organization.entity'
 import { OrganizationRole } from './entities/organization-role.entity'
 import { OrganizationUser } from './entities/organization-user.entity'
 import { OrganizationInvitation } from './entities/organization-invitation.entity'
+import { OrganizationMembershipOutbox } from './entities/organization-membership-outbox.entity'
 import { OrganizationService } from './services/organization.service'
 import { OrganizationRoleService } from './services/organization-role.service'
 import { OrganizationUserService } from './services/organization-user.service'
@@ -46,6 +47,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
       OrganizationRole,
       OrganizationUser,
       OrganizationInvitation,
+      OrganizationMembershipOutbox,
       Sandbox,
       Volume,
       SnapshotRunner,
