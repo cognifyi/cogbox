@@ -136,5 +136,47 @@ describe('OrganizationUserService', () => {
         entityManager,
       )
     })
+
+    it('writes the role_changed outbox row in the same transaction as the access update', async () => {
+      const assignedRoles = [{ id: 'role-1', permissions: [] } as never]
+      const roleService = { findByIds: jest.fn().mockResolvedValue(assignedRoles) }
+      const userService = { findOne: jest.fn().mockResolvedValue({ id: 'user-1' }) }
+      const existing = {
+        organizationId: 'org-1',
+        userId: 'user-1',
+        role: OrganizationMemberRole.MEMBER,
+        assignedRoles: [],
+      }
+      findOne.mockResolvedValue(existing)
+      const transactionalManager = {
+        save: jest.fn(async (entity: unknown) => entity),
+      }
+      const transaction = jest.fn(async (work: (em: unknown) => Promise<unknown>) => work(transactionalManager))
+      const emitAsync = jest.fn().mockResolvedValue(undefined)
+      const enqueue = jest.fn().mockResolvedValue(undefined)
+      const transactionalService = new OrganizationUserService(
+        { findOne, manager: { remove, count } } as unknown as Repository<OrganizationUser>,
+        roleService as unknown as OrganizationRoleService,
+        userService as unknown as UserService,
+        { emit, emitAsync } as unknown as EventEmitter2,
+        { transaction } as unknown as DataSource,
+        { enqueue } as unknown as OrganizationMembershipOutboxService,
+      )
+
+      await transactionalService.updateAccess('org-1', 'user-1', OrganizationMemberRole.MEMBER, ['role-1'])
+
+      expect(transaction).toHaveBeenCalledTimes(1)
+      expect(transactionalManager.save).toHaveBeenCalledTimes(1)
+      expect(enqueue).toHaveBeenCalledWith(
+        {
+          organizationId: 'org-1',
+          userId: 'user-1',
+          changeType: 'role_changed',
+          role: OrganizationMemberRole.MEMBER,
+          assignedRoleIds: ['role-1'],
+        },
+        transactionalManager,
+      )
+    })
   })
 })
