@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-572: Late fail-closed guard: availability service and fail-closed semantics land in step-04 after step-02 cache controller and step-03 drift controller expose reads — partial execution ships unguarded reads
 - NC-571: Outbox lifecycle missing: step-00 entity+migration 1771000000000 with retry/idempotency in goal text only, no cleanup/archival, backoff/jitter, retry-storm guard, ordering, poison-message handling or operator visibility — unbounded…
 - NC-570: Distributed invalidation gap: step-01 NestJS EventEmitter2 in-process does not propagate across scaled api instances, no Redis/pubsub, ordering, DLQ, polling interval or metrics — instance B serves stale billing introspection cache for…
 - NC-569: Ship blocked as high-risk: risk_level=high due to deploy_test_failed via cogos_unavailable, merge_decision=checks_failed, pr_created=false (missing head branch), merge_result=not_attempted
