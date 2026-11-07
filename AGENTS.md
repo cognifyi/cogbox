@@ -350,6 +350,7 @@ nix-env -q nix-direnv
 
 <!-- BEGIN: AUTO-GENERATED NEGATIVE CONSTRAINTS -->
 > 自动生成，请勿手改。完整账本：`omni nc list`。
+- NC-570: Distributed invalidation gap: step-01 NestJS EventEmitter2 in-process does not propagate across scaled api instances, no Redis/pubsub, ordering, DLQ, polling interval or metrics — instance B serves stale billing introspection cache for…
 - NC-569: Ship blocked as high-risk: risk_level=high due to deploy_test_failed via cogos_unavailable, merge_decision=checks_failed, pr_created=false (missing head branch), merge_result=not_attempted
 - NC-568: Empty scope traceability: goal_intent='', empty issue body/dag_id, spec_anchors=[] , assigned_skills=[] , no contract C1-C7/ADR/TODO/flow-to-rollback mapping — reuse and minimum-change unverifiable
 - NC-567: Empty verification baseline: assertion_results=[] , test_results={} , all 5 steps have assertions=[] with 20 expected_artifacts at zero compiled-assertion coverage — any write satisfies step, recovered only as pass without proof
