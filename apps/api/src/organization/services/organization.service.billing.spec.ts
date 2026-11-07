@@ -10,6 +10,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationService } from './organization.service'
 import { Organization } from '../entities/organization.entity'
 import { TypedConfigService } from '../../config/typed-config.service'
+import type { OrganizationMembershipOutboxService } from './organization-membership-outbox.service'
 
 const BILLING_API_URL = 'http://billing.test'
 const UNUSED_DEPENDENCY = undefined as never
@@ -72,6 +73,8 @@ function makeService(options: {
     UNUSED_DEPENDENCY,
     UNUSED_DEPENDENCY,
     UNUSED_DEPENDENCY,
+    // Outbox mock: creation must emit the owner-added event.
+    { enqueue: jest.fn().mockResolvedValue({}) } as unknown as OrganizationMembershipOutboxService,
   )
 
   return { service, save, findOne, count, emitAsync, organizationRepository }
