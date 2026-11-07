@@ -37,6 +37,9 @@ import { OrganizationAuthContextGuard } from './guards/organization-auth-context
 import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
 import { OrganizationRegionController } from './controllers/organization-region.controller'
+import { OrganizationIntrospectionController } from './controllers/organization-introspection.controller'
+import { OrganizationMembershipIntrospectionCacheService } from './services/organization-membership-introspection-cache.service'
+import { OrganizationMembershipCacheInvalidationService } from './services/organization-membership-cache-invalidation.service'
 import { Region } from '../region/entities/region.entity'
 import { EncryptionModule } from '../encryption/encryption.module'
 
@@ -64,6 +67,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationUserController,
     OrganizationInvitationController,
     OrganizationRegionController,
+    OrganizationIntrospectionController,
   ],
   providers: [
     OrganizationService,
@@ -74,6 +78,8 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrgMetricsExporterService,
     OrganizationMembershipOutboxService,
     OrganizationMembershipOutboxRelayService,
+    OrganizationMembershipIntrospectionCacheService,
+    OrganizationMembershipCacheInvalidationService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
     {
@@ -101,6 +107,8 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationUsageService,
     OrganizationMembershipOutboxService,
     OrganizationMembershipOutboxRelayService,
+    OrganizationMembershipIntrospectionCacheService,
+    OrganizationMembershipCacheInvalidationService,
     OrganizationAuthContextGuard,
   ],
 })
