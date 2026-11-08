@@ -139,24 +139,39 @@ export class OrganizationMembershipOutboxService {
       return []
     }
 
-    // One atomic statement: due rows are locked (SKIP LOCKED), leased by moving
-    // nextAttemptAt forward, and returned. The lease survives the transaction so a
-    // second replica cannot claim the same rows after the locks are released.
-    return this.outboxRepository.manager.query<OrganizationMembershipOutbox[]>(
-      `WITH due AS (
-         SELECT id FROM "organization_membership_outbox"
-         WHERE status IN ($1, $2) AND "nextAttemptAt" <= now()
-         ORDER BY "nextAttemptAt" ASC, id ASC
-         LIMIT $3
-         FOR UPDATE SKIP LOCKED
-       )
-       UPDATE "organization_membership_outbox" AS outbox
-       SET "nextAttemptAt" = now() + ($4::int * interval '1 millisecond')
-       FROM due
-       WHERE outbox.id = due.id
-       RETURNING outbox.*`,
-      [MEMBERSHIP_OUTBOX_STATUS_PENDING, MEMBERSHIP_OUTBOX_STATUS_FAILED, limit, MEMBERSHIP_OUTBOX_CLAIM_LEASE_MS],
-    )
+    // Due rows are locked (SKIP LOCKED) and leased by moving nextAttemptAt
+    // forward inside one transaction, so a second replica cannot claim the same
+    // rows after the locks are released. A QueryBuilder is used instead of a raw
+    // RETURNING query because raw results come back as positional arrays with
+    // this TypeORM version, which silently dropped every column (empty payloads,
+    // markSent updating zero rows).
+    return this.outboxRepository.manager.transaction(async (manager) => {
+      const due = await manager
+        .createQueryBuilder(OrganizationMembershipOutbox, 'outbox')
+        .setLock('pessimistic_write')
+        .setOnLocked('skip_locked')
+        .where('outbox.status IN (:...statuses)', {
+          statuses: [MEMBERSHIP_OUTBOX_STATUS_PENDING, MEMBERSHIP_OUTBOX_STATUS_FAILED],
+        })
+        .andWhere('outbox.nextAttemptAt <= now()')
+        .orderBy('outbox.nextAttemptAt', 'ASC')
+        .addOrderBy('outbox.id', 'ASC')
+        .limit(limit)
+        .getMany()
+      if (due.length === 0) {
+        return due
+      }
+      await manager
+        .createQueryBuilder()
+        .update(OrganizationMembershipOutbox)
+        .set({
+          nextAttemptAt: () =>
+            `now() + (${MEMBERSHIP_OUTBOX_CLAIM_LEASE_MS} * interval '1 millisecond')`,
+        })
+        .whereInIds(due.map((row) => row.id))
+        .execute()
+      return due
+    })
   }
 
   async countDue(): Promise<number> {
