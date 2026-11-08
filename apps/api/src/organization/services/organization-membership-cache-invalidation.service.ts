@@ -90,7 +90,10 @@ export class OrganizationMembershipCacheInvalidationService implements OnModuleI
     // Best-effort cross-replica fan-out (fire-and-forget; delivery is not
     // required for correctness — TTL bounds staleness).
     try {
-      void this.redis?.publish(MEMBERSHIP_INVALIDATION_CHANNEL, JSON.stringify({ organizationId, userId }))
+      void this.redis?.publish(
+        MEMBERSHIP_INVALIDATION_CHANNEL,
+        JSON.stringify({ organizationId, userId }),
+      )
     } catch (error) {
       this.logger.warn(
         `Membership invalidation fan-out failed: ${error instanceof Error ? error.message : String(error)}`,

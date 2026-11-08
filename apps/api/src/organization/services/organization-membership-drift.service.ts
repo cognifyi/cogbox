@@ -91,10 +91,7 @@ export class OrganizationMembershipDriftService {
       this.logger.warn(
         `Membership drift detected in ${drifted.length}/${reports.length} organization(s): ` +
           drifted
-            .map(
-              (r) =>
-                `${r.organizationId} (missing=${r.missing.length} stale=${r.stale.length} extra=${r.extra.length})`,
-            )
+            .map((r) => `${r.organizationId} (missing=${r.missing.length} stale=${r.stale.length} extra=${r.extra.length})`)
             .join(', '),
       )
     }

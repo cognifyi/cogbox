@@ -20,7 +20,6 @@ import io.cogbox.api.client.model.CreateOrganizationInvitation;
 import io.cogbox.api.client.model.CreateOrganizationRole;
 import io.cogbox.api.client.model.CreateRegion;
 import io.cogbox.api.client.model.CreateRegionResponse;
-import io.cogbox.api.client.model.MembershipDriftReportDto;
 import io.cogbox.api.client.model.Organization;
 import io.cogbox.api.client.model.OrganizationInvitation;
 import io.cogbox.api.client.model.OrganizationRole;
@@ -164,8 +163,7 @@ public class OrganizationsApiTest {
     public void deleteOrganizationMemberTest() throws ApiException {
         String organizationId = null;
         String userId = null;
-        String idempotencyKey = null;
-        api.deleteOrganizationMember(organizationId, userId, idempotencyKey);
+        api.deleteOrganizationMember(organizationId, userId);
         // TODO: test validations
     }
 
@@ -231,18 +229,6 @@ public class OrganizationsApiTest {
     }
 
     /**
-     * Reconcile organization membership versus the billing cache
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void getOrganizationMembershipDriftReportTest() throws ApiException {
-        String organizationId = null;
-        MembershipDriftReportDto response = api.getOrganizationMembershipDriftReport(organizationId);
-        // TODO: test validations
-    }
-
-    /**
      * Get organization OTEL config by organization ID
      *
      * @throws ApiException if the Api call fails
@@ -288,20 +274,6 @@ public class OrganizationsApiTest {
         String id = null;
         String xCogboxOrganizationID = null;
         Region response = api.getRegionById(id, xCogboxOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Introspect organization membership (billing cache)
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void introspectOrganizationMembershipTest() throws ApiException {
-        String organizationId = null;
-        String userId = null;
-        String fresh = null;
-        api.introspectOrganizationMembership(organizationId, userId, fresh);
         // TODO: test validations
     }
 
@@ -473,9 +445,8 @@ public class OrganizationsApiTest {
     public void updateAccessForOrganizationMemberTest() throws ApiException {
         String organizationId = null;
         String userId = null;
-        String idempotencyKey = null;
         UpdateOrganizationMemberAccess updateOrganizationMemberAccess = null;
-        OrganizationUser response = api.updateAccessForOrganizationMember(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess);
+        OrganizationUser response = api.updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess);
         // TODO: test validations
     }
 

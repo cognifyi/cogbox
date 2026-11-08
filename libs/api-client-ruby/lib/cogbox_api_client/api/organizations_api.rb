@@ -545,21 +545,19 @@ module CogboxApiClient
     # Delete organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param [Hash] opts the optional parameters
     # @return [nil]
-    def delete_organization_member(organization_id, user_id, idempotency_key, opts = {})
-      delete_organization_member_with_http_info(organization_id, user_id, idempotency_key, opts)
+    def delete_organization_member(organization_id, user_id, opts = {})
+      delete_organization_member_with_http_info(organization_id, user_id, opts)
       nil
     end
 
     # Delete organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_organization_member_with_http_info(organization_id, user_id, idempotency_key, opts = {})
+    def delete_organization_member_with_http_info(organization_id, user_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: OrganizationsApi.delete_organization_member ...'
       end
@@ -571,10 +569,6 @@ module CogboxApiClient
       if @api_client.config.client_side_validation && user_id.nil?
         fail ArgumentError, "Missing the required parameter 'user_id' when calling OrganizationsApi.delete_organization_member"
       end
-      # verify the required parameter 'idempotency_key' is set
-      if @api_client.config.client_side_validation && idempotency_key.nil?
-        fail ArgumentError, "Missing the required parameter 'idempotency_key' when calling OrganizationsApi.delete_organization_member"
-      end
       # resource path
       local_var_path = '/organizations/{organizationId}/users/{userId}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'userId' + '}', CGI.escape(user_id.to_s))
 
@@ -583,7 +577,6 @@ module CogboxApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
-      header_params[:'idempotency-key'] = idempotency_key
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -916,67 +909,6 @@ module CogboxApiClient
       return data, status_code, headers
     end
 
-    # Reconcile organization membership versus the billing cache
-    # @param organization_id [String] Organization ID
-    # @param [Hash] opts the optional parameters
-    # @return [MembershipDriftReportDto]
-    def get_organization_membership_drift_report(organization_id, opts = {})
-      data, _status_code, _headers = get_organization_membership_drift_report_with_http_info(organization_id, opts)
-      data
-    end
-
-    # Reconcile organization membership versus the billing cache
-    # @param organization_id [String] Organization ID
-    # @param [Hash] opts the optional parameters
-    # @return [Array<(MembershipDriftReportDto, Integer, Hash)>] MembershipDriftReportDto data, response status code and response headers
-    def get_organization_membership_drift_report_with_http_info(organization_id, opts = {})
-      if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: OrganizationsApi.get_organization_membership_drift_report ...'
-      end
-      # verify the required parameter 'organization_id' is set
-      if @api_client.config.client_side_validation && organization_id.nil?
-        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.get_organization_membership_drift_report"
-      end
-      # resource path
-      local_var_path = '/organizations/{organizationId}/membership-drift/report'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
-
-      # query parameters
-      query_params = opts[:query_params] || {}
-
-      # header parameters
-      header_params = opts[:header_params] || {}
-      # HTTP header 'Accept' (if needed)
-      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
-
-      # form parameters
-      form_params = opts[:form_params] || {}
-
-      # http body (model)
-      post_body = opts[:debug_body]
-
-      # return_type
-      return_type = opts[:debug_return_type] || 'MembershipDriftReportDto'
-
-      # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
-
-      new_options = opts.merge(
-        :operation => :"OrganizationsApi.get_organization_membership_drift_report",
-        :header_params => header_params,
-        :query_params => query_params,
-        :form_params => form_params,
-        :body => post_body,
-        :auth_names => auth_names,
-        :return_type => return_type
-      )
-
-      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
-      if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: OrganizationsApi#get_organization_membership_drift_report\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
-      end
-      return data, status_code, headers
-    end
-
     # Get organization OTEL config by organization ID
     # @param organization_id [String] Organization ID
     # @param [Hash] opts the optional parameters
@@ -1220,78 +1152,6 @@ module CogboxApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: OrganizationsApi#get_region_by_id\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
-      end
-      return data, status_code, headers
-    end
-
-    # Introspect organization membership (billing cache)
-    # @param organization_id [String] Organization ID
-    # @param user_id [String] User ID
-    # @param fresh [String] 
-    # @param [Hash] opts the optional parameters
-    # @return [nil]
-    def introspect_organization_membership(organization_id, user_id, fresh, opts = {})
-      introspect_organization_membership_with_http_info(organization_id, user_id, fresh, opts)
-      nil
-    end
-
-    # Introspect organization membership (billing cache)
-    # @param organization_id [String] Organization ID
-    # @param user_id [String] User ID
-    # @param fresh [String] 
-    # @param [Hash] opts the optional parameters
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def introspect_organization_membership_with_http_info(organization_id, user_id, fresh, opts = {})
-      if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: OrganizationsApi.introspect_organization_membership ...'
-      end
-      # verify the required parameter 'organization_id' is set
-      if @api_client.config.client_side_validation && organization_id.nil?
-        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.introspect_organization_membership"
-      end
-      # verify the required parameter 'user_id' is set
-      if @api_client.config.client_side_validation && user_id.nil?
-        fail ArgumentError, "Missing the required parameter 'user_id' when calling OrganizationsApi.introspect_organization_membership"
-      end
-      # verify the required parameter 'fresh' is set
-      if @api_client.config.client_side_validation && fresh.nil?
-        fail ArgumentError, "Missing the required parameter 'fresh' when calling OrganizationsApi.introspect_organization_membership"
-      end
-      # resource path
-      local_var_path = '/organizations/{organizationId}/introspection/membership/{userId}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'userId' + '}', CGI.escape(user_id.to_s))
-
-      # query parameters
-      query_params = opts[:query_params] || {}
-      query_params[:'fresh'] = fresh
-
-      # header parameters
-      header_params = opts[:header_params] || {}
-
-      # form parameters
-      form_params = opts[:form_params] || {}
-
-      # http body (model)
-      post_body = opts[:debug_body]
-
-      # return_type
-      return_type = opts[:debug_return_type]
-
-      # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
-
-      new_options = opts.merge(
-        :operation => :"OrganizationsApi.introspect_organization_membership",
-        :header_params => header_params,
-        :query_params => query_params,
-        :form_params => form_params,
-        :body => post_body,
-        :auth_names => auth_names,
-        :return_type => return_type
-      )
-
-      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
-      if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: OrganizationsApi#introspect_organization_membership\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -2096,23 +1956,21 @@ module CogboxApiClient
     # Update access for organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param update_organization_member_access [UpdateOrganizationMemberAccess] 
     # @param [Hash] opts the optional parameters
     # @return [OrganizationUser]
-    def update_access_for_organization_member(organization_id, user_id, idempotency_key, update_organization_member_access, opts = {})
-      data, _status_code, _headers = update_access_for_organization_member_with_http_info(organization_id, user_id, idempotency_key, update_organization_member_access, opts)
+    def update_access_for_organization_member(organization_id, user_id, update_organization_member_access, opts = {})
+      data, _status_code, _headers = update_access_for_organization_member_with_http_info(organization_id, user_id, update_organization_member_access, opts)
       data
     end
 
     # Update access for organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param update_organization_member_access [UpdateOrganizationMemberAccess] 
     # @param [Hash] opts the optional parameters
     # @return [Array<(OrganizationUser, Integer, Hash)>] OrganizationUser data, response status code and response headers
-    def update_access_for_organization_member_with_http_info(organization_id, user_id, idempotency_key, update_organization_member_access, opts = {})
+    def update_access_for_organization_member_with_http_info(organization_id, user_id, update_organization_member_access, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: OrganizationsApi.update_access_for_organization_member ...'
       end
@@ -2123,10 +1981,6 @@ module CogboxApiClient
       # verify the required parameter 'user_id' is set
       if @api_client.config.client_side_validation && user_id.nil?
         fail ArgumentError, "Missing the required parameter 'user_id' when calling OrganizationsApi.update_access_for_organization_member"
-      end
-      # verify the required parameter 'idempotency_key' is set
-      if @api_client.config.client_side_validation && idempotency_key.nil?
-        fail ArgumentError, "Missing the required parameter 'idempotency_key' when calling OrganizationsApi.update_access_for_organization_member"
       end
       # verify the required parameter 'update_organization_member_access' is set
       if @api_client.config.client_side_validation && update_organization_member_access.nil?
@@ -2147,7 +2001,6 @@ module CogboxApiClient
       if !content_type.nil?
           header_params['Content-Type'] = content_type
       end
-      header_params[:'idempotency-key'] = idempotency_key
 
       # form parameters
       form_params = opts[:form_params] || {}

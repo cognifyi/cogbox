@@ -98,8 +98,6 @@ models/lsp-location.ts
 models/lsp-server-request.ts
 models/lsp-symbol.ts
 models/match.ts
-models/membership-drift-entry-dto.ts
-models/membership-drift-report-dto.ts
 models/metric-data-point.ts
 models/metric-series.ts
 models/metrics-response.ts

@@ -199,19 +199,6 @@ type OrganizationsAPI interface {
 	GetOrganizationInvitationsCountForAuthenticatedUserExecute(r OrganizationsAPIGetOrganizationInvitationsCountForAuthenticatedUserRequest) (float32, *http.Response, error)
 
 	/*
-	GetOrganizationMembershipDriftReport Reconcile organization membership versus the billing cache
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId Organization ID
-	@return OrganizationsAPIGetOrganizationMembershipDriftReportRequest
-	*/
-	GetOrganizationMembershipDriftReport(ctx context.Context, organizationId string) OrganizationsAPIGetOrganizationMembershipDriftReportRequest
-
-	// GetOrganizationMembershipDriftReportExecute executes the request
-	//  @return MembershipDriftReportDto
-	GetOrganizationMembershipDriftReportExecute(r OrganizationsAPIGetOrganizationMembershipDriftReportRequest) (*MembershipDriftReportDto, *http.Response, error)
-
-	/*
 	GetOrganizationOtelConfig Get organization OTEL config by organization ID
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -262,19 +249,6 @@ type OrganizationsAPI interface {
 	// GetRegionByIdExecute executes the request
 	//  @return Region
 	GetRegionByIdExecute(r OrganizationsAPIGetRegionByIdRequest) (*Region, *http.Response, error)
-
-	/*
-	IntrospectOrganizationMembership Introspect organization membership (billing cache)
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId Organization ID
-	@param userId User ID
-	@return OrganizationsAPIIntrospectOrganizationMembershipRequest
-	*/
-	IntrospectOrganizationMembership(ctx context.Context, organizationId string, userId string) OrganizationsAPIIntrospectOrganizationMembershipRequest
-
-	// IntrospectOrganizationMembershipExecute executes the request
-	IntrospectOrganizationMembershipExecute(r OrganizationsAPIIntrospectOrganizationMembershipRequest) (*http.Response, error)
 
 	/*
 	LeaveOrganization Leave organization
@@ -1387,12 +1361,6 @@ type OrganizationsAPIDeleteOrganizationMemberRequest struct {
 	ApiService OrganizationsAPI
 	organizationId string
 	userId string
-	idempotencyKey *string
-}
-
-func (r OrganizationsAPIDeleteOrganizationMemberRequest) IdempotencyKey(idempotencyKey string) OrganizationsAPIDeleteOrganizationMemberRequest {
-	r.idempotencyKey = &idempotencyKey
-	return r
 }
 
 func (r OrganizationsAPIDeleteOrganizationMemberRequest) Execute() (*http.Response, error) {
@@ -1436,9 +1404,6 @@ func (a *OrganizationsAPIService) DeleteOrganizationMemberExecute(r Organization
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.idempotencyKey == nil {
-		return nil, reportError("idempotencyKey is required and must be specified")
-	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1457,7 +1422,6 @@ func (a *OrganizationsAPIService) DeleteOrganizationMemberExecute(r Organization
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	parameterAddToHeaderOrQuery(localVarHeaderParams, "idempotency-key", r.idempotencyKey, "simple", "")
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
@@ -1968,107 +1932,6 @@ func (a *OrganizationsAPIService) GetOrganizationInvitationsCountForAuthenticate
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type OrganizationsAPIGetOrganizationMembershipDriftReportRequest struct {
-	ctx context.Context
-	ApiService OrganizationsAPI
-	organizationId string
-}
-
-func (r OrganizationsAPIGetOrganizationMembershipDriftReportRequest) Execute() (*MembershipDriftReportDto, *http.Response, error) {
-	return r.ApiService.GetOrganizationMembershipDriftReportExecute(r)
-}
-
-/*
-GetOrganizationMembershipDriftReport Reconcile organization membership versus the billing cache
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId Organization ID
- @return OrganizationsAPIGetOrganizationMembershipDriftReportRequest
-*/
-func (a *OrganizationsAPIService) GetOrganizationMembershipDriftReport(ctx context.Context, organizationId string) OrganizationsAPIGetOrganizationMembershipDriftReportRequest {
-	return OrganizationsAPIGetOrganizationMembershipDriftReportRequest{
-		ApiService: a,
-		ctx: ctx,
-		organizationId: organizationId,
-	}
-}
-
-// Execute executes the request
-//  @return MembershipDriftReportDto
-func (a *OrganizationsAPIService) GetOrganizationMembershipDriftReportExecute(r OrganizationsAPIGetOrganizationMembershipDriftReportRequest) (*MembershipDriftReportDto, *http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MembershipDriftReportDto
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.GetOrganizationMembershipDriftReport")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/organizations/{organizationId}/membership-drift/report"
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
 type OrganizationsAPIGetOrganizationOtelConfigRequest struct {
 	ctx context.Context
 	ApiService OrganizationsAPI
@@ -2481,110 +2344,6 @@ func (a *OrganizationsAPIService) GetRegionByIdExecute(r OrganizationsAPIGetRegi
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type OrganizationsAPIIntrospectOrganizationMembershipRequest struct {
-	ctx context.Context
-	ApiService OrganizationsAPI
-	organizationId string
-	userId string
-	fresh *string
-}
-
-func (r OrganizationsAPIIntrospectOrganizationMembershipRequest) Fresh(fresh string) OrganizationsAPIIntrospectOrganizationMembershipRequest {
-	r.fresh = &fresh
-	return r
-}
-
-func (r OrganizationsAPIIntrospectOrganizationMembershipRequest) Execute() (*http.Response, error) {
-	return r.ApiService.IntrospectOrganizationMembershipExecute(r)
-}
-
-/*
-IntrospectOrganizationMembership Introspect organization membership (billing cache)
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId Organization ID
- @param userId User ID
- @return OrganizationsAPIIntrospectOrganizationMembershipRequest
-*/
-func (a *OrganizationsAPIService) IntrospectOrganizationMembership(ctx context.Context, organizationId string, userId string) OrganizationsAPIIntrospectOrganizationMembershipRequest {
-	return OrganizationsAPIIntrospectOrganizationMembershipRequest{
-		ApiService: a,
-		ctx: ctx,
-		organizationId: organizationId,
-		userId: userId,
-	}
-}
-
-// Execute executes the request
-func (a *OrganizationsAPIService) IntrospectOrganizationMembershipExecute(r OrganizationsAPIIntrospectOrganizationMembershipRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.IntrospectOrganizationMembership")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/organizations/{organizationId}/introspection/membership/{userId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.fresh == nil {
-		return nil, reportError("fresh is required and must be specified")
-	}
-
-	parameterAddToHeaderOrQuery(localVarQueryParams, "fresh", r.fresh, "form", "")
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
 }
 
 type OrganizationsAPILeaveOrganizationRequest struct {
@@ -3908,13 +3667,7 @@ type OrganizationsAPIUpdateAccessForOrganizationMemberRequest struct {
 	ApiService OrganizationsAPI
 	organizationId string
 	userId string
-	idempotencyKey *string
 	updateOrganizationMemberAccess *UpdateOrganizationMemberAccess
-}
-
-func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) IdempotencyKey(idempotencyKey string) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
-	r.idempotencyKey = &idempotencyKey
-	return r
 }
 
 func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) UpdateOrganizationMemberAccess(updateOrganizationMemberAccess UpdateOrganizationMemberAccess) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
@@ -3965,9 +3718,6 @@ func (a *OrganizationsAPIService) UpdateAccessForOrganizationMemberExecute(r Org
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.idempotencyKey == nil {
-		return localVarReturnValue, nil, reportError("idempotencyKey is required and must be specified")
-	}
 	if r.updateOrganizationMemberAccess == nil {
 		return localVarReturnValue, nil, reportError("updateOrganizationMemberAccess is required and must be specified")
 	}
@@ -3989,7 +3739,6 @@ func (a *OrganizationsAPIService) UpdateAccessForOrganizationMemberExecute(r Org
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	parameterAddToHeaderOrQuery(localVarHeaderParams, "idempotency-key", r.idempotencyKey, "simple", "")
 	// body params
 	localVarPostBody = r.updateOrganizationMemberAccess
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
