@@ -167,6 +167,8 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.LspServerRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.LspSymbol.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.Match.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.MembershipDriftEntryDto.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.MembershipDriftReportDto.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.MetricDataPoint.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.MetricSeries.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.cogbox.api.client.model.MetricsResponse.CustomTypeAdapterFactory());

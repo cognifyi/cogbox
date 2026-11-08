@@ -127,6 +127,8 @@ if TYPE_CHECKING:
     from cogbox_api_client_async.models.lsp_server_request import LspServerRequest
     from cogbox_api_client_async.models.lsp_symbol import LspSymbol
     from cogbox_api_client_async.models.match import Match
+    from cogbox_api_client_async.models.membership_drift_entry_dto import MembershipDriftEntryDto
+    from cogbox_api_client_async.models.membership_drift_report_dto import MembershipDriftReportDto
     from cogbox_api_client_async.models.metric_data_point import MetricDataPoint
     from cogbox_api_client_async.models.metric_series import MetricSeries
     from cogbox_api_client_async.models.metrics_response import MetricsResponse
@@ -343,6 +345,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "LspServerRequest": "cogbox_api_client_async.models.lsp_server_request",
     "LspSymbol": "cogbox_api_client_async.models.lsp_symbol",
     "Match": "cogbox_api_client_async.models.match",
+    "MembershipDriftEntryDto": "cogbox_api_client_async.models.membership_drift_entry_dto",
+    "MembershipDriftReportDto": "cogbox_api_client_async.models.membership_drift_report_dto",
     "MetricDataPoint": "cogbox_api_client_async.models.metric_data_point",
     "MetricSeries": "cogbox_api_client_async.models.metric_series",
     "MetricsResponse": "cogbox_api_client_async.models.metrics_response",
@@ -573,6 +577,8 @@ __all__ = [
     "LspServerRequest",
     "LspSymbol",
     "Match",
+    "MembershipDriftEntryDto",
+    "MembershipDriftReportDto",
     "MetricDataPoint",
     "MetricSeries",
     "MetricsResponse",
