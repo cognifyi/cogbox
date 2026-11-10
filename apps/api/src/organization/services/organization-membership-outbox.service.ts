@@ -165,8 +165,7 @@ export class OrganizationMembershipOutboxService {
         .createQueryBuilder()
         .update(OrganizationMembershipOutbox)
         .set({
-          nextAttemptAt: () =>
-            `now() + (${MEMBERSHIP_OUTBOX_CLAIM_LEASE_MS} * interval '1 millisecond')`,
+          nextAttemptAt: () => `now() + (${MEMBERSHIP_OUTBOX_CLAIM_LEASE_MS} * interval '1 millisecond')`,
         })
         .whereInIds(due.map((row) => row.id))
         .execute()
