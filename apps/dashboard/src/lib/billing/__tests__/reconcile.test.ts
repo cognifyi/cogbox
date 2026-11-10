@@ -54,10 +54,7 @@ describe('reconcilePeriodEvents', () => {
   it('folds corrections into the target net quantity', () => {
     const result = reconcilePeriodEvents(
       [expected('cogbox:period:1', 3600)],
-      [
-        billed('cogbox:period:1', 4000),
-        billed('cogbox:period:1:corr', -400, { corrects_event_id: 'cogbox:period:1' }),
-      ],
+      [billed('cogbox:period:1', 4000), billed('cogbox:period:1:corr', -400, { corrects_event_id: 'cogbox:period:1' })],
     )
     expect(result.isBalanced).toBe(true)
     expect(result.adjusted).toHaveLength(0)
@@ -78,10 +75,7 @@ describe('reconcilePeriodEvents', () => {
   })
 
   it('honors tolerance for float dust', () => {
-    const result = reconcilePeriodEvents(
-      [expected('a', 100)],
-      [billed('a', 100 + 1e-10)],
-    )
+    const result = reconcilePeriodEvents([expected('a', 100)], [billed('a', 100 + 1e-10)])
     expect(result.isBalanced).toBe(true)
   })
 })

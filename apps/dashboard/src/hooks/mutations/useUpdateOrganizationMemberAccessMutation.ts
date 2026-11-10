@@ -6,6 +6,7 @@
 
 import { OrganizationUser, UpdateOrganizationMemberAccess } from '@cogbox/api-client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { v4 as uuidv4 } from 'uuid'
 import { queryKeys } from '../queries/queryKeys'
 import { useApi } from '../useApi'
 import { mutationKeys } from './mutationKeys'
@@ -27,7 +28,12 @@ export const useUpdateOrganizationMemberAccessMutation = () => {
         throw new Error('No organization selected')
       }
 
-      const response = await organizationsApi.updateAccessForOrganizationMember(organizationId, userId, access)
+      const response = await organizationsApi.updateAccessForOrganizationMember(
+        organizationId,
+        userId,
+        uuidv4(),
+        access,
+      )
       return response.data
     },
     onSuccess: async (_data, { organizationId }) => {

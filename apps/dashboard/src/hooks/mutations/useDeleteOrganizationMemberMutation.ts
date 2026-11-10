@@ -5,6 +5,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { v4 as uuidv4 } from 'uuid'
 import { mutationKeys } from './mutationKeys'
 import { queryKeys } from '../queries/queryKeys'
 import { useApi } from '../useApi'
@@ -25,7 +26,7 @@ export const useDeleteOrganizationMemberMutation = () => {
         throw new Error('No organization selected')
       }
 
-      await organizationsApi.deleteOrganizationMember(organizationId, userId)
+      await organizationsApi.deleteOrganizationMember(organizationId, userId, uuidv4())
     },
     onSuccess: async (_data, { organizationId }) => {
       if (organizationId) {

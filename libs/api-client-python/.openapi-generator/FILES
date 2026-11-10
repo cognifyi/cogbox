@@ -98,6 +98,8 @@ cogbox_api_client/models/lsp_location.py
 cogbox_api_client/models/lsp_server_request.py
 cogbox_api_client/models/lsp_symbol.py
 cogbox_api_client/models/match.py
+cogbox_api_client/models/membership_drift_entry_dto.py
+cogbox_api_client/models/membership_drift_report_dto.py
 cogbox_api_client/models/metric_data_point.py
 cogbox_api_client/models/metric_series.py
 cogbox_api_client/models/metrics_response.py

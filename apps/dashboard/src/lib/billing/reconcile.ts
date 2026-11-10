@@ -157,8 +157,7 @@ export function reconcilePeriodEvents(
     const base = baseById.get(entry.eventId)
     const corrections = correctionsByTarget.get(entry.eventId) ?? []
     const baseQuantity = base?.quantity ?? 0
-    const actualQuantity =
-      baseQuantity + corrections.reduce((sum, event) => sum + event.quantity, 0)
+    const actualQuantity = baseQuantity + corrections.reduce((sum, event) => sum + event.quantity, 0)
 
     if (base === undefined && corrections.length === 0) {
       missing.push({ eventId: entry.eventId, metric: entry.metric, expectedQuantity: entry.quantity })

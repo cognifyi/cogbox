@@ -72,6 +72,8 @@ export * from './lsp-location';
 export * from './lsp-server-request';
 export * from './lsp-symbol';
 export * from './match';
+export * from './membership-drift-entry-dto';
+export * from './membership-drift-report-dto';
 export * from './metric-data-point';
 export * from './metric-series';
 export * from './metrics-response';

@@ -100,6 +100,8 @@ lib/cogbox_api_client/models/lsp_location.rb
 lib/cogbox_api_client/models/lsp_server_request.rb
 lib/cogbox_api_client/models/lsp_symbol.rb
 lib/cogbox_api_client/models/match.rb
+lib/cogbox_api_client/models/membership_drift_entry_dto.rb
+lib/cogbox_api_client/models/membership_drift_report_dto.rb
 lib/cogbox_api_client/models/metric_data_point.rb
 lib/cogbox_api_client/models/metric_series.rb
 lib/cogbox_api_client/models/metrics_response.rb
