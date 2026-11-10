@@ -63,9 +63,7 @@ export class OrganizationCogosMembershipSyncService {
     this.baseUrl = url?.replace(/\/+$/, '')
     this.adminKey = key
     if (!this.baseUrl || !this.adminKey) {
-      this.logger.warn(
-        'COGOS_API_URL/COGOS_ADMIN_API_KEY not configured — cogos membership sync disabled',
-      )
+      this.logger.warn('COGOS_API_URL/COGOS_ADMIN_API_KEY not configured — cogos membership sync disabled')
     }
   }
 
