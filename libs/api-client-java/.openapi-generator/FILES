@@ -114,6 +114,8 @@ src/main/java/io/cogbox/api/client/model/LspLocation.java
 src/main/java/io/cogbox/api/client/model/LspServerRequest.java
 src/main/java/io/cogbox/api/client/model/LspSymbol.java
 src/main/java/io/cogbox/api/client/model/Match.java
+src/main/java/io/cogbox/api/client/model/MembershipDriftEntryDto.java
+src/main/java/io/cogbox/api/client/model/MembershipDriftReportDto.java
 src/main/java/io/cogbox/api/client/model/MetricDataPoint.java
 src/main/java/io/cogbox/api/client/model/MetricSeries.java
 src/main/java/io/cogbox/api/client/model/MetricsResponse.java
@@ -316,6 +318,8 @@ src/test/java/io/cogbox/api/client/model/LspLocationTest.java
 src/test/java/io/cogbox/api/client/model/LspServerRequestTest.java
 src/test/java/io/cogbox/api/client/model/LspSymbolTest.java
 src/test/java/io/cogbox/api/client/model/MatchTest.java
+src/test/java/io/cogbox/api/client/model/MembershipDriftEntryDtoTest.java
+src/test/java/io/cogbox/api/client/model/MembershipDriftReportDtoTest.java
 src/test/java/io/cogbox/api/client/model/MetricDataPointTest.java
 src/test/java/io/cogbox/api/client/model/MetricSeriesTest.java
 src/test/java/io/cogbox/api/client/model/MetricsResponseTest.java

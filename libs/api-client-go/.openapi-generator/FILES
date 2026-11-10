@@ -96,6 +96,8 @@ model_lsp_location.go
 model_lsp_server_request.go
 model_lsp_symbol.go
 model_match.go
+model_membership_drift_entry_dto.go
+model_membership_drift_report_dto.go
 model_metric_data_point.go
 model_metric_series.go
 model_metrics_response.go
