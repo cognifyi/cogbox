@@ -245,10 +245,7 @@ export async function fetchWithBillingRetry(
         // Non-2xx is always a failure: retryable ones loop, everything else
         // throws immediately. Never return a failed response as data.
         lastError = new BillingError(response.status, `Billing request failed (${response.status})`)
-        if (
-          attempt < BILLING_MAX_ATTEMPTS &&
-          isRetryableBillingError(lastError)
-        ) {
+        if (attempt < BILLING_MAX_ATTEMPTS && isRetryableBillingError(lastError)) {
           await delayFn(retryDelayMs)
           continue
         }
@@ -300,9 +297,7 @@ export async function withBillingRetry<T>(
 
   for (let attempt = 1; attempt <= BILLING_MAX_ATTEMPTS; attempt += 1) {
     if (outerSignal?.aborted) {
-      throw outerSignal.reason instanceof Error
-        ? outerSignal.reason
-        : new BillingError(0, 'Billing request aborted')
+      throw outerSignal.reason instanceof Error ? outerSignal.reason : new BillingError(0, 'Billing request aborted')
     }
     const controller = new AbortController()
     const onAbort = (): void => controller.abort()
@@ -318,9 +313,7 @@ export async function withBillingRetry<T>(
       const result = await Promise.race([
         call(controller.signal),
         new Promise<never>((_, reject) => {
-          controller.signal.addEventListener('abort', () =>
-            reject(new BillingError(0, 'Billing request timed out')),
-          )
+          controller.signal.addEventListener('abort', () => reject(new BillingError(0, 'Billing request timed out')))
         }),
       ])
       clearTimeout(timeoutId)

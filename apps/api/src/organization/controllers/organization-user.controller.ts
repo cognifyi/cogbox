@@ -93,7 +93,13 @@ export class OrganizationUserController {
       throw new ForbiddenException('You cannot update your own access')
     }
 
-    return this.organizationUserService.updateAccess(organizationId, userId, dto.role, dto.assignedRoleIds, idempotencyKey)
+    return this.organizationUserService.updateAccess(
+      organizationId,
+      userId,
+      dto.role,
+      dto.assignedRoleIds,
+      idempotencyKey,
+    )
   }
 
   @Delete('/:userId')

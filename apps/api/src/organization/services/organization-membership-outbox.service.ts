@@ -74,7 +74,7 @@ const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
  * with retry/backoff, keyed by the idempotency key (`eventId`).
  */
 /** Retention for delivered outbox rows (purge cron). */
-export const MEMBERSHIP_OUTBOX_SENT_RETENTION_DAYS = 30;
+export const MEMBERSHIP_OUTBOX_SENT_RETENTION_DAYS = 30
 
 @Injectable()
 export class OrganizationMembershipOutboxService {
@@ -219,9 +219,7 @@ export class OrganizationMembershipOutboxService {
         this.logger.log(`Purged ${removed} sent membership outbox rows older than 30 days`)
       }
     } catch (error) {
-      this.logger.warn(
-        `Membership outbox purge failed: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      this.logger.warn(`Membership outbox purge failed: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 

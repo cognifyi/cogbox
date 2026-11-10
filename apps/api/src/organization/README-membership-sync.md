@@ -1,7 +1,8 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
- * Copyright Cognifyi
- * SPDX-License-Identifier: AGPL-3.0
+
+* Copyright 2025 Daytona Platforms Inc.
+* Copyright Cognifyi
+* SPDX-License-Identifier: AGPL-3.0
  */
 
 # Organization membership sync
@@ -31,12 +32,12 @@ within 60s via TTL expiry. Proven by
 `OrganizationMembershipFailClosedGuard` denies access whenever membership cannot
 be verified:
 
-- The database lookup throws: record a failure on
+* The database lookup throws: record a failure on
   `OrganizationMembershipAvailabilityService` and throw
   `InvalidAuthenticationContextException` (deny). Never grant on an error.
-- The availability service reports degraded (3 consecutive failures, 30s
+* The availability service reports degraded (3 consecutive failures, 30s
   cooldown by default): deny without trusting the cache.
-- The membership row is missing: deny.
+* The membership row is missing: deny.
 
 A success resets the failure count; after the cooldown one probe lookup is
 allowed and a success restores `available`. Proven by the same spec
@@ -44,9 +45,9 @@ allowed and a success restores `available`. Proven by the same spec
 
 ## Operate
 
-- Drift between the database and the cache is reported by
+* Drift between the database and the cache is reported by
   `OrganizationMembershipDriftService` (`missing` / `stale` / `extra`).
-- Outbox backlog is visible via `OrganizationMembershipOutboxService.backlogCounts()`;
+* Outbox backlog is visible via `OrganizationMembershipOutboxService.backlogCounts()`;
   `dead` rows need operator attention.
-- Do not raise the introspection TTL without updating the bound above and the
+* Do not raise the introspection TTL without updating the bound above and the
   latency spec.

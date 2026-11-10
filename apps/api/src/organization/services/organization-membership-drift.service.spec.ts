@@ -16,10 +16,7 @@ function makeHarness() {
   } as never as {
     snapshotOrganization: jest.Mock
   }
-  const service = new OrganizationMembershipDriftService(
-    organizationUserService as never,
-    introspectionCache as never,
-  )
+  const service = new OrganizationMembershipDriftService(organizationUserService as never, introspectionCache as never)
   return { service, organizationUserService, introspectionCache }
 }
 

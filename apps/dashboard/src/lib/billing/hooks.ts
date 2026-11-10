@@ -82,8 +82,7 @@ export function useBillingWallet({
 
   return useQuery<OrganizationWallet, Error>({
     queryKey: queryKeys.organization.wallet(organizationId),
-    queryFn: ({ signal }) =>
-      withBillingRetry(() => billingApi.getOrganizationWallet(organizationId), { signal }),
+    queryFn: ({ signal }) => withBillingRetry(() => billingApi.getOrganizationWallet(organizationId), { signal }),
     enabled: queryEnabled,
     refetchOnWindowFocus: true,
     ...queryOptions,
@@ -103,8 +102,7 @@ export function useBillingInvoices({
 
   return useQuery<PaginatedTInvoice, Error>({
     queryKey: queryKeys.billing.invoices(organizationId, page, perPage),
-    queryFn: ({ signal }) =>
-      withBillingRetry(() => billingApi.listInvoices(organizationId, page, perPage), { signal }),
+    queryFn: ({ signal }) => withBillingRetry(() => billingApi.listInvoices(organizationId, page, perPage), { signal }),
     enabled: queryEnabled,
     refetchOnWindowFocus: true,
     ...queryOptions,
@@ -171,12 +169,9 @@ export function useBillingInvoiceDetail({
     queryFn: ({ signal }) =>
       withBillingRetry(
         () =>
-          findInvoiceAcrossPages(
-            (page) => billingApi.listInvoices(organizationId, page, perPage),
-            invoiceId,
-            perPage,
-            { signal },
-          ),
+          findInvoiceAcrossPages((page) => billingApi.listInvoices(organizationId, page, perPage), invoiceId, perPage, {
+            signal,
+          }),
         { signal },
       ),
     enabled: queryEnabled,
