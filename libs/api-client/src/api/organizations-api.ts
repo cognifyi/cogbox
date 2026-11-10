@@ -416,17 +416,15 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
          * @summary Delete organization member
          * @param {string} organizationId Organization ID
          * @param {string} userId User ID
-         * @param {string} idempotencyKey 
+         * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteOrganizationMember: async (organizationId: string, userId: string, idempotencyKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteOrganizationMember: async (organizationId: string, userId: string, idempotencyKey?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'organizationId' is not null or undefined
             assertParamExists('deleteOrganizationMember', 'organizationId', organizationId)
             // verify required parameter 'userId' is not null or undefined
             assertParamExists('deleteOrganizationMember', 'userId', userId)
-            // verify required parameter 'idempotencyKey' is not null or undefined
-            assertParamExists('deleteOrganizationMember', 'idempotencyKey', idempotencyKey)
             const localVarPath = `/organizations/{organizationId}/users/{userId}`
                 .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
                 .replace(`{${"userId"}}`, encodeURIComponent(String(userId)));
@@ -1320,6 +1318,45 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
+         * @summary Requeue dead-lettered membership outbox events
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        requeueOrganizationMembershipDeadEvents: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('requeueOrganizationMembershipDeadEvents', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/membership-drift/requeue-dead`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -1448,18 +1485,16 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
          * @summary Update access for organization member
          * @param {string} organizationId Organization ID
          * @param {string} userId User ID
-         * @param {string} idempotencyKey 
          * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+         * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAccessForOrganizationMember: async (organizationId: string, userId: string, idempotencyKey: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateAccessForOrganizationMember: async (organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, idempotencyKey?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'organizationId' is not null or undefined
             assertParamExists('updateAccessForOrganizationMember', 'organizationId', organizationId)
             // verify required parameter 'userId' is not null or undefined
             assertParamExists('updateAccessForOrganizationMember', 'userId', userId)
-            // verify required parameter 'idempotencyKey' is not null or undefined
-            assertParamExists('updateAccessForOrganizationMember', 'idempotencyKey', idempotencyKey)
             // verify required parameter 'updateOrganizationMemberAccess' is not null or undefined
             assertParamExists('updateAccessForOrganizationMember', 'updateOrganizationMemberAccess', updateOrganizationMemberAccess)
             const localVarPath = `/organizations/{organizationId}/users/{userId}/access`
@@ -1988,11 +2023,11 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
          * @summary Delete organization member
          * @param {string} organizationId Organization ID
          * @param {string} userId User ID
-         * @param {string} idempotencyKey 
+         * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteOrganizationMember(organizationId: string, userId: string, idempotencyKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async deleteOrganizationMember(organizationId: string, userId: string, idempotencyKey?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganizationMember(organizationId, userId, idempotencyKey, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.deleteOrganizationMember']?.[localVarOperationServerIndex]?.url;
@@ -2278,6 +2313,19 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Requeue dead-lettered membership outbox events
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async requeueOrganizationMembershipDeadEvents(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.requeueOrganizationMembershipDeadEvents(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.requeueOrganizationMembershipDeadEvents']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -2322,13 +2370,13 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
          * @summary Update access for organization member
          * @param {string} organizationId Organization ID
          * @param {string} userId User ID
-         * @param {string} idempotencyKey 
          * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+         * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateAccessForOrganizationMember(organizationId: string, userId: string, idempotencyKey: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUser>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAccessForOrganizationMember(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess, options);
+        async updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, idempotencyKey?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUser>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateAccessForOrganizationMember']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -2547,11 +2595,11 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
          * @summary Delete organization member
          * @param {string} organizationId Organization ID
          * @param {string} userId User ID
-         * @param {string} idempotencyKey 
+         * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteOrganizationMember(organizationId: string, userId: string, idempotencyKey: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        deleteOrganizationMember(organizationId: string, userId: string, idempotencyKey?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.deleteOrganizationMember(organizationId, userId, idempotencyKey, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2771,6 +2819,16 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
         },
         /**
          * 
+         * @summary Requeue dead-lettered membership outbox events
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        requeueOrganizationMembershipDeadEvents(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.requeueOrganizationMembershipDeadEvents(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -2806,13 +2864,13 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
          * @summary Update access for organization member
          * @param {string} organizationId Organization ID
          * @param {string} userId User ID
-         * @param {string} idempotencyKey 
          * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+         * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAccessForOrganizationMember(organizationId: string, userId: string, idempotencyKey: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationUser> {
-            return localVarFp.updateAccessForOrganizationMember(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess, options).then((request) => request(axios, basePath));
+        updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, idempotencyKey?: string, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationUser> {
+            return localVarFp.updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3010,11 +3068,11 @@ export class OrganizationsApi extends BaseAPI {
      * @summary Delete organization member
      * @param {string} organizationId Organization ID
      * @param {string} userId User ID
-     * @param {string} idempotencyKey 
+     * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public deleteOrganizationMember(organizationId: string, userId: string, idempotencyKey: string, options?: RawAxiosRequestConfig) {
+    public deleteOrganizationMember(organizationId: string, userId: string, idempotencyKey?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).deleteOrganizationMember(organizationId, userId, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -3256,6 +3314,17 @@ export class OrganizationsApi extends BaseAPI {
 
     /**
      * 
+     * @summary Requeue dead-lettered membership outbox events
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public requeueOrganizationMembershipDeadEvents(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).requeueOrganizationMembershipDeadEvents(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Set default region for organization
      * @param {string} organizationId Organization ID
      * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -3294,13 +3363,13 @@ export class OrganizationsApi extends BaseAPI {
      * @summary Update access for organization member
      * @param {string} organizationId Organization ID
      * @param {string} userId User ID
-     * @param {string} idempotencyKey 
      * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+     * @param {string} [idempotencyKey] Client-supplied idempotency key for the membership outbox event
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public updateAccessForOrganizationMember(organizationId: string, userId: string, idempotencyKey: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig) {
-        return OrganizationsApiFp(this.configuration).updateAccessForOrganizationMember(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess, options).then((request) => request(this.axios, this.basePath));
+    public updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, idempotencyKey?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

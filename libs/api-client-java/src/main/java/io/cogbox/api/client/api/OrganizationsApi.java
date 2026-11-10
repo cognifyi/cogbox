@@ -1140,7 +1140,7 @@ public class OrganizationsApi {
      * Build call for deleteOrganizationMember
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
@@ -1151,7 +1151,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> User removed from organization successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteOrganizationMemberCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteOrganizationMemberCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nullable String idempotencyKey, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1202,7 +1202,7 @@ public class OrganizationsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteOrganizationMemberValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteOrganizationMemberValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nullable String idempotencyKey, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling deleteOrganizationMember(Async)");
@@ -1211,11 +1211,6 @@ public class OrganizationsApi {
         // verify the required parameter 'userId' is set
         if (userId == null) {
             throw new ApiException("Missing the required parameter 'userId' when calling deleteOrganizationMember(Async)");
-        }
-
-        // verify the required parameter 'idempotencyKey' is set
-        if (idempotencyKey == null) {
-            throw new ApiException("Missing the required parameter 'idempotencyKey' when calling deleteOrganizationMember(Async)");
         }
 
         return deleteOrganizationMemberCall(organizationId, userId, idempotencyKey, _callback);
@@ -1227,7 +1222,7 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -1236,7 +1231,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> User removed from organization successfully </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteOrganizationMember(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey) throws ApiException {
+    public void deleteOrganizationMember(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nullable String idempotencyKey) throws ApiException {
         deleteOrganizationMemberWithHttpInfo(organizationId, userId, idempotencyKey);
     }
 
@@ -1245,7 +1240,7 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -1255,7 +1250,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> User removed from organization successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteOrganizationMemberWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey) throws ApiException {
+    public ApiResponse<Void> deleteOrganizationMemberWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nullable String idempotencyKey) throws ApiException {
         okhttp3.Call localVarCall = deleteOrganizationMemberValidateBeforeCall(organizationId, userId, idempotencyKey, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1265,7 +1260,7 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -1276,7 +1271,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> User removed from organization successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteOrganizationMemberAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteOrganizationMemberAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nullable String idempotencyKey, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteOrganizationMemberValidateBeforeCall(organizationId, userId, idempotencyKey, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -3972,6 +3967,128 @@ public class OrganizationsApi {
         return localVarCall;
     }
     /**
+     * Build call for requeueOrganizationMembershipDeadEvents
+     * @param organizationId Organization ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Number of dead-lettered outbox rows moved back to pending </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call requeueOrganizationMembershipDeadEventsCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/membership-drift/requeue-dead"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call requeueOrganizationMembershipDeadEventsValidateBeforeCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling requeueOrganizationMembershipDeadEvents(Async)");
+        }
+
+        return requeueOrganizationMembershipDeadEventsCall(organizationId, _callback);
+
+    }
+
+    /**
+     * Requeue dead-lettered membership outbox events
+     * 
+     * @param organizationId Organization ID (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Number of dead-lettered outbox rows moved back to pending </td><td>  -  </td></tr>
+     </table>
+     */
+    public void requeueOrganizationMembershipDeadEvents(@javax.annotation.Nonnull String organizationId) throws ApiException {
+        requeueOrganizationMembershipDeadEventsWithHttpInfo(organizationId);
+    }
+
+    /**
+     * Requeue dead-lettered membership outbox events
+     * 
+     * @param organizationId Organization ID (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Number of dead-lettered outbox rows moved back to pending </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> requeueOrganizationMembershipDeadEventsWithHttpInfo(@javax.annotation.Nonnull String organizationId) throws ApiException {
+        okhttp3.Call localVarCall = requeueOrganizationMembershipDeadEventsValidateBeforeCall(organizationId, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Requeue dead-lettered membership outbox events (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Number of dead-lettered outbox rows moved back to pending </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call requeueOrganizationMembershipDeadEventsAsync(@javax.annotation.Nonnull String organizationId, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = requeueOrganizationMembershipDeadEventsValidateBeforeCall(organizationId, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for setOrganizationDefaultRegion
      * @param organizationId Organization ID (required)
      * @param updateOrganizationDefaultRegion  (required)
@@ -4356,8 +4473,8 @@ public class OrganizationsApi {
      * Build call for updateAccessForOrganizationMember
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
      * @param updateOrganizationMemberAccess  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
@@ -4368,7 +4485,7 @@ public class OrganizationsApi {
         <tr><td> 200 </td><td> Access updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateAccessForOrganizationMemberCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateAccessForOrganizationMemberCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, @javax.annotation.Nullable String idempotencyKey, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4421,7 +4538,7 @@ public class OrganizationsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateAccessForOrganizationMemberValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateAccessForOrganizationMemberValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, @javax.annotation.Nullable String idempotencyKey, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling updateAccessForOrganizationMember(Async)");
@@ -4432,17 +4549,12 @@ public class OrganizationsApi {
             throw new ApiException("Missing the required parameter 'userId' when calling updateAccessForOrganizationMember(Async)");
         }
 
-        // verify the required parameter 'idempotencyKey' is set
-        if (idempotencyKey == null) {
-            throw new ApiException("Missing the required parameter 'idempotencyKey' when calling updateAccessForOrganizationMember(Async)");
-        }
-
         // verify the required parameter 'updateOrganizationMemberAccess' is set
         if (updateOrganizationMemberAccess == null) {
             throw new ApiException("Missing the required parameter 'updateOrganizationMemberAccess' when calling updateAccessForOrganizationMember(Async)");
         }
 
-        return updateAccessForOrganizationMemberCall(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess, _callback);
+        return updateAccessForOrganizationMemberCall(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey, _callback);
 
     }
 
@@ -4451,8 +4563,8 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
      * @param updateOrganizationMemberAccess  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @return OrganizationUser
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -4462,8 +4574,8 @@ public class OrganizationsApi {
         <tr><td> 200 </td><td> Access updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public OrganizationUser updateAccessForOrganizationMember(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess) throws ApiException {
-        ApiResponse<OrganizationUser> localVarResp = updateAccessForOrganizationMemberWithHttpInfo(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess);
+    public OrganizationUser updateAccessForOrganizationMember(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, @javax.annotation.Nullable String idempotencyKey) throws ApiException {
+        ApiResponse<OrganizationUser> localVarResp = updateAccessForOrganizationMemberWithHttpInfo(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey);
         return localVarResp.getData();
     }
 
@@ -4472,8 +4584,8 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
      * @param updateOrganizationMemberAccess  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @return ApiResponse&lt;OrganizationUser&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -4483,8 +4595,8 @@ public class OrganizationsApi {
         <tr><td> 200 </td><td> Access updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<OrganizationUser> updateAccessForOrganizationMemberWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess) throws ApiException {
-        okhttp3.Call localVarCall = updateAccessForOrganizationMemberValidateBeforeCall(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess, null);
+    public ApiResponse<OrganizationUser> updateAccessForOrganizationMemberWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, @javax.annotation.Nullable String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = updateAccessForOrganizationMemberValidateBeforeCall(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey, null);
         Type localVarReturnType = new TypeToken<OrganizationUser>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
@@ -4494,8 +4606,8 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param userId User ID (required)
-     * @param idempotencyKey  (required)
      * @param updateOrganizationMemberAccess  (required)
+     * @param idempotencyKey Client-supplied idempotency key for the membership outbox event (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -4506,9 +4618,9 @@ public class OrganizationsApi {
         <tr><td> 200 </td><td> Access updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateAccessForOrganizationMemberAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String idempotencyKey, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, final ApiCallback<OrganizationUser> _callback) throws ApiException {
+    public okhttp3.Call updateAccessForOrganizationMemberAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String userId, @javax.annotation.Nonnull UpdateOrganizationMemberAccess updateOrganizationMemberAccess, @javax.annotation.Nullable String idempotencyKey, final ApiCallback<OrganizationUser> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = updateAccessForOrganizationMemberValidateBeforeCall(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess, _callback);
+        okhttp3.Call localVarCall = updateAccessForOrganizationMemberValidateBeforeCall(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey, _callback);
         Type localVarReturnType = new TypeToken<OrganizationUser>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;

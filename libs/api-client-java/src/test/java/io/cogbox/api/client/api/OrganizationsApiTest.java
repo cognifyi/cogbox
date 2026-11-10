@@ -427,6 +427,18 @@ public class OrganizationsApiTest {
     }
 
     /**
+     * Requeue dead-lettered membership outbox events
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void requeueOrganizationMembershipDeadEventsTest() throws ApiException {
+        String organizationId = null;
+        api.requeueOrganizationMembershipDeadEvents(organizationId);
+        // TODO: test validations
+    }
+
+    /**
      * Set default region for organization
      *
      * @throws ApiException if the Api call fails
@@ -473,9 +485,9 @@ public class OrganizationsApiTest {
     public void updateAccessForOrganizationMemberTest() throws ApiException {
         String organizationId = null;
         String userId = null;
-        String idempotencyKey = null;
         UpdateOrganizationMemberAccess updateOrganizationMemberAccess = null;
-        OrganizationUser response = api.updateAccessForOrganizationMember(organizationId, userId, idempotencyKey, updateOrganizationMemberAccess);
+        String idempotencyKey = null;
+        OrganizationUser response = api.updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, idempotencyKey);
         // TODO: test validations
     }
 

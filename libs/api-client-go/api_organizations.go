@@ -403,6 +403,18 @@ type OrganizationsAPI interface {
 	RegenerateSshGatewayApiKeyExecute(r OrganizationsAPIRegenerateSshGatewayApiKeyRequest) (*RegenerateApiKeyResponse, *http.Response, error)
 
 	/*
+	RequeueOrganizationMembershipDeadEvents Requeue dead-lettered membership outbox events
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest
+	*/
+	RequeueOrganizationMembershipDeadEvents(ctx context.Context, organizationId string) OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest
+
+	// RequeueOrganizationMembershipDeadEventsExecute executes the request
+	RequeueOrganizationMembershipDeadEventsExecute(r OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest) (*http.Response, error)
+
+	/*
 	SetOrganizationDefaultRegion Set default region for organization
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1390,6 +1402,7 @@ type OrganizationsAPIDeleteOrganizationMemberRequest struct {
 	idempotencyKey *string
 }
 
+// Client-supplied idempotency key for the membership outbox event
 func (r OrganizationsAPIDeleteOrganizationMemberRequest) IdempotencyKey(idempotencyKey string) OrganizationsAPIDeleteOrganizationMemberRequest {
 	r.idempotencyKey = &idempotencyKey
 	return r
@@ -1436,9 +1449,6 @@ func (a *OrganizationsAPIService) DeleteOrganizationMemberExecute(r Organization
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.idempotencyKey == nil {
-		return nil, reportError("idempotencyKey is required and must be specified")
-	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1457,7 +1467,9 @@ func (a *OrganizationsAPIService) DeleteOrganizationMemberExecute(r Organization
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	parameterAddToHeaderOrQuery(localVarHeaderParams, "idempotency-key", r.idempotencyKey, "simple", "")
+	if r.idempotencyKey != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "idempotency-key", r.idempotencyKey, "simple", "")
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
@@ -3614,6 +3626,96 @@ func (a *OrganizationsAPIService) RegenerateSshGatewayApiKeyExecute(r Organizati
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest struct {
+	ctx context.Context
+	ApiService OrganizationsAPI
+	organizationId string
+}
+
+func (r OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest) Execute() (*http.Response, error) {
+	return r.ApiService.RequeueOrganizationMembershipDeadEventsExecute(r)
+}
+
+/*
+RequeueOrganizationMembershipDeadEvents Requeue dead-lettered membership outbox events
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @return OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest
+*/
+func (a *OrganizationsAPIService) RequeueOrganizationMembershipDeadEvents(ctx context.Context, organizationId string) OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest {
+	return OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) RequeueOrganizationMembershipDeadEventsExecute(r OrganizationsAPIRequeueOrganizationMembershipDeadEventsRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.RequeueOrganizationMembershipDeadEvents")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/membership-drift/requeue-dead"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type OrganizationsAPISetOrganizationDefaultRegionRequest struct {
 	ctx context.Context
 	ApiService OrganizationsAPI
@@ -3908,17 +4010,18 @@ type OrganizationsAPIUpdateAccessForOrganizationMemberRequest struct {
 	ApiService OrganizationsAPI
 	organizationId string
 	userId string
-	idempotencyKey *string
 	updateOrganizationMemberAccess *UpdateOrganizationMemberAccess
-}
-
-func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) IdempotencyKey(idempotencyKey string) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
-	r.idempotencyKey = &idempotencyKey
-	return r
+	idempotencyKey *string
 }
 
 func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) UpdateOrganizationMemberAccess(updateOrganizationMemberAccess UpdateOrganizationMemberAccess) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
 	r.updateOrganizationMemberAccess = &updateOrganizationMemberAccess
+	return r
+}
+
+// Client-supplied idempotency key for the membership outbox event
+func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) IdempotencyKey(idempotencyKey string) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
+	r.idempotencyKey = &idempotencyKey
 	return r
 }
 
@@ -3965,9 +4068,6 @@ func (a *OrganizationsAPIService) UpdateAccessForOrganizationMemberExecute(r Org
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.idempotencyKey == nil {
-		return localVarReturnValue, nil, reportError("idempotencyKey is required and must be specified")
-	}
 	if r.updateOrganizationMemberAccess == nil {
 		return localVarReturnValue, nil, reportError("updateOrganizationMemberAccess is required and must be specified")
 	}
@@ -3989,7 +4089,9 @@ func (a *OrganizationsAPIService) UpdateAccessForOrganizationMemberExecute(r Org
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	parameterAddToHeaderOrQuery(localVarHeaderParams, "idempotency-key", r.idempotencyKey, "simple", "")
+	if r.idempotencyKey != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "idempotency-key", r.idempotencyKey, "simple", "")
+	}
 	// body params
 	localVarPostBody = r.updateOrganizationMemberAccess
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
