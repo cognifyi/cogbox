@@ -133,21 +133,32 @@ export class OrganizationMembershipOutboxRelayService {
       changeType: row.changeType,
     }
 
-    // Deliver to every listener individually so a consumer's failure is
-    // attributed by name (emitAsync would surface one rejection and hide
-    // which consumer failed). The row counts as delivered only when all
-    // listeners have consumed it.
+    // Deliver to every listener in parallel (same as emitAsync) but capture
+    // each consumer's failure individually so a rejection is attributed to a
+    // specific listener instead of surfacing as one anonymous error. The row
+    // counts as delivered only when all listeners have consumed it.
     const failures: { listener: string; error: unknown }[] = []
-    for (const listener of this.eventEmitter.listeners(OrganizationEvents.MEMBERSHIP_CHANGED)) {
-      try {
-        await listener(event)
-      } catch (error) {
-        failures.push({ listener: listener.name || 'anonymous', error })
-      }
-    }
+    const listeners = this.eventEmitter.listeners(OrganizationEvents.MEMBERSHIP_CHANGED)
+    await Promise.all(
+      listeners.map(async (listener, index) => {
+        try {
+          await listener(event)
+        } catch (error) {
+          failures.push({ listener: `#${index}:${listener.name || 'anonymous'}`, error })
+        }
+      }),
+    )
 
     if (failures.length === 0) {
-      await this.outboxService.markSent([row.id])
+      try {
+        await this.outboxService.markSent([row.id])
+      } catch (error) {
+        // A markSent failure must not abort the rest of the batch: the row's
+        // claim lease expires on its own and the row will be reclaimed.
+        this.logger.warn(
+          `Membership relay could not mark outbox event ${row.eventId} sent; leaving it for lease expiry: ${this.safeErrorMessage(error)}`,
+        )
+      }
       return
     }
 

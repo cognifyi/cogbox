@@ -11,6 +11,8 @@ import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { OrganizationAuthContextGuard } from '../guards/organization-auth-context.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { MembershipDriftReportDto } from '../dto/membership-drift-report.dto'
+import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
+import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationMembershipDriftService } from '../services/organization-membership-drift.service'
 import { OrganizationMembershipOutboxService } from '../services/organization-membership-outbox.service'
 
@@ -47,6 +49,7 @@ export class OrganizationMembershipDriftController {
   }
 
   @Post('requeue-dead')
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @ApiOperation({
     summary: 'Requeue dead-lettered membership outbox events',
     operationId: 'requeueOrganizationMembershipDeadEvents',
