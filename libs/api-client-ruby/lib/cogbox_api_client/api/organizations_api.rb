@@ -545,21 +545,21 @@ module CogboxApiClient
     # Delete organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param [Hash] opts the optional parameters
+    # @option opts [String] :idempotency_key Client-supplied idempotency key for the membership outbox event
     # @return [nil]
-    def delete_organization_member(organization_id, user_id, idempotency_key, opts = {})
-      delete_organization_member_with_http_info(organization_id, user_id, idempotency_key, opts)
+    def delete_organization_member(organization_id, user_id, opts = {})
+      delete_organization_member_with_http_info(organization_id, user_id, opts)
       nil
     end
 
     # Delete organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param [Hash] opts the optional parameters
+    # @option opts [String] :idempotency_key Client-supplied idempotency key for the membership outbox event
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_organization_member_with_http_info(organization_id, user_id, idempotency_key, opts = {})
+    def delete_organization_member_with_http_info(organization_id, user_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: OrganizationsApi.delete_organization_member ...'
       end
@@ -571,10 +571,6 @@ module CogboxApiClient
       if @api_client.config.client_side_validation && user_id.nil?
         fail ArgumentError, "Missing the required parameter 'user_id' when calling OrganizationsApi.delete_organization_member"
       end
-      # verify the required parameter 'idempotency_key' is set
-      if @api_client.config.client_side_validation && idempotency_key.nil?
-        fail ArgumentError, "Missing the required parameter 'idempotency_key' when calling OrganizationsApi.delete_organization_member"
-      end
       # resource path
       local_var_path = '/organizations/{organizationId}/users/{userId}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'userId' + '}', CGI.escape(user_id.to_s))
 
@@ -583,7 +579,7 @@ module CogboxApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
-      header_params[:'idempotency-key'] = idempotency_key
+      header_params[:'idempotency-key'] = opts[:'idempotency_key'] if !opts[:'idempotency_key'].nil?
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -1898,6 +1894,65 @@ module CogboxApiClient
       return data, status_code, headers
     end
 
+    # Requeue dead-lettered membership outbox events
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def requeue_organization_membership_dead_events(organization_id, opts = {})
+      requeue_organization_membership_dead_events_with_http_info(organization_id, opts)
+      nil
+    end
+
+    # Requeue dead-lettered membership outbox events
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def requeue_organization_membership_dead_events_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.requeue_organization_membership_dead_events ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.requeue_organization_membership_dead_events"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/membership-drift/requeue-dead'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.requeue_organization_membership_dead_events",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#requeue_organization_membership_dead_events\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Set default region for organization
     # @param organization_id [String] Organization ID
     # @param update_organization_default_region [UpdateOrganizationDefaultRegion] 
@@ -2096,23 +2151,23 @@ module CogboxApiClient
     # Update access for organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param update_organization_member_access [UpdateOrganizationMemberAccess] 
     # @param [Hash] opts the optional parameters
+    # @option opts [String] :idempotency_key Client-supplied idempotency key for the membership outbox event
     # @return [OrganizationUser]
-    def update_access_for_organization_member(organization_id, user_id, idempotency_key, update_organization_member_access, opts = {})
-      data, _status_code, _headers = update_access_for_organization_member_with_http_info(organization_id, user_id, idempotency_key, update_organization_member_access, opts)
+    def update_access_for_organization_member(organization_id, user_id, update_organization_member_access, opts = {})
+      data, _status_code, _headers = update_access_for_organization_member_with_http_info(organization_id, user_id, update_organization_member_access, opts)
       data
     end
 
     # Update access for organization member
     # @param organization_id [String] Organization ID
     # @param user_id [String] User ID
-    # @param idempotency_key [String] 
     # @param update_organization_member_access [UpdateOrganizationMemberAccess] 
     # @param [Hash] opts the optional parameters
+    # @option opts [String] :idempotency_key Client-supplied idempotency key for the membership outbox event
     # @return [Array<(OrganizationUser, Integer, Hash)>] OrganizationUser data, response status code and response headers
-    def update_access_for_organization_member_with_http_info(organization_id, user_id, idempotency_key, update_organization_member_access, opts = {})
+    def update_access_for_organization_member_with_http_info(organization_id, user_id, update_organization_member_access, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: OrganizationsApi.update_access_for_organization_member ...'
       end
@@ -2123,10 +2178,6 @@ module CogboxApiClient
       # verify the required parameter 'user_id' is set
       if @api_client.config.client_side_validation && user_id.nil?
         fail ArgumentError, "Missing the required parameter 'user_id' when calling OrganizationsApi.update_access_for_organization_member"
-      end
-      # verify the required parameter 'idempotency_key' is set
-      if @api_client.config.client_side_validation && idempotency_key.nil?
-        fail ArgumentError, "Missing the required parameter 'idempotency_key' when calling OrganizationsApi.update_access_for_organization_member"
       end
       # verify the required parameter 'update_organization_member_access' is set
       if @api_client.config.client_side_validation && update_organization_member_access.nil?
@@ -2147,7 +2198,7 @@ module CogboxApiClient
       if !content_type.nil?
           header_params['Content-Type'] = content_type
       end
-      header_params[:'idempotency-key'] = idempotency_key
+      header_params[:'idempotency-key'] = opts[:'idempotency_key'] if !opts[:'idempotency_key'].nil?
 
       # form parameters
       form_params = opts[:form_params] || {}

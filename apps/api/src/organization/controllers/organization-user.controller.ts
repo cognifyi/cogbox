@@ -5,7 +5,7 @@
  */
 
 import { Body, Controller, Delete, ForbiddenException, Get, Headers, Param, Post, UseGuards } from '@nestjs/common'
-import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiHeader, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
@@ -82,6 +82,11 @@ export class OrganizationUserController {
       }),
     },
   })
+  @ApiHeader({
+    name: 'idempotency-key',
+    required: false,
+    description: 'Client-supplied idempotency key for the membership outbox event',
+  })
   async updateAccess(
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('organizationId') organizationId: string,
@@ -126,6 +131,11 @@ export class OrganizationUserController {
     action: AuditAction.DELETE,
     targetType: AuditTarget.ORGANIZATION_USER,
     targetIdFromRequest: (req) => req.params.userId,
+  })
+  @ApiHeader({
+    name: 'idempotency-key',
+    required: false,
+    description: 'Client-supplied idempotency key for the membership outbox event',
   })
   async delete(
     @Param('organizationId') organizationId: string,

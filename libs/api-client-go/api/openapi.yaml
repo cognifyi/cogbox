@@ -981,10 +981,11 @@ paths:
         schema:
           type: string
         style: simple
-      - explode: false
+      - description: Client-supplied idempotency key for the membership outbox event
+        explode: false
         in: header
         name: idempotency-key
-        required: true
+        required: false
         schema:
           type: string
         style: simple
@@ -1030,10 +1031,11 @@ paths:
         schema:
           type: string
         style: simple
-      - explode: false
+      - description: Client-supplied idempotency key for the membership outbox event
+        explode: false
         in: header
         name: idempotency-key
-        required: true
+        required: false
         schema:
           type: string
         style: simple
@@ -1527,6 +1529,30 @@ paths:
         - profile
         - email
       summary: Reconcile organization membership versus the billing cache
+      tags:
+      - organizations
+  /organizations/{organizationId}/membership-drift/requeue-dead:
+    post:
+      operationId: requeueOrganizationMembershipDeadEvents
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Number of dead-lettered outbox rows moved back to pending
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Requeue dead-lettered membership outbox events
       tags:
       - organizations
   /users/me:

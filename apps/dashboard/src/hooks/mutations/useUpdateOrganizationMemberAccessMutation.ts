@@ -31,8 +31,8 @@ export const useUpdateOrganizationMemberAccessMutation = () => {
       const response = await organizationsApi.updateAccessForOrganizationMember(
         organizationId,
         userId,
-        uuidv4(),
         access,
+        uuidv4(),
       )
       return response.data
     },

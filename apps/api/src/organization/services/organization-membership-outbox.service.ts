@@ -268,6 +268,37 @@ export class OrganizationMembershipOutboxService {
     return counts
   }
 
+  /**
+   * Move dead-lettered rows back to pending so an operator can recover
+   * deliveries lost to a transient downstream outage. `attempts` resets so
+   * the row gets a fresh retry budget; `lastError` is kept for audit.
+   */
+  async requeueDead(organizationId?: string, limit = 100): Promise<number> {
+    const dead = await this.outboxRepository.find({
+      where: {
+        status: MEMBERSHIP_OUTBOX_STATUS_DEAD,
+        ...(organizationId ? { organizationId } : {}),
+      },
+      order: { createdAt: 'ASC' },
+      take: limit,
+      select: ['id'],
+    })
+    if (dead.length === 0) {
+      return 0
+    }
+
+    const result = await this.outboxRepository.update(
+      { id: In(dead.map((row) => row.id)) },
+      {
+        status: MEMBERSHIP_OUTBOX_STATUS_PENDING,
+        attempts: 0,
+        nextAttemptAt: new Date(),
+      },
+    )
+
+    return result.affected ?? 0
+  }
+
   private getMaxAttempts(): number {
     return this.getOption('maxAttempts', MEMBERSHIP_OUTBOX_DEFAULT_MAX_ATTEMPTS)
   }
