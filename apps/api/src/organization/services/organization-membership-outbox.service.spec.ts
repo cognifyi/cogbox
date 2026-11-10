@@ -23,12 +23,21 @@ function createBuilder() {
     'groupBy',
     'where',
     'andWhere',
+    'setLock',
+    'setOnLocked',
+    'orderBy',
+    'addOrderBy',
+    'limit',
+    'update',
+    'set',
+    'whereInIds',
   ]) {
     builder[method] = jest.fn(() => builder)
   }
   builder.execute = jest.fn().mockResolvedValue({ identifiers: [{ id: '1' }] })
   builder.getRawMany = jest.fn().mockResolvedValue([])
   builder.getRawOne = jest.fn().mockResolvedValue({ count: '0' })
+  builder.getMany = jest.fn().mockResolvedValue([])
   return builder
 }
 
@@ -42,6 +51,7 @@ function makeHarness(overrides?: { maxAttempts?: number; baseBackoffMs?: number;
     manager: {
       createQueryBuilder: jest.fn(() => builder),
       query: transactionManager.query,
+      transaction: jest.fn(async (work: (manager: unknown) => Promise<unknown>) => work(transactionManager)),
     },
     createQueryBuilder: jest.fn(() => builder),
     update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -138,24 +148,39 @@ describe('OrganizationMembershipOutboxService', () => {
 
   describe('claimDue', () => {
     it('leases due rows atomically with SKIP LOCKED so locks cannot be reused after release', async () => {
-      const { service, transactionManager } = makeHarness()
+      const { service, repository, builder } = makeHarness()
       const dueRow = makeRow()
-      transactionManager.query.mockResolvedValue([dueRow])
+      builder.getMany.mockResolvedValue([dueRow])
 
       await expect(service.claimDue(25)).resolves.toEqual([dueRow])
 
-      const [sql, params] = transactionManager.query.mock.calls[0] as [string, unknown[]]
-      expect(sql).toContain('FOR UPDATE SKIP LOCKED')
-      expect(sql).toContain('UPDATE "organization_membership_outbox"')
-      expect(sql).toContain('RETURNING outbox.*')
-      expect(params).toEqual(['pending', 'failed', 25, 300000])
+      // The claim must run inside one transaction so the row locks are held
+      // until the lease update commits; pessimistic_write + skip_locked is the
+      // QueryBuilder spelling of FOR UPDATE SKIP LOCKED.
+      expect(repository.manager.transaction).toHaveBeenCalled()
+      expect(builder.setLock).toHaveBeenCalledWith('pessimistic_write')
+      expect(builder.setOnLocked).toHaveBeenCalledWith('skip_locked')
+      expect(builder.limit).toHaveBeenCalledWith(25)
+      expect(builder.update).toHaveBeenCalledWith(OrganizationMembershipOutbox)
+      const leaseUpdate = builder.set.mock.calls[0][0] as { nextAttemptAt: () => string }
+      expect(leaseUpdate.nextAttemptAt()).toBe("now() + (300000 * interval '1 millisecond')")
+      expect(builder.whereInIds).toHaveBeenCalledWith([dueRow.id])
+      expect(builder.execute).toHaveBeenCalled()
+    })
+
+    it('skips the lease update when no rows are due', async () => {
+      const { service, builder } = makeHarness()
+
+      await expect(service.claimDue(10)).resolves.toEqual([])
+      expect(builder.getMany).toHaveBeenCalled()
+      expect(builder.update).not.toHaveBeenCalled()
     })
 
     it('does not query when the batch limit is not positive', async () => {
-      const { service, transactionManager } = makeHarness()
+      const { service, repository } = makeHarness()
 
       await expect(service.claimDue(0)).resolves.toEqual([])
-      expect(transactionManager.query).not.toHaveBeenCalled()
+      expect(repository.manager.transaction).not.toHaveBeenCalled()
     })
   })
 
