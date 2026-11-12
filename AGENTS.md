@@ -1,6 +1,27 @@
-# Agent Development Guide
+# AGENTS.md — cogbox
+
+Pazity Cogbox: sandbox runtime (Go + NestJS/TypeScript + Python + Ruby + Java
+in one Nx monorepo, built through Nix dev shells).
 
 This project uses **Nix flakes** to provide reproducible development environments outside of the devcontainer. When working on this codebase, use the appropriate Nix dev shell to ensure all build tools, language runtimes, and dependencies are available.
+
+## Invariants
+
+- **Never hand-edit generated API clients.** `libs/api-client-*` are produced
+  by OpenAPI Generator (config in `openapitools.json`, templates under
+  `hack/*-client/`). Change the spec/generator settings and regenerate with
+  `yarn generate:api-client` instead of editing generated files.
+- **Never commit build artifacts or dependencies.** `node_modules/`, `dist/`,
+  `.venv/`, `.bundle/`, and other generated outputs stay out of git.
+- **Run language toolchains inside the matching Nix shell**
+  (`nix develop .#<lang> --command ...`). This host has no `nix`, `go`, or
+  `yarn`; devcontainer or CI results are the source of truth for validation.
+- **One worktree/branch per change.** Work in
+  `/home/ec2-user/labs/worktree/cogbox-<slug>/`, never in the live checkout
+  `/home/ec2-user/labs/cogbox/`.
+
+Cross-repo rules (worktree policy, commit/PR conventions, verification matrix)
+live in `/home/ec2-user/labs/AGENTS.md` §2, §7.2 and §9.
 
 ## Prerequisites
 
