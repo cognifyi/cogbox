@@ -42,9 +42,20 @@ function makeService(options: { enabled?: boolean; userEmail?: string; kcUserSta
     return Promise.resolve(jsonResponse(204))
   })
   global.fetch = fetchMock as unknown as typeof fetch
+  const dataSource = {
+    getRepository: () => ({
+      createQueryBuilder: () => ({
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({}),
+      }),
+    }),
+  }
   const service = new OrganizationKeycloakOrgSyncService(
     configService as unknown as TypedConfigService,
     userService as unknown as UserService,
+    dataSource as never,
   )
   return { service, fetchMock, userService }
 }

@@ -16,6 +16,7 @@ import { RequestWithAuthMetadata } from './interfaces/request-with-auth-metadata
 import { CustomHeaders } from '../common/constants/header.constants'
 import { TypedConfigService } from '../config/typed-config.service'
 import { handleAuthError } from './utils/handle-auth-error.util'
+import { OrgClaimResolver, toOrgClaimHttpError } from './org-claim-resolver'
 
 interface JwtStrategyConfig {
   jwksUri: string
@@ -32,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly options: JwtStrategyConfig,
     private readonly userService: UserService,
     private readonly configService: TypedConfigService,
+    private readonly orgClaimResolver?: OrgClaimResolver,
   ) {
     super({
       secretOrKeyProvider: passportJwtSecret({
@@ -54,7 +56,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       return null
     }
 
-    const organizationId = request.get(CustomHeaders.ORGANIZATION_ID.name)
+    // K7: the X-Cogbox-Organization-ID header stays the explicit selector,
+    // but claim-bearing tokens must satisfy the frozen claim-set rules —
+    // selector normalized to canonical and inside the claim set, multi-org
+    // without a selector rejected, no first-pick / default-org fallback.
+    let organizationId = request.get(CustomHeaders.ORGANIZATION_ID.name)
+    let orgClaimOrgIds: string[] | undefined
+    if (this.orgClaimResolver) {
+      try {
+        const resolved = await this.orgClaimResolver.resolveOrganizationId(
+          payload as Record<string, unknown>,
+          organizationId,
+        )
+        organizationId = resolved.organizationId
+        orgClaimOrgIds = resolved.claimedOrgIds
+      } catch (error) {
+        throw toOrgClaimHttpError(error)
+      }
+    }
 
     let userId = payload.sub
     let email = payload.email
@@ -85,6 +104,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           role: newUser.role,
           email: newUser.email,
           organizationId,
+          orgClaimOrgIds,
         } satisfies UserAuthContext
       }
 
@@ -110,6 +130,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         role: existingUser.role,
         email: existingUser.email,
         organizationId,
+        orgClaimOrgIds,
       } satisfies UserAuthContext
     } catch (error) {
       this.logger.debug(`Error validating JWT for user ${userId}:`, error)

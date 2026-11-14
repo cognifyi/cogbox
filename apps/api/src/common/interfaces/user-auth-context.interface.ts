@@ -12,6 +12,10 @@ export interface UserAuthContext extends BaseAuthContext {
   email: string
   apiKey?: ApiKey
   organizationId?: string
+  /** K7: canonical org ids the JWT's organization claim set resolved to.
+   *  Present only for claim-bearing tokens — guards use it to bind
+   *  :organizationId path params to the claim set. */
+  orgClaimOrgIds?: string[]
 }
 
 export function isUserAuthContext(user: unknown): user is UserAuthContext {

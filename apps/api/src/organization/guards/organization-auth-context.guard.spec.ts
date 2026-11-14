@@ -81,6 +81,25 @@ describe('[AUTH] OrganizationAuthContextGuard', () => {
     await expect(guard.canActivate(context)).rejects.toThrow(InvalidAuthenticationContextException)
   })
 
+  it('should reject an org param outside the JWT organization claim set (K7)', async () => {
+    const user = createMockUserAuthContext({ orgClaimOrgIds: ['other-org-id'] })
+    const { context } = createMockExecutionContext({
+      user,
+      params: { organizationId: MOCK_ORGANIZATION_ID },
+    })
+    await expect(guard.canActivate(context)).rejects.toThrow(InvalidAuthenticationContextException)
+  })
+
+  it('should allow an org param inside the JWT organization claim set (K7)', async () => {
+    const user = createMockUserAuthContext({ orgClaimOrgIds: [MOCK_ORGANIZATION_ID] })
+    const { context } = createMockExecutionContext({
+      user,
+      params: { organizationId: MOCK_ORGANIZATION_ID },
+    })
+    const result = await guard.canActivate(context)
+    expect(result).toBe(true)
+  })
+
   it('should reject when API key org does not match requested org', async () => {
     const user = createMockUserAuthContext({
       organizationId: 'different-org',

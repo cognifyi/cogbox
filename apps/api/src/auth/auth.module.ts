@@ -7,6 +7,7 @@
 import { Module } from '@nestjs/common'
 import { PassportModule } from '@nestjs/passport'
 import { JwtStrategy } from './jwt.strategy'
+import { OrgClaimResolver } from './org-claim-resolver'
 import { ApiKeyStrategy } from './api-key.strategy'
 import { UserModule } from '../user/user.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
@@ -40,7 +41,12 @@ import { AuthStrategyType } from './enums/auth-strategy-type.enum'
     ApiKeyStrategy,
     {
       provide: JwtStrategy,
-      useFactory: async (userService: UserService, httpService: HttpService, configService: TypedConfigService) => {
+      useFactory: async (
+        userService: UserService,
+        httpService: HttpService,
+        configService: TypedConfigService,
+        orgClaimResolver: OrgClaimResolver,
+      ) => {
         if (configService.get('skipConnections')) {
           return
         }
@@ -72,11 +78,13 @@ import { AuthStrategyType } from './enums/auth-strategy-type.enum'
           },
           userService,
           configService,
+          orgClaimResolver,
         )
       },
-      inject: [UserService, HttpService, TypedConfigService],
+      inject: [UserService, HttpService, TypedConfigService, OrgClaimResolver],
     },
     FailedAuthTrackerService,
+    OrgClaimResolver,
   ],
   exports: [PassportModule, JwtStrategy, ApiKeyStrategy, FailedAuthTrackerService],
 })
