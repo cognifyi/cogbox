@@ -7,6 +7,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
+import { DataSource } from 'typeorm'
+import { Organization } from '../entities/organization.entity'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { UserService } from '../../user/user.service'
 import { OrganizationInvitationCreatedEvent } from '../events/organization-invitation-created.event'
@@ -90,6 +92,7 @@ export class OrganizationKeycloakOrgSyncService {
   constructor(
     private readonly configService: TypedConfigService,
     private readonly userService: UserService,
+    private readonly dataSource: DataSource,
   ) {
     const cfg = this.configService.get('keycloakOrgSync')
     this.enabled = cfg?.enabled === true
@@ -253,7 +256,33 @@ export class OrganizationKeycloakOrgSyncService {
       }
       this.orgByCogboxId = { map, loadedAt: Date.now() }
     }
-    return this.orgByCogboxId.map.get(cogboxOrgId)
+    const kcOrgId = this.orgByCogboxId.map.get(cogboxOrgId)
+    if (kcOrgId) {
+      await this.stampKcOrgId(cogboxOrgId, kcOrgId)
+    }
+    return kcOrgId
+  }
+
+  /**
+   * Self-healing K7 backfill: once a KC org is resolved for a cogbox org,
+   * persist `keycloakOrgId` on the organization row so request-path claim
+   * canonicalization (OrgClaimResolver) does not depend on name matching.
+   */
+  private async stampKcOrgId(cogboxOrgId: string, kcOrgId: string): Promise<void> {
+    try {
+      await this.dataSource
+        .getRepository(Organization)
+        .createQueryBuilder()
+        .update()
+        .set({ keycloakOrgId: kcOrgId })
+        .where('id = :id AND ("keycloakOrgId" IS NULL OR "keycloakOrgId" <> :kc)', {
+          id: cogboxOrgId,
+          kc: kcOrgId,
+        })
+        .execute()
+    } catch (error) {
+      this.logger.debug(`keycloakOrgId write-back skipped for org ${cogboxOrgId}: ${error}`)
+    }
   }
 
   private async adminToken(): Promise<string> {

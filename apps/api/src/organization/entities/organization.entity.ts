@@ -18,6 +18,11 @@ export class Organization {
   @Column()
   name: string
 
+  // K7: KC Organizations counterpart id (K3 import / K4 sync write-back);
+  // canonical tenant key stays this row's UUID — KC id is claim input only.
+  @Column({ nullable: true })
+  keycloakOrgId?: string
+
   @Column()
   createdBy: string
 
