@@ -42,6 +42,7 @@ import { OrganizationMembershipDriftController } from './controllers/organizatio
 import { OrganizationMembershipIntrospectionCacheService } from './services/organization-membership-introspection-cache.service'
 import { OrganizationMembershipCacheInvalidationService } from './services/organization-membership-cache-invalidation.service'
 import { OrganizationCogosMembershipSyncService } from './services/organization-cogos-membership-sync.service'
+import { OrganizationKeycloakOrgSyncService } from './services/organization-keycloak-org-sync.service'
 import { OrganizationMembershipAvailabilityService } from './services/organization-membership-availability.service'
 import { OrganizationMembershipFailClosedCheck } from './guards/organization-membership-fail-closed.check'
 import { OrganizationMembershipDriftService } from './services/organization-membership-drift.service'
@@ -87,6 +88,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationMembershipIntrospectionCacheService,
     OrganizationMembershipCacheInvalidationService,
     OrganizationCogosMembershipSyncService,
+    OrganizationKeycloakOrgSyncService,
     OrganizationMembershipAvailabilityService,
     OrganizationMembershipFailClosedCheck,
     OrganizationMembershipDriftService,

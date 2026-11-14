@@ -25,6 +25,7 @@ import { OrganizationInvitation } from '../entities/organization-invitation.enti
 import { OrganizationInvitationStatus } from '../enums/organization-invitation-status.enum'
 import { OrganizationInvitationAcceptedEvent } from '../events/organization-invitation-accepted.event'
 import { OrganizationInvitationCreatedEvent } from '../events/organization-invitation-created.event'
+import { OrganizationInvitationRevokedEvent } from '../events/organization-invitation-revoked.event'
 import { UserService } from '../../user/user.service'
 import { EmailUtils } from '../../common/utils/email.util'
 
@@ -99,6 +100,7 @@ export class OrganizationInvitationService {
     this.eventEmitter.emit(
       OrganizationEvents.INVITATION_CREATED,
       new OrganizationInvitationCreatedEvent(
+        invitation.organizationId,
         invitation.organization.name,
         invitation.invitedBy,
         invitation.email,
@@ -234,6 +236,12 @@ export class OrganizationInvitationService {
   async decline(invitationId: string): Promise<void> {
     const invitation = await this.prepareStatusUpdate(invitationId, OrganizationInvitationStatus.DECLINED)
     await this.organizationInvitationRepository.save(invitation)
+    // K4: let the KC-org listener revoke the pending KC invitation so a
+    // declined invite cannot still register into the KC organization.
+    this.eventEmitter.emit(
+      OrganizationEvents.INVITATION_DECLINED,
+      new OrganizationInvitationRevokedEvent(invitation.organizationId, invitation.email),
+    )
   }
 
   async cancel(organizationId: string, invitationId: string): Promise<void> {
@@ -243,6 +251,10 @@ export class OrganizationInvitationService {
       organizationId,
     )
     await this.organizationInvitationRepository.save(invitation)
+    this.eventEmitter.emit(
+      OrganizationEvents.INVITATION_CANCELLED,
+      new OrganizationInvitationRevokedEvent(invitation.organizationId, invitation.email),
+    )
   }
 
   private async prepareStatusUpdate(
