@@ -188,6 +188,13 @@ const configuration = {
     apiUrl: process.env.COGOS_API_URL,
     adminApiKey: process.env.COGOS_ADMIN_API_KEY,
   },
+  keycloakOrgSync: {
+    enabled: process.env.KC_ORG_SYNC_ENABLED === 'true',
+    baseUrl: process.env.KEYCLOAK_BASE_URL,
+    realm: process.env.KEYCLOAK_REALM || 'cogbox',
+    adminClientId: process.env.KEYCLOAK_ADMIN_CLIENT_ID,
+    adminClientSecret: process.env.KEYCLOAK_ADMIN_CLIENT_SECRET,
+  },
   defaultRunner: {
     domain: process.env.DEFAULT_RUNNER_DOMAIN,
     apiKey: process.env.DEFAULT_RUNNER_API_KEY,

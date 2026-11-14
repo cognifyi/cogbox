@@ -6,6 +6,7 @@
 
 export class OrganizationInvitationCreatedEvent {
   constructor(
+    public readonly organizationId: string,
     public readonly organizationName: string,
     public readonly invitedBy: string,
     public readonly inviteeEmail: string,

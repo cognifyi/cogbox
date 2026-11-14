@@ -99,6 +99,7 @@ export class OrganizationInvitationService {
     this.eventEmitter.emit(
       OrganizationEvents.INVITATION_CREATED,
       new OrganizationInvitationCreatedEvent(
+        invitation.organizationId,
         invitation.organization.name,
         invitation.invitedBy,
         invitation.email,
