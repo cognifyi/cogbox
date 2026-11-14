@@ -47,14 +47,17 @@ export class OrgClaimResolver {
    * Resolve the canonical organization id for the request, or `undefined`
    * when the request is not org-scoped.
    */
-  async resolveOrganizationId(payload: Record<string, unknown>, header: string | undefined) {
+  async resolveOrganizationId(
+    payload: Record<string, unknown>,
+    header: string | undefined,
+  ): Promise<{ organizationId?: string; claimedOrgIds?: string[] }> {
     const ctx = parseOrgContext(payload)
     const headerValue = header?.trim() || undefined
 
     if (ctx.entries.size === 0) {
       // Attribute-only / no-claim tokens: attribute is a compat hint, never a
       // claim-set selector — keep the legacy header passthrough unchanged.
-      return headerValue
+      return { organizationId: headerValue }
     }
 
     const claimed = new Set<string>()
@@ -77,11 +80,14 @@ export class OrgClaimResolver {
       if (!selected || !claimed.has(selected)) {
         throw new OrgUnknownError(`X-Cogbox-Organization-ID resolves outside the claim set`)
       }
-      return selected
+      return { organizationId: selected, claimedOrgIds: [...claimed] }
     }
 
     if (claimed.size === 1) {
-      return claimed.values().next().value
+      return {
+        organizationId: claimed.values().next().value,
+        claimedOrgIds: [...claimed],
+      }
     }
     if (claimed.size === 0) {
       // Claim set present but nothing maps to a known cogbox org — the sync
@@ -96,9 +102,9 @@ export class OrgClaimResolver {
     for (const raw of values) {
       const value = raw?.trim()
       if (!value) continue
-      const where = UUID_RE.test(value)
-        ? [{ id: value }, { keycloakOrgId: value }, { name: value }]
-        : [{ keycloakOrgId: value }, { name: value }]
+      // uuid-typed columns must never be compared to non-uuid literals —
+      // Postgres raises invalid-input-syntax instead of evaluating the OR.
+      const where = UUID_RE.test(value) ? [{ id: value }, { keycloakOrgId: value }, { name: value }] : [{ name: value }]
       const org = await this.repo.findOne({ where, select: ['id'] })
       if (org) {
         return org.id

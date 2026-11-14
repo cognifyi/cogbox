@@ -4,7 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { HttpException, HttpStatus, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GlobalAuthGuard } from './global-auth.guard'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
@@ -106,6 +112,12 @@ describe('[AUTH] GlobalAuthGuard', () => {
       expect(() => guard.handleRequest(new HttpException('fail', HttpStatus.GATEWAY_TIMEOUT), null, null)).toThrow(
         ServiceUnavailableException,
       )
+    })
+
+    it('should rethrow coded 4xx HttpExceptions instead of flattening to 401 (K7)', () => {
+      const coded = new ForbiddenException({ code: 'org.required' })
+      expect(() => guard.handleRequest(coded, null, null)).toThrow(coded)
+      expect(() => guard.handleRequest(new UnauthorizedException('bad key'), null, null)).toThrow(UnauthorizedException)
     })
   })
 })

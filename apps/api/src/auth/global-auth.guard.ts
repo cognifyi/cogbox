@@ -60,6 +60,14 @@ export class GlobalAuthGuard extends AuthGuard([AuthStrategyType.API_KEY, AuthSt
       throw new ServiceUnavailableException('Temporary authentication service error')
     }
 
+    // Coded auth errors (K7 org-clause rejections like org.required/
+    // org.unknown/org.claim_conflict, and strategy UnauthorizedExceptions)
+    // must reach the client intact — flattening them to a generic 401 both
+    // breaks the contract error matrix and feeds the failed-auth throttle.
+    if (err instanceof HttpException) {
+      throw err
+    }
+
     if (err || !user) {
       this.logger.debug('Authentication failed', { err, user })
       throw new UnauthorizedException('Invalid credentials')

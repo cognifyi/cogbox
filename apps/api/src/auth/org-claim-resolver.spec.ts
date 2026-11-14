@@ -33,20 +33,23 @@ function makeResolver() {
 describe('OrgClaimResolver', () => {
   it('adopts the sole claimed org without a header', async () => {
     const { resolver } = makeResolver()
-    const orgId = await resolver.resolveOrganizationId({ organization: { cogbox: { id: KC_A } } }, undefined)
-    expect(orgId).toBe(ORG_A)
+    const resolved = await resolver.resolveOrganizationId({ organization: { cogbox: { id: KC_A } } }, undefined)
+    expect(resolved.organizationId).toBe(ORG_A)
   })
 
   it('resolves a KC-org-id header to canonical and accepts when in set', async () => {
     const { resolver } = makeResolver()
-    const orgId = await resolver.resolveOrganizationId({ organization: { cogbox: { id: KC_A } } }, KC_A)
-    expect(orgId).toBe(ORG_A)
+    const resolved = await resolver.resolveOrganizationId({ organization: { cogbox: { id: KC_A } } }, KC_A)
+    expect(resolved.organizationId).toBe(ORG_A)
   })
 
   it('multi-org with a valid selector resolves', async () => {
     const { resolver } = makeResolver()
-    const orgId = await resolver.resolveOrganizationId({ organization: { a: { id: KC_A }, b: { id: ORG_B } } }, ORG_B)
-    expect(orgId).toBe(ORG_B)
+    const resolved = await resolver.resolveOrganizationId(
+      { organization: { a: { id: KC_A }, b: { id: ORG_B } } },
+      ORG_B,
+    )
+    expect(resolved.organizationId).toBe(ORG_B)
   })
 
   it('multi-org without a selector → OrgRequiredError (never first-pick)', async () => {
@@ -72,28 +75,32 @@ describe('OrgClaimResolver', () => {
 
   it('consistent dual-track attribute does not conflict', async () => {
     const { resolver } = makeResolver()
-    const orgId = await resolver.resolveOrganizationId(
+    const resolved = await resolver.resolveOrganizationId(
       { organization: { cogbox: { id: KC_A } }, org_id: 'cogbox' },
       undefined,
     )
-    expect(orgId).toBe(ORG_A)
+    expect(resolved.organizationId).toBe(ORG_A)
   })
 
   it('attribute-only tokens keep the legacy header passthrough', async () => {
     const { resolver } = makeResolver()
-    await expect(resolver.resolveOrganizationId({ org_id: 'cogbox' }, 'whatever')).resolves.toBe('whatever')
-    await expect(resolver.resolveOrganizationId({ org_id: 'cogbox' }, undefined)).resolves.toBeUndefined()
+    await expect(resolver.resolveOrganizationId({ org_id: 'cogbox' }, 'whatever')).resolves.toEqual({
+      organizationId: 'whatever',
+    })
+    await expect(resolver.resolveOrganizationId({ org_id: 'cogbox' }, undefined)).resolves.toEqual({
+      organizationId: undefined,
+    })
   })
 
   it('claim-free tokens keep the legacy header passthrough', async () => {
     const { resolver } = makeResolver()
-    await expect(resolver.resolveOrganizationId({}, ORG_A)).resolves.toBe(ORG_A)
+    await expect(resolver.resolveOrganizationId({}, ORG_A)).resolves.toEqual({ organizationId: ORG_A })
   })
 
   it('array-form claims resolve by name', async () => {
     const { resolver } = makeResolver()
-    const orgId = await resolver.resolveOrganizationId({ organization: ['cogbox'] }, undefined)
-    expect(orgId).toBe(ORG_A)
+    const resolved = await resolver.resolveOrganizationId({ organization: ['cogbox'] }, undefined)
+    expect(resolved.organizationId).toBe(ORG_A)
   })
 
   it('malformed organization claims throw OrgClaimError', async () => {

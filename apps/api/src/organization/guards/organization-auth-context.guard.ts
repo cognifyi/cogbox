@@ -88,6 +88,18 @@ export class OrganizationAuthContextGuard extends AuthContextGuard {
       return null
     }
 
+    // K7: for claim-bearing JWTs the path param is another selector — it
+    // must stay inside the token's organization claim set (fail closed by
+    // rejecting the context, same as an org the user is not part of).
+    if (
+      organizationIdParam &&
+      authContext.orgClaimOrgIds?.length &&
+      !authContext.orgClaimOrgIds.includes(organizationIdParam)
+    ) {
+      this.logger.warn(`Organization ID ${organizationIdParam} is outside the JWT organization claim set`)
+      return null
+    }
+
     if (organizationIdParam && authContext.apiKey && authContext.apiKey.organizationId !== organizationIdParam) {
       this.logger.warn(
         `Organization ID mismatch in the request context. Expected: ${organizationIdParam}, Actual: ${authContext.apiKey.organizationId}`,

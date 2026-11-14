@@ -12,7 +12,7 @@ export class Migration1794655808999 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "organization" ADD COLUMN IF NOT EXISTS "keycloakOrgId" uuid`)
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "idx_organization_keycloak_org_id" ON "organization" ("keycloakOrgId") `,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "idx_organization_keycloak_org_id" ON "organization" ("keycloakOrgId") `,
     )
   }
 

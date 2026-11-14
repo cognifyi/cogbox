@@ -61,12 +61,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // selector normalized to canonical and inside the claim set, multi-org
     // without a selector rejected, no first-pick / default-org fallback.
     let organizationId = request.get(CustomHeaders.ORGANIZATION_ID.name)
+    let orgClaimOrgIds: string[] | undefined
     if (this.orgClaimResolver) {
       try {
-        organizationId = await this.orgClaimResolver.resolveOrganizationId(
+        const resolved = await this.orgClaimResolver.resolveOrganizationId(
           payload as Record<string, unknown>,
           organizationId,
         )
+        organizationId = resolved.organizationId
+        orgClaimOrgIds = resolved.claimedOrgIds
       } catch (error) {
         throw toOrgClaimHttpError(error)
       }
@@ -101,6 +104,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           role: newUser.role,
           email: newUser.email,
           organizationId,
+          orgClaimOrgIds,
         } satisfies UserAuthContext
       }
 
@@ -126,6 +130,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         role: existingUser.role,
         email: existingUser.email,
         organizationId,
+        orgClaimOrgIds,
       } satisfies UserAuthContext
     } catch (error) {
       this.logger.debug(`Error validating JWT for user ${userId}:`, error)
