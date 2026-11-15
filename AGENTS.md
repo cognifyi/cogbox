@@ -17,11 +17,11 @@ This project uses **Nix flakes** to provide reproducible development environment
   (`nix develop .#<lang> --command ...`). This host has no `nix`, `go`, or
   `yarn`; devcontainer or CI results are the source of truth for validation.
 - **One worktree/branch per change.** Work in
-  `/home/ec2-user/labs/worktree/cogbox-<slug>/`, never in the live checkout
-  `/home/ec2-user/labs/cogbox/`.
+  `labs/worktree/cogbox-<slug>/`, never in the live checkout
+  `cogbox/`.
 
 Cross-repo rules (worktree policy, commit/PR conventions, verification matrix)
-live in `/home/ec2-user/labs/AGENTS.md` §2, §7.2 and §9.
+live in `labs/AGENTS.md` §2, §7.2 and §9.
 
 ## Prerequisites
 

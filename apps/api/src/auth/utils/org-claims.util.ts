@@ -8,7 +8,7 @@
  * K2-0 frozen contract parsing of the Keycloak `organization` claim set plus
  * the legacy `org_id` attribute. Mirrors billing's org-claims.ts and the
  * frozen fixture expectations in
- * plan/4.功能设计/miles/2026-11-kc-org-unification/02-claim-contract.md.
+ * plan/0.战役工单/06-2026-11-kc组织统一/02-claim-contract.md.
  *
  * Values returned here are raw claim values — the caller canonicalizes them
  * (KC org id / alias / cogbox UUID → cogbox organization id).
