@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.work
           cache: true
@@ -98,7 +98,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.work
           cache: true
@@ -123,7 +123,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.work
           cache: true
@@ -268,14 +268,14 @@ jobs:
           persist-credentials: false
 
       - name: Check AGPL License Headers
-        uses: apache/skywalking-eyes/header@532f795c83aff65c3306638dcabee28f96f52790 # main
+        uses: apache/skywalking-eyes/header@efe45bd3b405b0cf90480d96a405f4c65902b264 # main
         with:
           token: ${{ github.token }}
           config: .licenserc.yaml
           mode: 'check'
 
       - name: Check Apache License Headers
-        uses: apache/skywalking-eyes/header@532f795c83aff65c3306638dcabee28f96f52790 # main
+        uses: apache/skywalking-eyes/header@efe45bd3b405b0cf90480d96a405f4c65902b264 # main
         with:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
